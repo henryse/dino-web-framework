@@ -10,7 +10,7 @@
 #include <string.h>
 #include "dino.h"
 
-GET(main)
+GET(amor)
 {
     for (int i = 0; i < PARAMS_COUNT; i++)
     {
@@ -20,11 +20,10 @@ GET(main)
         RESPONSE_SEND("\n\r", 2);
     }
 
-    char *data = "Hello From GET!\n";
+    char *lyrics = "When the moon hits you eye like a big pizza pie\n That's amore!\n";
     
-    RESPONSE_SEND(data, strlen(data));
+    RESPONSE_SEND(lyrics, strlen(lyrics));
 
-    RESPONSE_SEND(data, strlen(data));
 
     RSP_HEADER_SET("Content-Type", "music");
 
@@ -35,7 +34,7 @@ GET(main)
     return HTTP_ERROR_CODE_OK;
 }
 
-GET(main2)
+GET(sway)
 {
     for (int i = 0; i < PARAMS_COUNT; i++)
     {
@@ -210,7 +209,7 @@ TRACE(main)
     return HTTP_ERROR_CODE_OK;
 }
 
-CONNECT(main)
+CONNECT(volare)
 {
     for (int i = 0; i < PARAMS_COUNT; i++)
     {
@@ -237,19 +236,19 @@ CONNECT(main)
 
 int main(int argc, const char * argv[])
 {
-    int port = 3031;
+    int port = 3030;
     char *host = "localhost";
     
     DINO_CONFIG_START(port, host);
-        ROUTE_GET(main, "/")
-        ROUTE_GET(main2, "/wine")
+        ROUTE_GET(amor, "/")
+        ROUTE_GET(sway, "/wine")
         ROUTE_POST(main, "/")
         ROUTE_DELETE(main, "/")
         ROUTE_PUT(main, "/")
         ROUTE_OPTIONS(main, "/")
         ROUTE_HEAD(main, "/")
         ROUTE_TRACE(main, "/")
-        ROUTE_CONNECT(main, "/")
+        ROUTE_CONNECT(volare, "/")
     DINO_CONFIG_END;
     
     DINO_START;
