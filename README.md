@@ -1,11 +1,17 @@
 TODO List
 ====
 () Add support for wild cards:  /hello/*
+
 () Add support for name binding in url: /hello/:name where :name becomes a key in the parameter list and what ever appears at :name becomes the value
+
 () Convert into a lib
+
 () Make Autoconf work.
+
 () Create \lib directory for lib files.
+
 () Create \sample directory for sample programs
+
 () Fill out documentation.
 
 Getting Started
