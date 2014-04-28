@@ -1,3 +1,13 @@
+TODO List
+====
+() Add support for wild cards:  /hello/*
+() Add support for name binding in url: /hello/:name where :name becomes a key in the parameter list and what ever appears at :name becomes the value
+() Convert into a lib
+() Make Autoconf work.
+() Create \lib directory for lib files.
+() Create \sample directory for sample programs
+() Fill out documentation.
+
 Getting Started
 ====
 
@@ -13,7 +23,7 @@ Simply include the Dino header:
 #include "dino.h"  /* <--- Here is the header you need */
 ~~~
 
-Inlcude the dino.lib in your project.
+Include the dino.lib in your project.
 
 Define a route by binding it to a path:
 
@@ -33,7 +43,7 @@ int main(int argc, const char * argv[])
 }
 ~~~
 
-Then define a fuction that will be called when the route is invoked on a given path:
+Then define a function that will be called when the route is invoked on a given path:
 
 ~~~C
 GET(amor)
@@ -46,7 +56,7 @@ GET(amor)
 }
 ~~~
 
-So your simple program should look someting like:
+So your simple program should look something like:
 
 ~~~C
 #include <stdio.h>
