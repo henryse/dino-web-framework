@@ -46,7 +46,6 @@ stack_char_ptr *stack_ptr_alloc(const char *data)
     stack_char_ptr *stack = (stack_char_ptr *)malloc_and_clear(sizeof(stack_char_ptr));
     
     stack->data = malloc_and_clear(strlen(data) + 1);
-    
     memcpy(stack->data, data, strlen(data));
     
     return stack;
