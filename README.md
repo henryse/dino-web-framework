@@ -16,6 +16,8 @@ TODO List
 
 () Add makefile
 
+() How to do unit tests?
+
 Getting Started
 ====
 
