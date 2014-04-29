@@ -351,17 +351,6 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
         return http_invalid;
     }
 
-    // Read the Method:
-    //
-    size_t line_len = read_line(request, line, size);
-    
-    assert(strlen(line) == line_len);
-    
-    if (0 == line_len)
-    {
-        return http_invalid;
-    }
-
     // Obtain the method
     //
     char method[32];
@@ -480,13 +469,20 @@ char *clean_string(char *value)
     zap = strrchr(value, '\r');
     if (zap) *zap = 0;
     
+    if (*value == ' ')
+    {
+        value++;        
+    }
+    
     return value;
 }
 
 size_t parse_headers(http_request *request, char *line, size_t size)
 {
     size_t content_size = 0;
-    size_t line_len = read_line(request, line, size);
+    
+    clear_memory(line, size);
+    size_t line_len = 0;
 
     // Read the headers...
     //
@@ -557,10 +553,22 @@ size_t parse_headers(http_request *request, char *line, size_t size)
 bool read_request(http_request *request)
 {
     char line[MAX_HTTP_HEADER_LINE_LENGTH];
+    clear_memory(line, sizeof(line));
+
+    // Read the Method:
+    //
+    size_t line_len = read_line(request, line, sizeof(line));
     
+    if (0 == line_len)
+    {
+        return false;
+    }
+
+    assert(strlen(line) == line_len);
+
     // Validate the Method:
     //
-    if (http_invalid == parse_method_url(request, line, sizeof(line)))
+    if (http_invalid == parse_method_url(request, line, line_len))
     {
         return false;
     }
@@ -612,8 +620,8 @@ void accept_request(dino_site *psite, int client)
         // Output Response
         //
         char buf[MAX_HTTP_HEADER_LINE_LENGTH];
-
         clear_memory(&buf, sizeof(buf));
+        
         int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 %d\r\n", http_error_code);
         send(client, buf, bytes, 0);
         
