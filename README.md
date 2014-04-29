@@ -14,6 +14,7 @@ TODO List
 
 () Fill out documentation.
 
+() Add makefile
 Getting Started
 ====
 
