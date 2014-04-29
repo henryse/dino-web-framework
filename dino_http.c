@@ -89,15 +89,37 @@ dino_route *list_find(dino_route *list, const char *name)
 
 dino_route *list_method_find(dino_route *list, http_method method, const char *url)
 {
+    char *buffer = malloc_and_clear(strlen(url) + 1);
+    memcpy(buffer, url, strlen(url));
+    stack_char_ptr *stack = stack_ptr_parse(NULL, buffer);
+    
+    bool found = false;
+    
     while(NULL != list)
     {
-        if((method == list->method) && (strncmp(url, list->path, sizeof(list->name)) == 0))
+        int index = 0;
+        
+        if(method == list->method)
         {
-            return list;
+            for (; index < list->stack->count && index < stack->count; index++)
+            {
+                // TODO: add :name matching here...
+                
+                if (0 == strcmp(list->stack->ptrs[index],stack->ptrs[index]))
+                {
+                    found = true;
+                }
+            }
         }
         
+        if (found && list->stack->count == index)
+        {
+            break;
+        }
         list = list->next;
     }
+    
+    stack_ptr_free(stack);
     
     return list;
 }
@@ -409,7 +431,7 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
         query++;
         url++;
     }
-    
+        
     if (*query == '?')
     {
         query++;
