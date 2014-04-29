@@ -89,11 +89,9 @@ dino_route *list_find(dino_route *list, const char *name)
 
 dino_route *list_method_find(dino_route *list, http_method method, const char *url)
 {
-    char *buffer = malloc_and_clear(strlen(url) + 1);
-    memcpy(buffer, url, strlen(url));
-    stack_char_ptr *url_stack = stack_ptr_parse(NULL, buffer, "/");
+    stack_char_ptr *url_stack = stack_ptr_parse(NULL, url, "/");
     
-    bool found = false;
+    bool match = false;
     
     while(NULL != list)
     {
@@ -101,21 +99,48 @@ dino_route *list_method_find(dino_route *list, http_method method, const char *u
         
         if(method == list->method)
         {
-            for (; index < list->stack->count && index < url_stack->count; index++)
+            // Do they have the same number of elements?
+            //
+            if (list->stack->count == url_stack->count)
             {
-                // TODO: add :name matching here...
+                // Assume that we have a match...
+                //
+                match = true;
                 
-                if (0 == strcmp(list->stack->ptrs[index], url_stack->ptrs[index]))
+                // Now comapre the elements.
+                //
+                for (; index < list->stack->count && index < url_stack->count; index++)
                 {
-                    found = true;
+                    // If it is a wild card then assume it is good!
+                    //
+                    if (list->stack->ptrs[index][0] == '*')
+                    {
+                        continue;
+                    }
+                    
+                    // Do we have a :param element?
+                    //
+                    if (list->stack->ptrs[index][0] == ':')
+                    {
+                        continue;
+                    }
+                    
+                    // Ok see if they are the same string
+                    //
+                    if (0 != strcmp(list->stack->ptrs[index], url_stack->ptrs[index]))
+                    {
+                        match = false;
+                        break;
+                    }
                 }
             }
         }
         
-        if (found && list->stack->count == index)
+        if (match)
         {
             break;
         }
+        
         list = list->next;
     }
     
@@ -420,7 +445,7 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
         query++;
         url++;
     }
-        
+    
     if (*query == '?')
     {
         query++;
@@ -590,6 +615,35 @@ bool read_request(http_request *request)
     return true;
 }
 
+bool bind_url_params(http_request *request, dino_route *route)
+{
+    stack_char_ptr *url_stack = stack_ptr_parse(NULL, request->url, "/");
+    
+    // Now comapre the elements.
+    //
+    for (int index = 0; index < route->stack->count && index < url_stack->count; index++)
+    {
+        // If it is a wild card then Just skip it.
+        //
+        if (route->stack->ptrs[index][0] == '*')
+        {
+            continue;
+        }
+        
+        // Do we have a :param element?
+        //
+        if (route->stack->ptrs[index][0] == ':')
+        {
+            // TODO: push :name, value into params.
+            continue;
+        }        
+    }
+    
+    stack_ptr_free(url_stack);
+    
+    return true;
+}
+
 void accept_request(dino_site *psite, int client)
 {
     http_request request;
@@ -604,10 +658,14 @@ void accept_request(dino_site *psite, int client)
     
     // Search for a match...
     //
-    dino_route *path = list_method_find(psite->list, request.method, request.url);
+    dino_route *route = list_method_find(psite->list, request.method, request.url);
     
-    if (NULL != path)
+    if (NULL != route)
     {
+        // bind url parameters
+        //
+        bind_url_params(&request, route);
+        
         http_response response;
         clear_memory(&response, sizeof(response));
         
@@ -615,7 +673,7 @@ void accept_request(dino_site *psite, int client)
 
         // Invoke the method..
         //
-        int http_error_code = path->verb_func(&request, &response);
+        int http_error_code = route->verb_func(&request, &response);
         
         // Output Response
         //
