@@ -73,9 +73,22 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
     
     dino_route *ppath = list_add_new_item(&psite->list);
 
+    // Build name for method
+    //
     strncpy(ppath->name, METHOD_GET(method), sizeof(ppath->name));
     strncat(ppath->name, name, sizeof(ppath->name));
+    
+    // Look for ":" directives
+    //  path - /:wine/:bottle
+    //
+    
+    
+    // Store the path
+    //
     strncpy(ppath->path, path, sizeof(ppath->path));
+    
+    // Save callback function pointer
+    //
     ppath->verb_func = verb_func;
     ppath->method = method;
     

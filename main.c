@@ -241,7 +241,7 @@ int main(int argc, const char * argv[])
     
     DINO_CONFIG_START(port, host);
         ROUTE_GET(amor, "/")
-        ROUTE_GET(sway, "/wine")
+        ROUTE_GET(sway, "/:wine/:bottle")
         ROUTE_POST(main, "/")
         ROUTE_DELETE(main, "/")
         ROUTE_PUT(main, "/")

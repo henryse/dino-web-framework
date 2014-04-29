@@ -87,7 +87,7 @@ dino_route *list_find(dino_route *list, const char *name)
     return list;
 }
 
-dino_route *list_find_method(dino_route *list, http_method method, const char *url)
+dino_route *list_method_find(dino_route *list, http_method method, const char *url)
 {
     while(NULL != list)
     {
@@ -602,7 +602,7 @@ void accept_request(dino_site *psite, int client)
     
     // Search for a match...
     //
-    dino_route *path = list_find_method(psite->list, request.method, request.url);
+    dino_route *path = list_method_find(psite->list, request.method, request.url);
     
     if (NULL != path)
     {

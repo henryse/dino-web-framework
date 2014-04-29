@@ -70,23 +70,22 @@ typedef struct dino_site_struct
 {
     u_short port;
     char host[HOST_STRING_SIZE];
-    
     dino_route *list;
 }dino_site;
 
 // HTTP Parametgers/key value paire.
 //
-typedef struct http_params_struct
+typedef struct http_key_value_struct
 {
     char key[HTTP_MAX_KEY_SIZE];
     char value[HTTP_MAX_VALUE_SIZE];
-}http_params;
+}http_key_value;
 
 // Request structure
 //
 typedef struct http_request_struct
 {
-    http_params params[HTTP_MAX_PARAMS];
+    http_key_value params[HTTP_MAX_PARAMS];
     int param_index;
     
     http_method method;
@@ -105,7 +104,7 @@ typedef struct http_response_struct
     int client;
     BUFFER buffer_handle;
 
-    http_params params[HTTP_MAX_PARAMS];
+    http_key_value params[HTTP_MAX_PARAMS];
     int param_index;
 }http_response;
 
