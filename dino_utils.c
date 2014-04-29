@@ -41,30 +41,37 @@ void *malloc_and_clear(size_t n)
     return clear_memory(malloc(n), n);
 }
 
-stack_char_ptr *stack_ptr_alloc()
+stack_char_ptr *stack_ptr_alloc(const char *data)
 {
-    return malloc_and_clear(sizeof(stack_char_ptr));
+    stack_char_ptr *stack = (stack_char_ptr *)malloc_and_clear(sizeof(stack_char_ptr));
+    
+    stack->data = malloc_and_clear(strlen(data) + 1);
+    
+    memcpy(stack->data, data, strlen(data));
+    
+    return stack;
 }
 
 void stack_ptr_free(stack_char_ptr *stack)
 {
     if (NULL != stack)
     {
-        if (stack->ptrs != NULL)
+        if (NULL != stack->ptrs)
         {
             free(stack->ptrs);
         }
+        
+        if (NULL != stack->data)
+        {
+            free(stack->data);
+        }
+        
         free(stack);
     }
 }
 
 stack_char_ptr *stack_ptr_push(stack_char_ptr *stack, char *ptr)
 {
-    if (NULL == stack)
-    {
-        stack = stack_ptr_alloc();
-    }
-    
     if (NULL != stack)
     {
         stack->count++;
@@ -75,15 +82,15 @@ stack_char_ptr *stack_ptr_push(stack_char_ptr *stack, char *ptr)
     return stack;
 }
 
-stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, char *path, char *delim)
+stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, const char *data, const char *delim)
 {
     if (NULL == stack)
     {
-        stack = stack_ptr_alloc();
+        stack = stack_ptr_alloc(data);
     }
 
     char *brkt = NULL;
-    for (char *param = strtok_r(path, delim, &brkt);
+    for (char *param = strtok_r(stack->data, delim, &brkt);
          param;
          param = strtok_r(NULL, delim, &brkt))
     {

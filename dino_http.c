@@ -91,7 +91,7 @@ dino_route *list_method_find(dino_route *list, http_method method, const char *u
 {
     char *buffer = malloc_and_clear(strlen(url) + 1);
     memcpy(buffer, url, strlen(url));
-    stack_char_ptr *stack = stack_ptr_parse(NULL, buffer, "/");
+    stack_char_ptr *url_stack = stack_ptr_parse(NULL, buffer, "/");
     
     bool found = false;
     
@@ -101,11 +101,11 @@ dino_route *list_method_find(dino_route *list, http_method method, const char *u
         
         if(method == list->method)
         {
-            for (; index < list->stack->count && index < stack->count; index++)
+            for (; index < list->stack->count && index < url_stack->count; index++)
             {
                 // TODO: add :name matching here...
                 
-                if (0 == strcmp(list->stack->ptrs[index],stack->ptrs[index]))
+                if (0 == strcmp(list->stack->ptrs[index], url_stack->ptrs[index]))
                 {
                     found = true;
                 }
@@ -119,7 +119,7 @@ dino_route *list_method_find(dino_route *list, http_method method, const char *u
         list = list->next;
     }
     
-    stack_ptr_free(stack);
+    stack_ptr_free(url_stack);
     
     return list;
 }

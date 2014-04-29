@@ -27,6 +27,7 @@
 
 typedef struct stack_char_ptr_struct
 {
+    char *data;
     size_t count;
     char **ptrs;
 }stack_char_ptr;
@@ -34,9 +35,7 @@ typedef struct stack_char_ptr_struct
 void *clear_memory(void *p, size_t n);
 void *malloc_and_clear(size_t n);
 
-stack_char_ptr *stack_ptr_alloc();
 void            stack_ptr_free(stack_char_ptr *stack);
-stack_char_ptr *stack_ptr_push(stack_char_ptr *stack, char *ptr);
-stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, char *path, char *delim);
+stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, const char *data, const char *delim);
 
 #endif
