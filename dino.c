@@ -31,7 +31,7 @@
 #include "dino_http.h"
 #include "dino_utils.h"
 
-const char* METHOD_GET(http_method method)
+const char* method_name_get(http_method method)
 {
     switch(method)
     {
@@ -75,8 +75,12 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
 
     // Build name for method
     //
-    strncpy(ppath->name, METHOD_GET(method), sizeof(ppath->name));
-    strncat(ppath->name, name, sizeof(ppath->name));
+    const char *method_name =method_name_get(method);
+    
+    
+    ppath->name = alloc_and_clear_memory(strlen(method_name) + strlen(name) + 1);
+    strncpy(ppath->name, method_name, strlen(method_name));
+    strncat(ppath->name, name, strlen(name));
     
     // Look for ":" directives
     //  path - /:wine/:bottle
@@ -85,7 +89,8 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
     
     // Store the path
     //
-    strncpy(ppath->path, path, sizeof(ppath->path));
+    ppath->path = alloc_and_clear_memory(strlen(path) + 1);
+    strncpy(ppath->path, path, strlen(path));
     
     // Save callback function pointer
     //

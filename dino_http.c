@@ -79,7 +79,7 @@ dino_route* list_add_new_item(dino_route **head)
 
 dino_route *list_find(dino_route *list, const char *name)
 {
-    while(NULL != list && strncmp(name, list->name, sizeof(list->name)))
+    while(NULL != list && strncmp(name, list->name, strlen(list->name)))
     {
         list = list->next;
     }
@@ -100,35 +100,6 @@ dino_route *list_method_find(dino_route *list, http_method method, const char *u
     }
     
     return list;
-}
-
-bool list_remove_item(dino_route **head, dino_route *target)
-{
-    if(NULL == head || NULL == *head || NULL == target)
-    {
-        return false;
-    }
-    
-    if (*head == target)
-    {
-        *head = target->next;
-        return true;
-    }
-    
-    dino_route *current = *head;
-    
-    while(NULL != current->next && current->next != target)
-    {
-        current = current->next;
-    }
-    
-    if (current->next != NULL)
-    {
-        current->next = current->next->next;
-        return true;
-    }
-    
-    return false;
 }
 
 //
@@ -579,7 +550,7 @@ bool read_request(http_request *request)
     //
     if (request->content_size)
     {
-        request->data = malloc(request->content_size);
+        request->data = alloc_and_clear_memory(request->content_size);
         size_t total = read_data(request, request->data, request->content_size);
         assert(total == request->content_size);
         request->content_size = total;

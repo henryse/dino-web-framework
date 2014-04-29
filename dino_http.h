@@ -28,15 +28,12 @@
 // HTTP Defines used:
 //
 #define HOST_STRING_SIZE 1024
-#define PATH_STRING_SIZE 1024
 #define MAX_HTTP_HEADER_LINE_LENGTH 1024
 #define MAX_ERROR_LENGTH 1024
-#define NAME_STRING_SIZE 64
 #define HTTP_MAX_PARAMS 32
 #define HTTP_MAX_KEY_SIZE 128
 #define HTTP_MAX_VALUE_SIZE 128
 #define HTTP_URL_SIZE 1024
-
 
 // List of methods
 //
@@ -60,8 +57,8 @@ typedef struct dino_route_struct
     struct dino_route_struct *next;
     http_method method;
     http_verb_func verb_func;
-    char name[NAME_STRING_SIZE];
-    char path[PATH_STRING_SIZE];
+    char *name;
+    char *path;
 }dino_route;
 
 // Site

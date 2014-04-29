@@ -24,9 +24,6 @@
 
 #include <stdlib.h>
 #include <strings.h>
-#include "dino_buffer.h"
-#include "dino.h"
-#include "dino_http.h"
 #include "dino_utils.h"
 
 void *clear_memory(void *p, size_t n)
