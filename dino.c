@@ -75,23 +75,21 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
 
     // Build name for method
     //
-    const char *method_name =method_name_get(method);
+    const char *method_name = method_name_get(method);
     
-    
-    ppath->name = alloc_and_clear_memory(strlen(method_name) + strlen(name) + 1);
+    ppath->name = malloc_and_clear(strlen(method_name) + strlen(name) + 1);
     strncpy(ppath->name, method_name, strlen(method_name));
     strncat(ppath->name, name, strlen(name));
     
-    // Look for ":" directives
-    //  path - /:wine/:bottle
-    //
-    
-    
     // Store the path
     //
-    ppath->path = alloc_and_clear_memory(strlen(path) + 1);
+    ppath->path = malloc_and_clear(strlen(path) + 1);
     strncpy(ppath->path, path, strlen(path));
     
+    // Parse the path, we need to see if there are any :[name] directives
+    //
+    ppath->stack = stack_ptr_parse(ppath->stack, ppath->path);
+
     // Save callback function pointer
     //
     ppath->verb_func = verb_func;
@@ -103,7 +101,7 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
 
 DHANDLE dino_config_start(unsigned int port,  char *host)
 {
-    dino_site *psite = (dino_site *)alloc_and_clear_memory(sizeof(dino_site));
+    dino_site *psite = (dino_site *)malloc_and_clear(sizeof(dino_site));
     if (NULL != psite)
     {
         strncpy(psite->host, host, sizeof(psite->host));

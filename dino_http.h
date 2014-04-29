@@ -24,6 +24,7 @@
 
 #ifndef dino_dino_http_h
 #define dino_dino_http_h
+#include "dino_utils.h"
 
 // HTTP Defines used:
 //
@@ -59,6 +60,7 @@ typedef struct dino_route_struct
     http_verb_func verb_func;
     char *name;
     char *path;
+    stack_char_ptr *stack;
 }dino_route;
 
 // Site

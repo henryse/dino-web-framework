@@ -37,13 +37,13 @@ typedef struct http_buffer_struct
 
 BUFFER buffer_alloc(size_t size)
 {
-    http_buffer *buffer = alloc_and_clear_memory(sizeof(http_buffer));
+    http_buffer *buffer = malloc_and_clear(sizeof(http_buffer));
     
     if (NULL != buffer)
     {
         buffer->allocated = size;
         buffer->used = size;
-        buffer->data = alloc_and_clear_memory(size);
+        buffer->data = malloc_and_clear(size);
     }
     
     return buffer;
@@ -62,7 +62,7 @@ BUFFER buffer_realloc(BUFFER buffer_handle, size_t size)
     {
         buffer->allocated = size;
         buffer->used = size;
-        buffer->data = alloc_and_clear_memory(size);
+        buffer->data = malloc_and_clear(size);
     }
     
     size_t new_size = buffer->used + size;

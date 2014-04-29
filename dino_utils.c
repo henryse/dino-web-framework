@@ -36,7 +36,59 @@ void *clear_memory(void *p, size_t n)
     return p;
 }
 
-void *alloc_and_clear_memory(size_t n)
+void *malloc_and_clear(size_t n)
 {
     return clear_memory(malloc(n), n);
+}
+
+stack_char_ptr *stack_ptr_alloc()
+{
+    return malloc_and_clear(sizeof(stack_char_ptr));
+}
+
+void stack_ptr_free(stack_char_ptr *stack)
+{
+    if (NULL != stack)
+    {
+        if (stack->ptrs != NULL)
+        {
+            free(stack->ptrs);
+        }
+        free(stack);
+    }
+}
+
+stack_char_ptr *stack_ptr_push(stack_char_ptr *stack, char *ptr)
+{
+    if (NULL == stack)
+    {
+        stack = stack_ptr_alloc();
+    }
+    
+    if (NULL != stack)
+    {
+        stack->count++;
+        stack->ptrs = (char **)realloc(stack->ptrs, stack->count * sizeof(char *));
+        stack->ptrs[stack->count - 1] = ptr;
+    }
+    
+    return stack;
+}
+
+stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, char *path)
+{
+    if (NULL == stack)
+    {
+        stack = stack_ptr_alloc();
+    }
+
+    char *brkt = NULL;
+    for (char *param = strtok_r(path, "/", &brkt);
+         param;
+         param = strtok_r(NULL, "/", &brkt))
+    {
+        stack = stack_ptr_push(stack, param);
+    }
+
+    return stack;
 }

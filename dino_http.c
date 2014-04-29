@@ -43,7 +43,7 @@ dino_route* list_create(dino_route **head)
         return NULL;
     }
     
-    dino_route *ptr = (dino_route*)alloc_and_clear_memory(sizeof(dino_route));
+    dino_route *ptr = (dino_route*)malloc_and_clear(sizeof(dino_route));
     if(NULL != ptr)
     {
         *head = ptr;
@@ -64,7 +64,7 @@ dino_route* list_add_new_item(dino_route **head)
         return (list_create(head));
     }
     
-    dino_route *ptr = (dino_route*)alloc_and_clear_memory(sizeof(dino_route));
+    dino_route *ptr = (dino_route*)malloc_and_clear(sizeof(dino_route));
     
     if(NULL == ptr)
     {
@@ -396,22 +396,23 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
     char *query = line + offset;
     char *url = request->url;
     
-    while ( *query != '\0' && *query != '?' )
+    // Skip over the ' 's and the tabs
+    //
+    while(*query != '\0' && (*query == ' ' || *query == '\t'))
     {
-        query++;
+        ++query;
+    }
+    
+    while ( *query != '\0' && *query != '?' && *query != ' ' && *query != '\t')
+    {
         *url = *query;
+        query++;
         url++;
     }
     
     if (*query == '?')
     {
-        // Move off the '?'
-        //
         query++;
-        
-        // Zap the '?' in the url
-        //
-        *(url - 1) = 0;
     }
     
     offset = 0;
@@ -550,7 +551,7 @@ bool read_request(http_request *request)
     //
     if (request->content_size)
     {
-        request->data = alloc_and_clear_memory(request->content_size);
+        request->data = malloc_and_clear(request->content_size);
         size_t total = read_data(request, request->data, request->content_size);
         assert(total == request->content_size);
         request->content_size = total;
