@@ -75,7 +75,7 @@ stack_char_ptr *stack_ptr_push(stack_char_ptr *stack, char *ptr)
     return stack;
 }
 
-stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, char *path)
+stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, char *path, char *delim)
 {
     if (NULL == stack)
     {
@@ -83,9 +83,9 @@ stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, char *path)
     }
 
     char *brkt = NULL;
-    for (char *param = strtok_r(path, "/", &brkt);
+    for (char *param = strtok_r(path, delim, &brkt);
          param;
-         param = strtok_r(NULL, "/", &brkt))
+         param = strtok_r(NULL, delim, &brkt))
     {
         stack = stack_ptr_push(stack, param);
     }

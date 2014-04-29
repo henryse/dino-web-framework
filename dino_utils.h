@@ -37,6 +37,6 @@ void *malloc_and_clear(size_t n);
 stack_char_ptr *stack_ptr_alloc();
 void            stack_ptr_free(stack_char_ptr *stack);
 stack_char_ptr *stack_ptr_push(stack_char_ptr *stack, char *ptr);
-stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, char *path);
+stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, char *path, char *delim);
 
 #endif

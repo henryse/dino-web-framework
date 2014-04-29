@@ -88,7 +88,7 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
     
     // Parse the path, we need to see if there are any :[name] directives
     //
-    ppath->stack = stack_ptr_parse(ppath->stack, ppath->path);
+    ppath->stack = stack_ptr_parse(ppath->stack, ppath->path, "/");
 
     // Save callback function pointer
     //

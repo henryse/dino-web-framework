@@ -91,7 +91,7 @@ dino_route *list_method_find(dino_route *list, http_method method, const char *u
 {
     char *buffer = malloc_and_clear(strlen(url) + 1);
     memcpy(buffer, url, strlen(url));
-    stack_char_ptr *stack = stack_ptr_parse(NULL, buffer);
+    stack_char_ptr *stack = stack_ptr_parse(NULL, buffer, "/");
     
     bool found = false;
     
