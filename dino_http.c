@@ -475,10 +475,14 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
 
         if (key && *key && request->param_index < HTTP_MAX_PARAMS)
         {
-            strncpy(request->params[request->param_index].key, key, sizeof(request->params[request->param_index].key));
+            strncpy(request->params[request->param_index].key,
+                    key,
+                    sizeof(request->params[request->param_index].key));
             if (value && *value)
             {
-                strncpy(request->params[request->param_index].value, value, sizeof(request->params[request->param_index].value));
+                strncpy(request->params[request->param_index].value,
+                        value,
+                        sizeof(request->params[request->param_index].value));
             }
             request->param_index++;
         }
@@ -537,18 +541,24 @@ size_t parse_headers(http_request *request, char *line, size_t size)
         //
         if (key && *key && request->param_index < HTTP_MAX_PARAMS)
         {
-            strncpy(request->params[request->param_index].key, key, sizeof(request->params[request->param_index].key));
+            strncpy(request->params[request->param_index].key,
+                    key,
+                    sizeof(request->params[request->param_index].key));
             if (value && *value)
             {
                 // Copy over the "value"
                 //
-                strncpy(request->params[request->param_index].value, value, sizeof(request->params[request->param_index].value));
+                strncpy(request->params[request->param_index].value,
+                        value,
+                        sizeof(request->params[request->param_index].value));
             }
             request->param_index++;
         }
         else if (request->param_index >= HTTP_MAX_PARAMS)
         {
-            fprintf(stderr, "WARNING: More than %d parameters found, ignorning: %s\n\r", HTTP_MAX_PARAMS, key);
+            fprintf(stderr, "WARNING: More than %d parameters found, ignorning: %s\n\r",
+                    HTTP_MAX_PARAMS,
+                    key);
         }
         
         // Check to see if we have hit the end...
@@ -634,7 +644,20 @@ bool bind_url_params(http_request *request, dino_route *route)
         //
         if (route->stack->ptrs[index][0] == ':')
         {
-            // TODO: push :name, value into params.
+            if (request->param_index < HTTP_MAX_PARAMS)
+            {
+                strncpy(request->params[request->param_index].key,
+                        route->stack->ptrs[index],
+                        sizeof(request->params[request->param_index].key));
+                if (url_stack->ptrs[index] && *url_stack->ptrs[index])
+                {
+                    strncpy(request->params[request->param_index].value,
+                            url_stack->ptrs[index],
+                            sizeof(request->params[request->param_index].value));
+                }
+                request->param_index++;
+            }
+
             continue;
         }        
     }
@@ -686,7 +709,9 @@ void accept_request(dino_site *psite, int client)
         for (int index = 0; index < response.param_index; index++)
         {
             clear_memory(&buf, sizeof(buf));
-            bytes = snprintf(buf, sizeof(buf), "%s: %s\r\n", response.params[index].key, response.params[index].value);
+            bytes = snprintf(buf, sizeof(buf), "%s: %s\r\n",
+                             response.params[index].key,
+                             response.params[index].value);
             send(client, buf, bytes, 0);
         }
         
