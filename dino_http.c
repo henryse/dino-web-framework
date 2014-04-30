@@ -36,57 +36,6 @@
 
 #define DINO_VERSION "Server: dinohttpd/0.1\r\n"
 
-dino_route* list_create(dino_route **head)
-{
-    if(NULL == head)
-    {
-        return NULL;
-    }
-    
-    dino_route *ptr = (dino_route*)malloc_and_clear(sizeof(dino_route));
-    if(NULL != ptr)
-    {
-        *head = ptr;
-    }
-    
-    return ptr;
-}
-
-dino_route* list_add_new_item(dino_route **head)
-{
-    if(NULL == head)
-    {
-        return NULL;
-    }
-    
-    if(NULL == *head)
-    {
-        return (list_create(head));
-    }
-    
-    dino_route *ptr = (dino_route*)malloc_and_clear(sizeof(dino_route));
-    
-    if(NULL == ptr)
-    {
-        return NULL;
-    }
-    
-    ptr->next = *head;
-    *head = ptr;
-    
-    return ptr;
-}
-
-dino_route *list_find(dino_route *list, const char *name)
-{
-    while(NULL != list && strncmp(name, list->name, strlen(list->name)))
-    {
-        list = list->next;
-    }
-    
-    return list;
-}
-
 dino_route *list_method_find(dino_route *list, http_method method, const char *url)
 {
     stack_char_ptr *url_stack = stack_ptr_parse(NULL, url, "/");

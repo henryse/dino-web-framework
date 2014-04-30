@@ -57,6 +57,58 @@ const char* method_name_get(http_method method)
     return "unknown_";
 }
 
+dino_route* list_create(dino_route **head)
+{
+    if(NULL == head)
+    {
+        return NULL;
+    }
+    
+    dino_route *ptr = (dino_route*)malloc_and_clear(sizeof(dino_route));
+    if(NULL != ptr)
+    {
+        *head = ptr;
+    }
+    
+    return ptr;
+}
+
+
+dino_route* list_add_new_item(dino_route **head)
+{
+    if(NULL == head)
+    {
+        return NULL;
+    }
+    
+    if(NULL == *head)
+    {
+        return (list_create(head));
+    }
+    
+    dino_route *ptr = (dino_route*)malloc_and_clear(sizeof(dino_route));
+    
+    if(NULL == ptr)
+    {
+        return NULL;
+    }
+    
+    ptr->next = *head;
+    *head = ptr;
+    
+    return ptr;
+}
+
+dino_route *list_find(dino_route *list, const char *name)
+{
+    while(NULL != list && strncmp(name, list->name, strlen(list->name)))
+    {
+        list = list->next;
+    }
+    
+    return list;
+}
+
 bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path)
 {
     if(NULL == dhandle)

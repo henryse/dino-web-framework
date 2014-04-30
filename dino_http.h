@@ -111,9 +111,4 @@ typedef struct http_response_struct
 //
 void dino_start_http(dino_site *psite);
 
-// Handly Linked list functions:
-//
-dino_route*  list_add_new_item(dino_route **head);
-dino_route   *list_find(dino_route *list, const char *name);
-
 #endif
