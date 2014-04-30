@@ -36,10 +36,8 @@
 
 #define DINO_VERSION "Server: dinohttpd/0.1\r\n"
 
-dino_route *list_method_find(dino_route *list, http_method method, const char *url)
+dino_route *list_method_find(dino_route *list, http_method method, stack_char_ptr *url_stack)
 {
-    stack_char_ptr *url_stack = stack_ptr_parse(NULL, url, "/");
-    
     bool match = false;
     
     while(NULL != list)
@@ -92,9 +90,7 @@ dino_route *list_method_find(dino_route *list, http_method method, const char *u
         
         list = list->next;
     }
-    
-    stack_ptr_free(url_stack);
-    
+
     return list;
 }
 
@@ -574,10 +570,8 @@ bool read_request(http_request *request)
     return true;
 }
 
-bool bind_url_params(http_request *request, dino_route *route)
+bool bind_url_params(http_request *request, dino_route *route, stack_char_ptr *url_stack)
 {
-    stack_char_ptr *url_stack = stack_ptr_parse(NULL, request->url, "/");
-    
     // Now comapre the elements.
     //
     for (int index = 0; index < route->stack->count && index < url_stack->count; index++)
@@ -611,8 +605,6 @@ bool bind_url_params(http_request *request, dino_route *route)
         }        
     }
     
-    stack_ptr_free(url_stack);
-    
     return true;
 }
 
@@ -628,15 +620,17 @@ void accept_request(dino_site *psite, int client)
         return;
     }
     
+    stack_char_ptr *url_stack = stack_ptr_parse(NULL, request.url, "/");
+
     // Search for a match...
     //
-    dino_route *route = list_method_find(psite->list, request.method, request.url);
+    dino_route *route = list_method_find(psite->list, request.method, url_stack);
     
     if (NULL != route)
     {
         // bind url parameters
         //
-        bind_url_params(&request, route);
+        bind_url_params(&request, route, url_stack);
         
         http_response response;
         clear_memory(&response, sizeof(response));
@@ -674,6 +668,8 @@ void accept_request(dino_site *psite, int client)
     {
         fprintf(stderr, "ERROR: Path %s not found\n\r", request.url);
     }
+
+    stack_ptr_free(url_stack);
 
     close(client);
 }
