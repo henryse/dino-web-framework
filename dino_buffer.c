@@ -28,6 +28,8 @@
 #include "dino_buffer.h"
 #include "dino_utils.h"
 
+#define BUFFER_BLOCK_SIZE 256
+
 typedef struct http_buffer_struct
 {
     size_t allocated;
@@ -35,41 +37,64 @@ typedef struct http_buffer_struct
     unsigned char *data;
 }http_buffer;
 
+size_t calculate_allocated_size(size_t size)
+{
+    // Figure out how many we can get...
+    //
+    size_t num_blocks = size / BUFFER_BLOCK_SIZE;
+    
+    // Was there a remainder?
+    //
+    if ( size % BUFFER_BLOCK_SIZE )
+    {
+        // Bump it once more to pick up the remainder
+        //
+        ++num_blocks;
+    }
+    
+    // Calculate the number of bytes to allocate
+    //
+    return num_blocks * BUFFER_BLOCK_SIZE;
+}
+
 BUFFER buffer_alloc(size_t size)
 {
     http_buffer *buffer = malloc_and_clear(sizeof(http_buffer));
     
     if (NULL != buffer)
     {
-        buffer->allocated = size;
+        buffer->allocated = calculate_allocated_size(size);
+        buffer->data = malloc_and_clear(buffer->allocated);
         buffer->used = size;
-        buffer->data = malloc_and_clear(size);
     }
     
     return buffer;
 }
 
-
 BUFFER buffer_realloc(BUFFER buffer_handle, size_t size)
 {
-    http_buffer *buffer = (http_buffer *)buffer_handle;
-    if ( buffer == NULL )
+    if ( buffer_handle == NULL )
     {
         return buffer_alloc(size);
     }
     
+    http_buffer *buffer = (http_buffer *)buffer_handle;
+    
     if( buffer->data == NULL)
     {
-        buffer->allocated = size;
+        buffer->allocated = calculate_allocated_size(size);
+        buffer->data = malloc_and_clear(buffer->allocated);
         buffer->used = size;
-        buffer->data = malloc_and_clear(size);
     }
-    
-    size_t new_size = buffer->used + size;
-    
-    buffer->allocated = new_size;
-    buffer->used = new_size;
-    buffer->data = realloc(buffer->data, new_size);
+    else
+    {
+        if (buffer->allocated < size)
+        {
+            buffer->allocated = calculate_allocated_size(size);
+            buffer->data = realloc(buffer->data, buffer->allocated);
+            buffer->used = size;
+        }
+    }
     
     return buffer;
 }
@@ -93,20 +118,18 @@ void buffer_free(BUFFER buffer_handle)
 
 BUFFER buffer_append(BUFFER buffer_handle, const char *data, size_t size)
 {
-    http_buffer *buffer = NULL;
+    http_buffer *buffer = (http_buffer *)buffer_handle;
+
     char *ptr = NULL;
-    
-    if ( NULL == buffer_handle)
+    if ( NULL == buffer)
     {
         buffer = (http_buffer *)buffer_alloc(size);
         ptr = (char *)buffer->data;
     }
     else
     {
-        buffer = (http_buffer *)buffer_handle;
-        size_t offset = buffer->allocated;
-        buffer = (http_buffer *)buffer_realloc(buffer_handle, buffer->allocated + size);
-        ptr = (char *)buffer->data + offset;
+        ptr = (char *)buffer->data + buffer->used;
+        buffer = (http_buffer *)buffer_realloc(buffer_handle, buffer->used + size);
     }
     
     if (NULL != buffer)

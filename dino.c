@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <stdarg.h>
 
 #include "dino_buffer.h"
 #include "dino.h"
@@ -268,6 +269,49 @@ void response_send(RESPONE response_handle, const char *data, size_t size, const
     {
         fprintf(stderr, "ERROR:[%s:%d] resposne_handle is NULL... \n\r", function, line);
     }
+}
+
+int response_printf(RESPONE response_handle, const char *function, int line, const char *fmt, ...)
+{
+
+    int ival = 0;
+    double dval = 0.0;
+    
+    // Points to each unnamed arg in turn
+    //
+    va_list ap;
+    // make ap point to 1st unnamed arg
+    //
+    va_start(ap, fmt);
+    for (const char *p = fmt; *p; p++)
+    {
+        if (*p!='%')
+        {
+            putchar(*p);
+            continue;
+        }
+        switch (*++p)
+        {
+            case 'd':
+                ival = va_arg(ap, int);
+                printf("%d", ival);
+                break;
+            case 'f':
+                dval = va_arg(ap, double);
+                printf("%f", dval);
+                break;
+            case 's':
+                for (char *sval = va_arg(ap, char *); *sval; sval++)
+                    putchar(*sval);
+                break;
+            default:
+                putchar(*p);
+                break;
+        }
+    }
+    va_end(ap); /* clean up when done */
+    
+    return 0;
 }
 
 void response_header_set(RESPONE response_handle, const char *key, const char *value, const char *function, int line)

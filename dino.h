@@ -50,6 +50,8 @@ bool dino_start(DHANDLE dhandle, const char *function, int line);
 bool dino_stop(DHANDLE dhandle, const char *function, int line);
 
 void response_send      (RESPONE response_handle, const char *data, size_t size, const char *function, int line);
+void response_send      (RESPONE response_handle, const char *data, size_t size, const char *function, int line);
+int  response_printf    (RESPONE response_handle, const char *function, int line, const char *fmt, ...);
 void response_header_set(RESPONE response_handle, const char *key, const char *value, const char *function, int line);
 
 const char *params_get  (REQUEST request, const char *key);
@@ -91,6 +93,7 @@ size_t      params_count(REQUEST request);
 // Operations
 //
 #define RESPONSE_SEND(data, size)  response_send(response, data, size, __FUNCTION__, __LINE__)
+#define RESPONSE_PRINTF(restrict, ...) response_printf(response, restrict, __FUNCTION__, __LINE__, ...)
 #define RSP_HEADER_SET(key, value) response_header_set(response, key, value, __FUNCTION__, __LINE__)
 
 #define PARAMS(key)         params_get(request, key)
