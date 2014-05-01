@@ -57,16 +57,28 @@ size_t calculate_allocated_size(size_t size)
     return num_blocks * BUFFER_BLOCK_SIZE;
 }
 
-BUFFER buffer_alloc(size_t size)
+void buffer_initialize(BUFFER buffer_handle, size_t size)
 {
-    http_buffer *buffer = malloc_and_clear(sizeof(http_buffer));
-    
-    if (NULL != buffer)
+    if (NULL != buffer_handle)
     {
+        http_buffer *buffer = (http_buffer *)buffer_handle;
+        
+        if (buffer->data)
+        {
+            free(buffer->data);
+        }
+        
         buffer->allocated = calculate_allocated_size(size);
         buffer->data = malloc_and_clear(buffer->allocated);
         buffer->used = size;
     }
+}
+
+BUFFER buffer_alloc_initialize(size_t size)
+{
+    http_buffer *buffer = malloc_and_clear(sizeof(http_buffer));
+    
+    buffer_initialize(buffer, size);
     
     return buffer;
 }
@@ -75,16 +87,14 @@ BUFFER buffer_realloc(BUFFER buffer_handle, size_t size)
 {
     if ( buffer_handle == NULL )
     {
-        return buffer_alloc(size);
+        return buffer_alloc_initialize(size);
     }
     
     http_buffer *buffer = (http_buffer *)buffer_handle;
     
     if( buffer->data == NULL)
     {
-        buffer->allocated = calculate_allocated_size(size);
-        buffer->data = malloc_and_clear(buffer->allocated);
-        buffer->used = size;
+        buffer_initialize(buffer_handle, size);
     }
     else
     {
@@ -98,7 +108,6 @@ BUFFER buffer_realloc(BUFFER buffer_handle, size_t size)
     
     return buffer;
 }
-
 
 void buffer_free(BUFFER buffer_handle)
 {
@@ -123,7 +132,7 @@ BUFFER buffer_append(BUFFER buffer_handle, const char *data, size_t size)
     char *ptr = NULL;
     if ( NULL == buffer)
     {
-        buffer = (http_buffer *)buffer_alloc(size);
+        buffer = (http_buffer *)buffer_alloc_initialize(size);
         ptr = (char *)buffer->data;
     }
     else
