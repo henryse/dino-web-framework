@@ -1,8 +1,5 @@
 TODO List
 ====
-() Add support for wild cards:  /hello/*
-
-() Add support for name binding in url: /hello/:name where :name becomes a key in the parameter list and what ever appears at :name becomes the value
 
 () Convert into a lib
 
@@ -99,5 +96,61 @@ int main(int argc, const char * argv[])
 
 That's it! Fire up a browser and point it at http://localhost:3030
 
+Parameters (Params)
+====
 
+Routes
+====
 
+In Dino, a route is an HTTP method paired with a URL-matching pattern. Each route is associated a call back function defined in a CONFIG block:
+
+~~~C
+int main(int argc, const char * argv[])
+{
+    int port = 3031;
+    char *host = "localhost";
+    
+    DINO_CONFIG_START(port, host);
+        ROUTE_GET(amor, "/")
+        ROUTE_GET(sway, "/:wine/:bottle")
+        ROUTE_POST(main, "/")
+        ROUTE_DELETE(main, "/")
+        ROUTE_PUT(main, "/")
+        ROUTE_OPTIONS(main, "/")
+        ROUTE_HEAD(main, "/")
+        ROUTE_TRACE(main, "/")
+        ROUTE_CONNECT(volare, "/")
+    DINO_CONFIG_END;
+    
+    DINO_START;
+    
+    return 0;
+}
+~~~
+
+The config block starts off with the port and the host that the server will listen on:
+
+~~~C
+DINO_CONFIG_START(port, host);
+~~~
+
+Then each route is bound to a name, for example amor is bound to "http://host:port/" and sway is bound to "http://host:port/sway"
+
+~~~C
+	ROUTE_GET(amor, "/")
+	ROUTE_GET(sway, "/smile")
+~~~
+
+Dino also support parameter binding. so if the route is defined as:
+
+~~~C
+	ROUTE_GET(sway, "/:wine/:bottle")
+~~~
+
+The parameter list will bind what ever appears at :wine and :bottle to values at those location.  For example:
+
+~~~
+http://host:port/red/glass
+~~~
+
+Will cause :wine == red and :bottle == glass in the parameter list. 
