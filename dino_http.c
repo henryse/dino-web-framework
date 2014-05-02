@@ -26,9 +26,12 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <string.h>
 #include <strings.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "dino_buffer.h"
 #include "dino.h"
 #include "dino_http.h"
