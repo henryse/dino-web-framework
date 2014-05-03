@@ -5,10 +5,10 @@
 BINARYDIR := Release
 
 #Toolchain
-CC := C:/cygwin64/bin/gcc.exe
-CXX := C:/cygwin64/bin/g++.exe
+CC := gcc.exe
+CXX := g++.exe
 LD := $(CXX)
-AR := C:/cygwin64/bin/ar.exe
+AR := ar.exe
 OBJCOPY := 
 
 #Additional flags
