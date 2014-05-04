@@ -6,7 +6,7 @@ BINARYDIR := Release
 
 #Toolchain
 CC := gcc.exe
-CXX := g++.exe
+CXX := gcc.exe
 LD := $(CXX)
 AR := ar.exe
 OBJCOPY := 
