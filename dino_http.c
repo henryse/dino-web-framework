@@ -610,6 +610,58 @@ bool bind_url_params(http_request *request, dino_route *route, stack_char_ptr *u
     return true;
 }
 
+void invoke_method(dino_route *route, http_request *request, stack_char_ptr *url_stack)
+{
+    if (NULL == request || NULL == route || NULL == url_stack)
+    {
+        log_error("invoke_method: Invlaid inputs... NULL");
+        return;
+    }
+    // bind url parameters
+    //
+    bind_url_params(request, route, url_stack);
+    
+    // Setup the response object
+    //
+    http_response response;
+    clear_memory(&response, sizeof(response));
+    
+    response.client = request->socket;
+    
+    // Invoke the method..
+    //
+    int http_error_code = route->verb_func(request, &response);
+    
+    // Output Response Headers
+    //
+    char buf[MAX_HTTP_HEADER_LINE_LENGTH];
+    clear_memory(&buf, sizeof(buf));
+    
+    int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 %d\r\n", http_error_code);
+    send(request->socket, buf, bytes, 0);
+    
+    for (int index = 0; index < response.param_index; index++)
+    {
+        clear_memory(&buf, sizeof(buf));
+        bytes = snprintf(buf, sizeof(buf), "%s: %s\r\n",
+                         response.params[index].key,
+                         response.params[index].value);
+        send(request->socket, buf, bytes, 0);
+    }
+    
+    clear_memory(&buf, sizeof(buf));
+    bytes = snprintf(buf, sizeof(buf), "\r\n");
+    send(request->socket, buf, bytes, 0);
+    
+    // Output the data payload
+    //
+    send(request->socket, buffer_data(response.buffer_handle), buffer_size(response.buffer_handle), 0);
+    
+    // Free the buffer
+    //
+    buffer_free(response.buffer_handle);
+}
+
 void accept_request(dino_site *psite, int client)
 {
     http_request request;
@@ -622,51 +674,19 @@ void accept_request(dino_site *psite, int client)
         return;
     }
     
+    // Parse the URL Parameters.
+    //
     stack_char_ptr *url_stack = stack_ptr_parse(NULL, request.url, "/");
 
     // Search for a match...
     //
     dino_route *route = list_method_find(psite->list, request.method, url_stack);
     
+    // Do we have a route?
+    //
     if (NULL != route)
     {
-        // bind url parameters
-        //
-        bind_url_params(&request, route, url_stack);
-        
-        http_response response;
-        clear_memory(&response, sizeof(response));
-        
-        response.client = client;
-
-        // Invoke the method..
-        //
-        int http_error_code = route->verb_func(&request, &response);
-        
-        // Output Response
-        //
-        char buf[MAX_HTTP_HEADER_LINE_LENGTH];
-        clear_memory(&buf, sizeof(buf));
-        
-        int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 %d\r\n", http_error_code);
-        send(client, buf, bytes, 0);
-        
-        for (int index = 0; index < response.param_index; index++)
-        {
-            clear_memory(&buf, sizeof(buf));
-            bytes = snprintf(buf, sizeof(buf), "%s: %s\r\n",
-                             response.params[index].key,
-                             response.params[index].value);
-            send(client, buf, bytes, 0);
-        }
-        
-        clear_memory(&buf, sizeof(buf));
-        bytes = snprintf(buf, sizeof(buf), "\r\n");
-        send(client, buf, bytes, 0);
-
-        send(client, buffer_data(response.buffer_handle), buffer_size(response.buffer_handle), 0);
-        
-        buffer_free(response.buffer_handle);
+        invoke_method(route, &request, url_stack);
     }
     else
     {
