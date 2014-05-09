@@ -20,7 +20,7 @@ GET(amor)
         RESPONSE_SEND("\n\r", 2);
     }
 
-    char *lyrics = "When the moon hits you eye like a big pizza pie\n That's amore!\n\rsdssaf";
+    char *lyrics = "When the moon hits you eye like a big pizza pie\n That's amore!\n\r";
     
     RESPONSE_SEND(lyrics, strlen(lyrics));
 

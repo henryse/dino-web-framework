@@ -196,10 +196,9 @@ void unimplemented(int client)
     send(client, buf, bytes, 0);
 }
 
-void throw_error(const char *sc)
+void log_error(const char *sc)
 {
     perror(sc);
-    exit(1);
 }
 
 //
@@ -214,7 +213,7 @@ int startup_connection(dino_site *psite)
     httpd = socket(PF_INET, SOCK_STREAM, 0);
     if (httpd == -1)
     {
-        throw_error("socket");
+        log_error("socket");
     }
     
     memset(&name, 0, sizeof(name));
@@ -224,7 +223,7 @@ int startup_connection(dino_site *psite)
     
     if (bind(httpd, (struct sockaddr *)&name, sizeof(name)) < 0)
     {
-        throw_error("bind");
+        log_error("bind");
     }
     
     // Dynamically allocate the port?
@@ -234,7 +233,7 @@ int startup_connection(dino_site *psite)
         socklen_t namelen = sizeof(name);
         if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
         {
-            throw_error("getsockname");
+            log_error("getsockname");
         }
         
         psite->port = ntohs(name.sin_port);
@@ -242,7 +241,7 @@ int startup_connection(dino_site *psite)
     
     if (listen(httpd, 5) < 0)
     {
-        throw_error("listen");
+        log_error("listen");
     }
     return(httpd);
 }
@@ -663,6 +662,8 @@ void accept_request(dino_site *psite, int client)
         send(client, buf, bytes, 0);
 
         send(client, buffer_data(response.buffer_handle), buffer_size(response.buffer_handle), 0);
+        
+        buffer_free(response.buffer_handle);
     }
     else
     {
@@ -695,7 +696,7 @@ void dino_start_http(dino_site *psite)
         int client_socket = accept(server_socket, (struct sockaddr *)&sockaddr_client, &sockaddr_client_length);
         if (client_socket == -1)
         {
-            throw_error("accept");
+            log_error("accept");
         }
         
         accept_request(psite, client_socket);

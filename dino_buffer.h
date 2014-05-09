@@ -28,6 +28,8 @@
 typedef void * BUFFER;
 
 BUFFER      buffer_append   (BUFFER buffer_handle, const char *data, size_t size);
+void        buffer_free     (BUFFER buffer_handle);
+
 const char* buffer_data     (BUFFER buffer_handle);
 size_t      buffer_size     (BUFFER buffer_handle);
 
