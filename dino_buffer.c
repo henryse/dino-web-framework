@@ -131,19 +131,21 @@ BUFFER buffer_append(BUFFER buffer_handle, const char *data, size_t size)
     http_buffer *buffer = (http_buffer *)buffer_handle;
 
     char *ptr = NULL;
+    size_t used = 0;
+    
     if ( NULL == buffer)
     {
         buffer = (http_buffer *)buffer_alloc_initialize(size);
-        ptr = (char *)buffer->data;
     }
     else
     {
-        ptr = (char *)buffer->data + buffer->used;
+        used = buffer->used;
         buffer = (http_buffer *)buffer_realloc(buffer_handle, buffer->used + size);
     }
     
     if (NULL != buffer)
     {
+        ptr = (char *)buffer->data + used;
         memcpy(ptr, data, size);
     }
     
