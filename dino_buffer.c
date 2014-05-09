@@ -102,8 +102,9 @@ BUFFER buffer_realloc(BUFFER buffer_handle, size_t size)
         {
             buffer->allocated = calculate_allocated_size(size);
             buffer->data = realloc(buffer->data, buffer->allocated);
-            buffer->used = size;
         }
+
+        buffer->used = size;
     }
     
     return buffer;
