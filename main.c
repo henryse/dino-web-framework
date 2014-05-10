@@ -10,6 +10,7 @@
 #include <string.h>
 #include "dino.h"
 
+
 GET(amor)
 {
     for (int i = 0; i < PARAMS_COUNT; i++)
@@ -34,6 +35,13 @@ GET(amor)
     return HTTP_ERROR_CODE_OK;
 }
 
+void sway_test(DINO_DEF_VARS)
+{
+    char *data = "Hello From GET sway_test!\n";
+    
+    RESPONSE_SEND(data, strlen(data));
+}
+
 GET(sway)
 {
     for (int i = 0; i < PARAMS_COUNT; i++)
@@ -44,11 +52,7 @@ GET(sway)
         RESPONSE_SEND("\n\r", 2);
     }
 
-    char *data = "Hello From GET 2!\n";
-    
-    RESPONSE_SEND(data, strlen(data));
-    
-    RESPONSE_SEND(data, strlen(data));
+    sway_test(DINO_VARS);
     
     RSP_HEADER_SET("Content-Type", "music");
     

@@ -32,7 +32,8 @@
 typedef void *DHANDLE;
 typedef int (*http_verb_func)(DHANDLE);
 
-// Funcions used by macros below.
+// Funcions used by macros below. It is safer to use the MACROS because we reserve the right
+// to change the function signatures whenever we want.
 //
 DHANDLE dino_config_start(unsigned int port,  char *host);
 bool dino_route_get     (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
@@ -56,6 +57,11 @@ const char *params_get  (DHANDLE dhandle, const char *key);
 const char *param_key   (DHANDLE dhandle, size_t index);
 const char *param_value (DHANDLE dhandle, size_t index);
 size_t      params_count(DHANDLE dhandle);
+
+
+// MACRO API, this API is intended to not change.  Thus it is safer to use the MACROS when writting your applications then
+// to use the raw functions described above.
+//
 
 // Bindings for Routes
 //
@@ -98,5 +104,10 @@ size_t      params_count(DHANDLE dhandle);
 #define PARAMS_COUNT        params_count(dhandle)
 #define PARAM_KEY(index)    param_key(dhandle, index)
 #define PARAM_VALUE(index)  param_value(dhandle, index)
+
+// Params list to pass dino parameters
+//
+#define DINO_VARS   dhandle
+#define DINO_DEF_VARS   DHANDLE dhandle
 
 #endif

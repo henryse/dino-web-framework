@@ -33,6 +33,9 @@
 #include "dino_http.h"
 #include "dino_utils.h"
 
+// DHANDLE Casting helpers functions.
+//
+
 dino_site *cast_dhandle_site(DHANDLE dhandle)
 {
     if ( NULL != dhandle )
@@ -75,7 +78,10 @@ http_response *cast_dhandle_response(DHANDLE dhandle)
     return NULL;
 }
 
-const char* method_name_get(http_method method)
+// HTTP Verbs to function prefix strings...
+//
+
+const char* http_method_prefix_string(http_method method)
 {
     switch(method)
     {
@@ -157,7 +163,7 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
 
     // Build name for method
     //
-    const char *method_name = method_name_get(method);
+    const char *method_name = http_method_prefix_string(method);
     
     ppath->name = malloc_and_clear(strlen(method_name) + strlen(name) + 1);
     strncpy(ppath->name, method_name, strlen(method_name));
@@ -179,7 +185,6 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
     
     return true;
 }
-
 
 DHANDLE dino_config_start(unsigned int port,  char *host)
 {
