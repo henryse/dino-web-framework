@@ -5,10 +5,10 @@
 BINARYDIR := Debug
 
 #Toolchain
-CC := gcc.exe
-CXX := gcc.exe
+CC := gcc
+CXX := gcc
 LD := $(CXX)
-AR := ar.exe
+AR := ar
 OBJCOPY := 
 
 #Additional flags
