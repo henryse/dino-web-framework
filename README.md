@@ -97,10 +97,10 @@ int main(int argc, const char * argv[])
 That's it! Fire up a browser and point it at http://localhost:3030
 
 Parameters (Params)
-====
+----
 
 Routes
-====
+----
 
 In Dino, a route is an HTTP method paired with a URL-matching pattern. Each route is associated a call back function defined in a CONFIG block:
 
@@ -159,7 +159,7 @@ API
 ====
 
 Configuration
-====
+----
 
 DINO_CONFIG_START(port, host)
 
@@ -182,7 +182,7 @@ ROUTE_CONNECT(route_name, path)
 DINO_CONFIG_END
 
 Start/Stop
-====
+----
 
 DINO_START
 
@@ -190,7 +190,7 @@ DINO_STOP
 
 
 HTTP Methods
-====
+----
 
 GET(route_name)
 
@@ -209,7 +209,7 @@ TRACE(route_name)
 CONNECT(route_name)
 
 Operations
-====
+----
 
 RESPONSE_SEND(data, size)
 
@@ -226,7 +226,7 @@ PARAM_KEY(index)
 PARAM_VALUE(index)
 
 Helpers
-====
+----
 
 Params list to pass dino parameters
 
