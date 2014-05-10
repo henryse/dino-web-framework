@@ -63,15 +63,6 @@ typedef struct dino_route_struct
     stack_char_ptr *stack;
 }dino_route;
 
-// Site
-//
-typedef struct dino_site_struct
-{
-    u_short port;
-    char host[HOST_STRING_SIZE];
-    dino_route *list;
-}dino_site;
-
 // HTTP Parametgers/key value paire.
 //
 typedef struct http_key_value_struct
@@ -80,32 +71,63 @@ typedef struct http_key_value_struct
     char value[HTTP_MAX_VALUE_SIZE];
 }http_key_value;
 
+typedef enum dino_handle_type_enum
+{
+    dino_handle_invalid,
+    dino_handle_site,
+    dino_handle_http,
+}dino_handle_type;
+
+// Site
+//
+typedef struct dino_site_struct
+{
+    dino_handle_type handle_type;
+
+    u_short port;
+    dino_route *list;
+    char host[HOST_STRING_SIZE];
+}dino_site;
+
 // Request structure
 //
 typedef struct http_request_struct
-{
-    http_key_value params[HTTP_MAX_PARAMS];
-    int param_index;
-    
+{    
+    size_t content_size;
+    char *data;
+
     http_method method;
     char url[HTTP_URL_SIZE];
 
-    int socket;
-    
-    size_t content_size;
-    char *data;
+    int param_index;
+    http_key_value params[HTTP_MAX_PARAMS];
 }http_request;
 
 // Response structure
 //
 typedef struct http_response_struct
 {
-    int client;
     BUFFER buffer_handle;
 
-    http_key_value params[HTTP_MAX_PARAMS];
     int param_index;
+    http_key_value params[HTTP_MAX_PARAMS];
 }http_response;
+
+typedef struct http_data_struct
+{
+    dino_handle_type handle_type;
+
+    int socket;
+
+    http_request request;
+    http_response response;
+}http_data;
+
+typedef union dino_handle_type
+{
+    dino_site site;
+    http_data http;
+}dino_handle;
 
 // Start server
 //

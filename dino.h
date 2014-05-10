@@ -30,9 +30,7 @@
 // Types
 //
 typedef void *DHANDLE;
-typedef void *REQUEST;
-typedef void *RESPONE;
-typedef int (*http_verb_func)(REQUEST, RESPONE);
+typedef int (*http_verb_func)(DHANDLE);
 
 // Funcions used by macros below.
 //
@@ -46,18 +44,18 @@ bool dino_route_head    (DHANDLE dhandle, http_verb_func verb_func, const char *
 bool dino_route_trace   (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
 bool dino_route_connect (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
 
-bool dino_start(DHANDLE dhandle, const char *function, int line);
-bool dino_stop(DHANDLE dhandle, const char *function, int line);
+bool dino_start         (DHANDLE dhandle, const char *function, int line);
+bool dino_stop          (DHANDLE dhandle, const char *function, int line);
 
-void response_send      (RESPONE response_handle, const char *data, size_t size, const char *function, int line);
-void response_send      (RESPONE response_handle, const char *data, size_t size, const char *function, int line);
-int  response_printf    (RESPONE response_handle, const char *function, int line, const char *fmt, ...);
-void response_header_set(RESPONE response_handle, const char *key, const char *value, const char *function, int line);
+void response_send      (DHANDLE dhandle, const char *data, size_t size, const char *function, int line);
+void response_send      (DHANDLE dhandle, const char *data, size_t size, const char *function, int line);
+int  response_printf    (DHANDLE dhandle, const char *function, int line, const char *fmt, ...);
+void response_header_set(DHANDLE dhandle, const char *key, const char *value, const char *function, int line);
 
-const char *params_get  (REQUEST request, const char *key);
-const char *param_key   (REQUEST request, size_t index);
-const char *param_value (REQUEST request, size_t index);
-size_t      params_count(REQUEST request);
+const char *params_get  (DHANDLE dhandle, const char *key);
+const char *param_key   (DHANDLE dhandle, size_t index);
+const char *param_value (DHANDLE dhandle, size_t index);
+size_t      params_count(DHANDLE dhandle);
 
 // Bindings for Routes
 //
@@ -76,29 +74,29 @@ size_t      params_count(REQUEST request);
 
 #define DINO_CONFIG_END } while(0)
 
-#define DINO_START dino_start(dhandle, __FUNCTION__, __LINE__);
-#define DINO_STOP dino_stop(dhandle, __FUNCTION__, __LINE__);
+#define DINO_START  dino_start(dhandle, __FUNCTION__, __LINE__);
+#define DINO_STOP   dino_stop(dhandle, __FUNCTION__, __LINE__);
 
 // Declarations for Methods to be invoked for a given route.
 //
-#define GET(name)       int get_##name(REQUEST request, RESPONE response)
-#define POST(name)      int post_##name(REQUEST request, RESPONE response)
-#define PUT(name)       int put_##name(REQUEST request, RESPONE response)
-#define DELETE(name)    int delete_##name(REQUEST request, RESPONE response)
-#define OPTIONS(name)   int options_##name(REQUEST request, RESPONE response)
-#define HEAD(name)      int head_##name(REQUEST request, RESPONE response)
-#define TRACE(name)     int trace_##name(REQUEST request, RESPONE response)
-#define CONNECT(name)   int connect_##name(REQUEST request, RESPONE response)
+#define GET(name)       int get_##name(DHANDLE dhandle)
+#define POST(name)      int post_##name(DHANDLE dhandle)
+#define PUT(name)       int put_##name(DHANDLE dhandle)
+#define DELETE(name)    int delete_##name(DHANDLE dhandle)
+#define OPTIONS(name)   int options_##name(DHANDLE dhandle)
+#define HEAD(name)      int head_##name(DHANDLE dhandle)
+#define TRACE(name)     int trace_##name(DHANDLE dhandle)
+#define CONNECT(name)   int connect_##name(DHANDLE dhandle)
 
 // Operations
 //
-#define RESPONSE_SEND(data, size)  response_send(response, data, size, __FUNCTION__, __LINE__)
-#define RESPONSE_PRINTF(restrict, ...) response_printf(response, restrict, __FUNCTION__, __LINE__, ...)
-#define RSP_HEADER_SET(key, value) response_header_set(response, key, value, __FUNCTION__, __LINE__)
+#define RESPONSE_SEND(data, size)       response_send(dhandle, data, size, __FUNCTION__, __LINE__)
+#define RESPONSE_PRINTF(restrict, ...)  response_printf(dhandle, restrict, __FUNCTION__, __LINE__, ...)
+#define RSP_HEADER_SET(key, value)      response_header_set(dhandle, key, value, __FUNCTION__, __LINE__)
 
-#define PARAMS(key)         params_get(request, key)
-#define PARAMS_COUNT        params_count(request)
-#define PARAM_KEY(index)    param_key(request, index)
-#define PARAM_VALUE(index)  param_value(request, index)
+#define PARAMS(key)         params_get(dhandle, key)
+#define PARAMS_COUNT        params_count(dhandle)
+#define PARAM_KEY(index)    param_key(dhandle, index)
+#define PARAM_VALUE(index)  param_value(dhandle, index)
 
 #endif

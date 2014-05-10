@@ -33,6 +33,48 @@
 #include "dino_http.h"
 #include "dino_utils.h"
 
+dino_site *cast_dhandle_site(DHANDLE dhandle)
+{
+    if ( NULL != dhandle )
+    {
+        dino_site *ptr = (dino_site *)dhandle;
+        
+        if ( dino_handle_site == ptr->handle_type )
+        {
+            return ptr;
+        }
+    }
+    return NULL;
+}
+
+http_request *cast_dhandle_request(DHANDLE dhandle)
+{
+    if ( NULL != dhandle )
+    {
+        http_data *ptr = (http_data *)dhandle;
+        
+        if ( dino_handle_http == ptr->handle_type )
+        {
+            return &ptr->request;
+        }
+    }
+    return NULL;
+}
+
+http_response *cast_dhandle_response(DHANDLE dhandle)
+{
+    if ( NULL != dhandle )
+    {
+        http_data *ptr = (http_data *)dhandle;
+        
+        if ( dino_handle_http == ptr->handle_type )
+        {
+            return &ptr->response;
+        }
+    }
+    return NULL;
+}
+
 const char* method_name_get(http_method method)
 {
     switch(method)
@@ -104,7 +146,7 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
         return false;
     }
     
-    dino_site *psite = (dino_site *)dhandle;
+    dino_site *psite = cast_dhandle_site(dhandle);
     
     if (NULL != list_find(psite->list, name))
     {
@@ -147,6 +189,7 @@ DHANDLE dino_config_start(unsigned int port,  char *host)
         strncpy(psite->host, host, sizeof(psite->host));
         psite->port = port;
         psite->list = NULL;
+        psite->handle_type = dino_handle_site;
     }
     
     return psite;
@@ -242,7 +285,7 @@ bool dino_start(DHANDLE dhandle, const char *function, int line)
         return false;
     }
     
-    dino_start_http((dino_site *)dhandle);
+    dino_start_http(cast_dhandle_site(dhandle));
 
     return true;
 }
@@ -258,12 +301,12 @@ bool dino_stop(DHANDLE dhandle, const char *function, int line)
     return true;
 }
 
-void response_send(RESPONE response_handle, const char *data, size_t size, const char *function, int line)
+void response_send(DHANDLE dhandle, const char *data, size_t size, const char *function, int line)
 {
-    if (response_handle != NULL)
+    http_response *response = cast_dhandle_response(dhandle);
+    
+    if (NULL != response )
     {
-        http_response *response = (http_response *)response_handle;
-        
         response->buffer_handle = buffer_append(response->buffer_handle, data, size);
     }
     else
@@ -272,7 +315,7 @@ void response_send(RESPONE response_handle, const char *data, size_t size, const
     }
 }
 
-int response_printf(RESPONE response_handle, const char *function, int line, const char *fmt, ...)
+int response_printf(DHANDLE dhandle, const char *function, int line, const char *fmt, ...)
 {
 
     int ival = 0;
@@ -315,11 +358,12 @@ int response_printf(RESPONE response_handle, const char *function, int line, con
     return 0;
 }
 
-void response_header_set(RESPONE response_handle, const char *key, const char *value, const char *function, int line)
+void response_header_set(DHANDLE dhandle, const char *key, const char *value, const char *function, int line)
 {
-    if (response_handle != NULL)
+    http_response *response = cast_dhandle_response(dhandle);
+    
+    if ( NULL != response )
     {
-        http_response *response = (http_response *)response_handle;
 
         if (key && *key)
         {
@@ -359,12 +403,12 @@ void response_header_set(RESPONE response_handle, const char *key, const char *v
     }
 }
 
-const char *params_get(REQUEST request_handle, const char *key)
+const char *params_get(DHANDLE dhandle, const char *key)
 {
-    if (NULL != request_handle)
+    http_request *request = cast_dhandle_request(dhandle);
+
+    if ( NULL != request )
     {
-        http_request *request = (http_request *)request_handle;
-        
         for (int index = 0; index < request->param_index; index++)
         {
             if (0 == strncmp( request->params[index].key, key, sizeof( request->params[index].key)))
@@ -377,23 +421,22 @@ const char *params_get(REQUEST request_handle, const char *key)
     return "";
 }
 
-size_t params_count(REQUEST request_handle)
+size_t params_count(DHANDLE dhandle)
 {
-    if (NULL != request_handle)
+    http_request *request = cast_dhandle_request(dhandle);
+    if (NULL != request)
     {
-        http_request *request = (http_request *)request_handle;
         return request->param_index;
     }
     
     return 0;
 }
 
-const char *param_key(REQUEST request_handle, size_t index)
+const char *param_key(DHANDLE dhandle, size_t index)
 {
-    if (NULL != request_handle)
+    http_request *request = cast_dhandle_request(dhandle);
+    if (NULL != request)
     {
-        http_request *request = (http_request *)request_handle;
-        
         if (index < request->param_index)
         {
             return request->params[index].key;
@@ -403,12 +446,11 @@ const char *param_key(REQUEST request_handle, size_t index)
     return "";
 }
 
-const char *param_value(REQUEST request_handle, size_t index)
+const char *param_value(DHANDLE dhandle, size_t index)
 {
-    if (NULL != request_handle)
-    {
-        http_request *request = (http_request *)request_handle;
-        
+    http_request *request = cast_dhandle_request(dhandle);
+    if (NULL != request)
+    {        
         if (index < request->param_index)
         {
             return request->params[index].value;

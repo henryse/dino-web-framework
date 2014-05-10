@@ -253,7 +253,7 @@ int startup_connection(dino_site *psite)
 // Read data from socket
 //
 
-size_t read_line(http_request *request, char *line, size_t size)
+size_t read_line(int socket, char *line, size_t size)
 {
     clear_memory(line, size);
     
@@ -262,17 +262,17 @@ size_t read_line(http_request *request, char *line, size_t size)
     
     while ((i < size) && (c != '\n'))
     {
-        ssize_t n = recv(request->socket, &c, 1, 0);
+        ssize_t n = recv(socket, &c, 1, 0);
         
         if (n > 0)
         {
             if (c == '\r')
             {
-                n = recv(request->socket, &c, 1, MSG_PEEK);
+                n = recv(socket, &c, 1, MSG_PEEK);
 
                 if ((n > 0) && (c == '\n'))
                 {
-                    recv(request->socket, &c, 1, 0);
+                    recv(socket, &c, 1, 0);
                 }
                 else
                 {
@@ -291,7 +291,7 @@ size_t read_line(http_request *request, char *line, size_t size)
     return i;
 }
 
-size_t read_data(http_request *request, char *data, size_t size)
+size_t read_data(int socket, char *data, size_t size)
 {
     clear_memory(data, size);
     
@@ -300,7 +300,7 @@ size_t read_data(http_request *request, char *data, size_t size)
     
     while (i < size)
     {
-        ssize_t n = recv(request->socket, &c, 1, 0);
+        ssize_t n = recv(socket, &c, 1, 0);
         
         if (n > 0)
         {
@@ -316,9 +316,9 @@ size_t read_data(http_request *request, char *data, size_t size)
 // Parsers
 //
 
-http_method parse_method_url(http_request *request, char *line, size_t size)
+http_method parse_method_url(http_data *http, char *line, size_t size)
 {
-    if (request == NULL || line == NULL)
+    if ( NULL == http || NULL == line)
     {
         return http_invalid;
     }
@@ -335,39 +335,39 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
         offset++;
     }
 
-    request->method = http_invalid;
+    http->request.method = http_invalid;
     
     if (0 == strcasecmp(method, "GET"))
     {
-        request->method = http_get;
+        http->request.method = http_get;
     }
     else if (0 == strcasecmp(method, "POST"))
     {
-        request->method = http_post;
+        http->request.method = http_post;
     }
     else if (0 == strcasecmp(method, "PUT"))
     {
-        request->method = http_put;
+        http->request.method = http_put;
     }
     else if (0 == strcasecmp(method, "DELETE"))
     {
-        request->method = http_delete;
+        http->request.method = http_delete;
     }
     else if (0 == strcasecmp(method, "OPTIONS"))
     {
-        request->method = http_options;
+        http->request.method = http_options;
     }
     else if (0 == strcasecmp(method, "HEAD"))
     {
-        request->method = http_head;
+        http->request.method = http_head;
     }
     else if (0 == strcasecmp(method, "TRACE"))
     {
-        request->method = http_trace;
+        http->request.method = http_trace;
     }
     else if (0 == strcasecmp(method, "CONNECT"))
     {
-        request->method = http_connect;
+        http->request.method = http_connect;
     }
     else
     {
@@ -377,7 +377,7 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
     // Fetch the URL
     //
     char *query = line + offset;
-    char *url = request->url;
+    char *url = http->request.url;
     
     // Skip over the ' 's and the tabs
     //
@@ -402,7 +402,7 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
         offset = 0;
         
         char params_buffer[HTTP_URL_SIZE];
-        while(!isspace(*query) && *query != 0 && offset < sizeof(request->url) )
+        while(!isspace(*query) && *query != 0 && offset < sizeof(http->request.url) )
         {
             params_buffer[offset] = *query;
             offset++;
@@ -421,22 +421,22 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
             char *key = strtok_r(param, "=", &brkt2);
             char *value = strtok_r(NULL, "=", &brkt2);
 
-            if (key && *key && request->param_index < HTTP_MAX_PARAMS)
+            if (key && *key && http->request.param_index < HTTP_MAX_PARAMS)
             {
-                strncpy(request->params[request->param_index].key,
+                strncpy(http->request.params[http->request.param_index].key,
                         key,
-                        sizeof(request->params[request->param_index].key));
+                        sizeof(http->request.params[http->request.param_index].key));
                 if (value && *value)
                 {
-                    strncpy(request->params[request->param_index].value,
+                    strncpy(http->request.params[http->request.param_index].value,
                             value,
-                            sizeof(request->params[request->param_index].value));
+                            sizeof(http->request.params[http->request.param_index].value));
                 }
-                request->param_index++;
+                http->request.param_index++;
             }
         }
     }
-    return request->method;
+    return http->request.method;
 }
 
 char *clean_string(char *value)
@@ -454,7 +454,7 @@ char *clean_string(char *value)
     return value;
 }
 
-size_t parse_headers(http_request *request, char *line, size_t size)
+size_t parse_headers(http_data *http, char *line, size_t size)
 {
     size_t content_size = 0;
     
@@ -463,7 +463,7 @@ size_t parse_headers(http_request *request, char *line, size_t size)
 
     // Read the headers...
     //
-    while ((line_len = read_line(request, line, size)))
+    while ((line_len = read_line(http->socket, line, size)))
     {
         // Find the key and the value
         //
@@ -487,22 +487,22 @@ size_t parse_headers(http_request *request, char *line, size_t size)
         
         // Copy to parameter list
         //
-        if (key && *key && request->param_index < HTTP_MAX_PARAMS)
+        if (key && *key && http->request.param_index < HTTP_MAX_PARAMS)
         {
-            strncpy(request->params[request->param_index].key,
+            strncpy(http->request.params[http->request.param_index].key,
                     key,
-                    sizeof(request->params[request->param_index].key));
+                    sizeof(http->request.params[http->request.param_index].key));
             if (value && *value)
             {
                 // Copy over the "value"
                 //
-                strncpy(request->params[request->param_index].value,
+                strncpy(http->request.params[http->request.param_index].value,
                         value,
-                        sizeof(request->params[request->param_index].value));
+                        sizeof(http->request.params[http->request.param_index].value));
             }
-            request->param_index++;
+            http->request.param_index++;
         }
-        else if (request->param_index >= HTTP_MAX_PARAMS)
+        else if (http->request.param_index >= HTTP_MAX_PARAMS)
         {
             fprintf(stderr, "WARNING: More than %d parameters found, ignorning: %s\n\r",
                     HTTP_MAX_PARAMS,
@@ -533,14 +533,14 @@ size_t parse_headers(http_request *request, char *line, size_t size)
 // Read in the request
 //
 
-bool read_request(http_request *request)
+bool read_request(http_data *http)
 {
     char line[MAX_HTTP_HEADER_LINE_LENGTH];
     clear_memory(line, sizeof(line));
 
     // Read the Method:
     //
-    size_t line_len = read_line(request, line, sizeof(line));
+    size_t line_len = read_line(http->socket, line, sizeof(line));
     
     if (0 == line_len)
     {
@@ -551,23 +551,23 @@ bool read_request(http_request *request)
 
     // Validate the Method:
     //
-    if (http_invalid == parse_method_url(request, line, line_len))
+    if (http_invalid == parse_method_url(http, line, line_len))
     {
         return false;
     }
     
     // Read the headers...
     //
-    request->content_size = parse_headers(request, line, sizeof(line));
+    http->request.content_size = parse_headers(http, line, sizeof(line));
     
     // Get the content
     //
-    if (request->content_size)
+    if (http->request.content_size)
     {
-        request->data = malloc_and_clear(request->content_size);
-        size_t total = read_data(request, request->data, request->content_size);
-        assert(total == request->content_size);
-        request->content_size = total;
+        http->request.data = malloc_and_clear(http->request.content_size);
+        size_t total = read_data(http->socket, http->request.data, http->request.content_size);
+        assert(total == http->request.content_size);
+        http->request.content_size = total;
     }
     
     return true;
@@ -611,27 +611,21 @@ bool bind_url_params(http_request *request, dino_route *route, stack_char_ptr *u
     return true;
 }
 
-void invoke_method(dino_route *route, http_request *request, stack_char_ptr *url_stack)
+void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack)
 {
-    if (NULL == request || NULL == route || NULL == url_stack)
+    if (NULL == http || NULL == route || NULL == url_stack)
     {
         log_error("invoke_method: Invlaid inputs... NULL");
         return;
     }
+    
     // bind url parameters
     //
-    bind_url_params(request, route, url_stack);
-    
-    // Setup the response object
-    //
-    http_response response;
-    clear_memory(&response, sizeof(response));
-    
-    response.client = request->socket;
+    bind_url_params(&http->request, route, url_stack);
     
     // Invoke the method..
     //
-    int http_error_code = route->verb_func(request, &response);
+    int http_error_code = route->verb_func(http);
     
     // Output Response Headers
     //
@@ -639,64 +633,66 @@ void invoke_method(dino_route *route, http_request *request, stack_char_ptr *url
     clear_memory(&buf, sizeof(buf));
     
     int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 %d\r\n", http_error_code);
-    send(request->socket, buf, bytes, 0);
+    send(http->socket, buf, bytes, 0);
     
-    for (int index = 0; index < response.param_index; index++)
+    for (int index = 0; index < http->response.param_index; index++)
     {
         clear_memory(&buf, sizeof(buf));
         bytes = snprintf(buf, sizeof(buf), "%s: %s\r\n",
-                         response.params[index].key,
-                         response.params[index].value);
-        send(request->socket, buf, bytes, 0);
+                         http->response.params[index].key,
+                         http->response.params[index].value);
+        send(http->socket, buf, bytes, 0);
     }
     
     clear_memory(&buf, sizeof(buf));
     bytes = snprintf(buf, sizeof(buf), "\r\n");
-    send(request->socket, buf, bytes, 0);
+    send(http->socket, buf, bytes, 0);
     
     // Output the data payload
     //
-    send(request->socket, buffer_data(response.buffer_handle), buffer_size(response.buffer_handle), 0);
+    send(http->socket, buffer_data(http->response.buffer_handle), buffer_size(http->response.buffer_handle), 0);
     
     // Free the buffer
     //
-    buffer_free(response.buffer_handle);
+    buffer_free(http->response.buffer_handle);
 }
 
-void accept_request(dino_site *psite, int client)
+void accept_request(dino_site *psite, int socket)
 {
-    http_request request;
-    clear_memory(&request, sizeof(request));
+    dino_handle dhandle;
+    clear_memory(&dhandle, sizeof(dhandle));
     
-    request.socket = client;
-    if(!read_request(&request))
+    dhandle.http.handle_type = dino_handle_http;
+    dhandle.http.socket = socket;
+
+    if(!read_request(&dhandle.http))
     {
-        bad_request(client);
+        bad_request(socket);
         return;
     }
     
     // Parse the URL Parameters.
     //
-    stack_char_ptr *url_stack = stack_ptr_parse(NULL, request.url, "/");
+    stack_char_ptr *url_stack = stack_ptr_parse(NULL, dhandle.http.request.url, "/");
 
     // Search for a match...
     //
-    dino_route *route = list_method_find(psite->list, request.method, url_stack);
+    dino_route *route = list_method_find(psite->list, dhandle.http.request.method, url_stack);
     
     // Do we have a route?
     //
     if (NULL != route)
     {
-        invoke_method(route, &request, url_stack);
+        invoke_method(route, &dhandle.http, url_stack);
     }
     else
     {
-        fprintf(stderr, "ERROR: Path %s not found\n\r", request.url);
+        fprintf(stderr, "ERROR: Path %s not found\n\r", dhandle.http.request.url);
     }
 
     stack_ptr_free(url_stack);
 
-    close(client);
+    close(socket);
 }
 
 void dino_start_http(dino_site *psite)
