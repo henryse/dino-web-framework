@@ -36,14 +36,14 @@ typedef int (*http_verb_func)(DHANDLE);
 // to change the function signatures whenever we want.
 //
 DHANDLE dino_config_start(unsigned int port,  char *host);
-bool dino_route_get     (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
-bool dino_route_post    (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
-bool dino_route_delete  (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
-bool dino_route_put     (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
-bool dino_route_options (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
-bool dino_route_head    (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
-bool dino_route_trace   (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
-bool dino_route_connect (DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line);
+bool dino_route_get     (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool dino_route_post    (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool dino_route_delete  (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool dino_route_put     (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool dino_route_options (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool dino_route_head    (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool dino_route_trace   (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool dino_route_connect (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
 
 bool dino_start         (DHANDLE dhandle, const char *function, int line);
 bool dino_stop          (DHANDLE dhandle, const char *function, int line);
@@ -69,14 +69,14 @@ size_t      params_count(DHANDLE dhandle);
             do {  \
                 dhandle = dino_config_start(port, host);
 
-#define ROUTE_GET(name, path)      if (!dino_route_get(dhandle, get_##name, #name, path, __FUNCTION__, __LINE__)) break;
-#define ROUTE_POST(name, path)     if (!dino_route_post(dhandle, post_##name, #name, path, __FUNCTION__, __LINE__)) break;
-#define ROUTE_DELETE(name, path)   if (!dino_route_delete(dhandle, delete_##name, #name, path, __FUNCTION__, __LINE__)) break;
-#define ROUTE_PUT(name, path)      if (!dino_route_put(dhandle, put_##name, #name, path, __FUNCTION__, __LINE__)) break;
-#define ROUTE_OPTIONS(name, path)  if (!dino_route_options(dhandle, options_##name, #name, path, __FUNCTION__, __LINE__)) break;
-#define ROUTE_HEAD(name, path)     if (!dino_route_head(dhandle, head_##name, #name, path, __FUNCTION__, __LINE__)) break;
-#define ROUTE_TRACE(name, path)    if (!dino_route_trace(dhandle, trace_##name, #name, path, __FUNCTION__, __LINE__)) break;
-#define ROUTE_CONNECT(name, path)  if (!dino_route_connect(dhandle, connect_##name, #name, path, __FUNCTION__, __LINE__)) break;
+#define ROUTE_GET(route_name, path)      if (!dino_route_get(dhandle, get_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
+#define ROUTE_POST(route_name, path)     if (!dino_route_post(dhandle, post_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
+#define ROUTE_DELETE(route_name, path)   if (!dino_route_delete(dhandle, delete_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
+#define ROUTE_PUT(route_name, path)      if (!dino_route_put(dhandle, put_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
+#define ROUTE_OPTIONS(route_name, path)  if (!dino_route_options(dhandle, options_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
+#define ROUTE_HEAD(route_name, path)     if (!dino_route_head(dhandle, head_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
+#define ROUTE_TRACE(route_name, path)    if (!dino_route_trace(dhandle, trace_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
+#define ROUTE_CONNECT(route_name, path)  if (!dino_route_connect(dhandle, connect_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
 
 #define DINO_CONFIG_END } while(0)
 
@@ -85,14 +85,14 @@ size_t      params_count(DHANDLE dhandle);
 
 // Declarations for Methods to be invoked for a given route.
 //
-#define GET(name)       int get_##name(DHANDLE dhandle)
-#define POST(name)      int post_##name(DHANDLE dhandle)
-#define PUT(name)       int put_##name(DHANDLE dhandle)
-#define DELETE(name)    int delete_##name(DHANDLE dhandle)
-#define OPTIONS(name)   int options_##name(DHANDLE dhandle)
-#define HEAD(name)      int head_##name(DHANDLE dhandle)
-#define TRACE(name)     int trace_##name(DHANDLE dhandle)
-#define CONNECT(name)   int connect_##name(DHANDLE dhandle)
+#define GET(route_name)       int get_##route_name(DHANDLE dhandle)
+#define POST(route_name)      int post_##route_name(DHANDLE dhandle)
+#define PUT(route_name)       int put_##route_name(DHANDLE dhandle)
+#define DELETE(route_name)    int delete_##route_name(DHANDLE dhandle)
+#define OPTIONS(route_name)   int options_##route_name(DHANDLE dhandle)
+#define HEAD(route_name)      int head_##route_name(DHANDLE dhandle)
+#define TRACE(route_name)     int trace_##route_name(DHANDLE dhandle)
+#define CONNECT(route_name)   int connect_##route_name(DHANDLE dhandle)
 
 // Operations
 //

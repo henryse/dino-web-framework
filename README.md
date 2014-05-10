@@ -11,9 +11,9 @@ TODO List
 
 () Fill out documentation.
 
-() Add makefile
-
 () How to do unit tests?
+
+() Get RESPONSE_PRINTF working
 
 Getting Started
 ====
@@ -154,3 +154,50 @@ http://host:port/red/glass
 ~~~
 
 Will cause :wine == red and :bottle == glass in the parameter list. 
+
+API
+====
+
+DINO_CONFIG_START
+______
+DINO_CONFIG_START(port, host)
+
+ROUTE_GET(route_name, path)
+ROUTE_POST(route_name, path)
+ROUTE_DELETE(route_name, path)
+ROUTE_PUT(route_name, path)
+ROUTE_OPTIONS(route_name, path)
+ROUTE_HEAD(route_name, path)
+ROUTE_TRACE(route_name, path)
+ROUTE_CONNECT(route_name, path)
+
+DINO_CONFIG_END
+
+DINO_START
+DINO_STOP
+
+
+GET(route_name)
+POST(route_name)
+PUT(route_name)
+DELETE(route_name)
+OPTIONS(route_name)
+HEAD(route_name)
+TRACE(route_name)
+CONNECT(route_name)
+
+// Operations
+//
+RESPONSE_SEND(data, size)
+RESPONSE_PRINTF(restrict, ...)
+RSP_HEADER_SET(key, value)
+
+PARAMS(key)
+PARAMS_COUNT
+PARAM_KEY(index)
+PARAM_VALUE(index)
+
+// Params list to pass dino parameters
+//
+DINO_VARS
+DINO_DEF_VARS
