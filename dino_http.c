@@ -395,46 +395,47 @@ http_method parse_method_url(http_request *request, char *line, size_t size)
     
     if (*query == '?')
     {
+        // Move off of '?'
+        //
         query++;
-    }
-    
-    offset = 0;
-    
-    char params_buffer[HTTP_URL_SIZE];
-    while(!isspace(*query) && *query != 0 && offset < sizeof(request->url) )
-    {
-        params_buffer[offset] = *query;
-        offset++;
-        query++;
-    }
-
-    // Parse the URL parameters
-    //
-    char *brkt = NULL;
-
-    for (char *param = strtok_r(params_buffer, "&", &brkt);
-         param;
-         param = strtok_r(NULL, "&", &brkt))
-    {
-        char *brkt2 = NULL;
-        char *key = strtok_r(param, "=", &brkt2);
-        char *value = strtok_r(NULL, "=", &brkt2);
-
-        if (key && *key && request->param_index < HTTP_MAX_PARAMS)
+        
+        offset = 0;
+        
+        char params_buffer[HTTP_URL_SIZE];
+        while(!isspace(*query) && *query != 0 && offset < sizeof(request->url) )
         {
-            strncpy(request->params[request->param_index].key,
-                    key,
-                    sizeof(request->params[request->param_index].key));
-            if (value && *value)
+            params_buffer[offset] = *query;
+            offset++;
+            query++;
+        }
+
+        // Parse the URL parameters
+        //
+        char *brkt = NULL;
+
+        for (char *param = strtok_r(params_buffer, "&", &brkt);
+             param;
+             param = strtok_r(NULL, "&", &brkt))
+        {
+            char *brkt2 = NULL;
+            char *key = strtok_r(param, "=", &brkt2);
+            char *value = strtok_r(NULL, "=", &brkt2);
+
+            if (key && *key && request->param_index < HTTP_MAX_PARAMS)
             {
-                strncpy(request->params[request->param_index].value,
-                        value,
-                        sizeof(request->params[request->param_index].value));
+                strncpy(request->params[request->param_index].key,
+                        key,
+                        sizeof(request->params[request->param_index].key));
+                if (value && *value)
+                {
+                    strncpy(request->params[request->param_index].value,
+                            value,
+                            sizeof(request->params[request->param_index].value));
+                }
+                request->param_index++;
             }
-            request->param_index++;
         }
     }
-
     return request->method;
 }
 
