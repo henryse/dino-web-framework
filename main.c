@@ -19,11 +19,13 @@ GET(amor)
         RESPONSE_SEND(":", 1);
         RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
         RESPONSE_SEND("\n\r", 2);
+		
     }
 
-    char *lyrics = "When the moon hits you eye like a big pizza pie\n That's amore!\n\r";
-    
-    RESPONSE_SEND(lyrics, strlen(lyrics));
+    char *lyrics = "When the moon hits you eye like a big %s %s pizza pie\n That's amore!\n\r";
+    char *ingredientOne = "pineapple pepperoni";
+    char *magicIngredient = "anchovies";
+    RESPONSE_PRINTF(lyrics, ingredientOne, magicIngredient);
 
 
     RSP_HEADER_SET("Content-Type", "music");

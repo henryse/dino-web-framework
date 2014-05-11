@@ -97,7 +97,7 @@ size_t      params_count(DHANDLE dhandle);
 // Operations
 //
 #define RESPONSE_SEND(data, size)       response_send(dhandle, data, size, __FUNCTION__, __LINE__)
-#define RESPONSE_PRINTF(restrict, ...)  response_printf(dhandle, restrict, __FUNCTION__, __LINE__, ...)
+#define RESPONSE_PRINTF(fmt, ...)  response_printf(dhandle, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #define RSP_HEADER_SET(key, value)      response_header_set(dhandle, key, value, __FUNCTION__, __LINE__)
 
 #define PARAMS(key)         params_get(dhandle, key)
@@ -109,5 +109,5 @@ size_t      params_count(DHANDLE dhandle);
 //
 #define DINO_VARS   dhandle
 #define DINO_DEF_VARS   DHANDLE dhandle
-
+#define RESPONSE_PRINTF_MAX_STRING_SIZE 1024
 #endif

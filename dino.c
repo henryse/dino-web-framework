@@ -322,44 +322,29 @@ void response_send(DHANDLE dhandle, const char *data, size_t size, const char *f
 
 int response_printf(DHANDLE dhandle, const char *function, int line, const char *fmt, ...)
 {
+    // FTM let's say RESPONSE_PRINTF_MAX_STRING_SIZE
+    //
+    char result[RESPONSE_PRINTF_MAX_STRING_SIZE];
+    clear_memory(result, sizeof(result));
 
-    int ival = 0;
-    double dval = 0.0;
-    
     // Points to each unnamed arg in turn
     //
     va_list ap;
+
     // make ap point to 1st unnamed arg
     //
     va_start(ap, fmt);
-    for (const char *p = fmt; *p; p++)
-    {
-        if (*p!='%')
-        {
-            putchar(*p);
-            continue;
-        }
-        switch (*++p)
-        {
-            case 'd':
-                ival = va_arg(ap, int);
-                printf("%d", ival);
-                break;
-            case 'f':
-                dval = va_arg(ap, double);
-                printf("%f", dval);
-                break;
-            case 's':
-                for (char *sval = va_arg(ap, char *); *sval; sval++)
-                    putchar(*sval);
-                break;
-            default:
-                putchar(*p);
-                break;
-        }
-    }
+
+    // sprintf with variable params
+    //
+    vsprintf(result, fmt, ap);
+
+    // now call the send method
+    //
+    response_send(dhandle, result, strlen(result), function, line);
+
     va_end(ap); /* clean up when done */
-    
+
     return 0;
 }
 
