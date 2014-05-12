@@ -152,13 +152,13 @@ BUFFER buffer_append(BUFFER buffer_handle, const char *data, size_t size)
     return buffer;
 }
 
-const char* buffer_data(BUFFER buffer_handle)
+char* buffer_data(BUFFER buffer_handle)
 {
     if(buffer_handle != NULL)
     {
         http_buffer *buffer = (http_buffer *)buffer_handle;
         
-        return (const char*)buffer->data;
+        return (char*)buffer->data;
     }
     
     return NULL;

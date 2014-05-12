@@ -270,14 +270,24 @@ int startup_connection(dino_site *psite)
 // Read data from socket
 //
 
-size_t read_line(int socket, char *line, size_t size)
+size_t read_line(int socket, BUFFER *buffer)
 {
-    clear_memory(line, size);
+    if ( NULL == buffer)
+    {
+        return 0;
+    }
     
-    size_t i = 0;
+    // Free the buffer because the expectation is that we are reading in a
+    // whole new line.
+    //
+    buffer_free(*buffer);
+    *buffer = NULL;
+    
+    // Now we read in the data:
+    //
     char c = '\0';
     
-    while ((i < size) && (c != '\n'))
+    while (c != '\n')
     {
         ssize_t n = recv(socket, &c, 1, 0);
         
@@ -296,8 +306,7 @@ size_t read_line(int socket, char *line, size_t size)
                     c = '\n';
                 }
             }
-            line[i] = c;
-            ++i;
+            *buffer = buffer_append(*buffer, &c, 1);
         }
         else
         {
@@ -305,7 +314,13 @@ size_t read_line(int socket, char *line, size_t size)
         }
     }
     
-    return i;
+    if ( buffer_size(*buffer))
+    {
+        c = '\0';
+        *buffer = buffer_append(*buffer, &c, 1);
+    }
+    
+    return buffer_size(*buffer);
 }
 
 size_t read_data(int socket, char *data, size_t size)
@@ -333,10 +348,20 @@ size_t read_data(int socket, char *data, size_t size)
 // Parsers
 //
 
-http_method parse_method_url(http_data *http, char *line, size_t size)
+http_method parse_method_url(http_data *http)
 {
-    if ( NULL == http || NULL == line)
+    if ( NULL == http )
     {
+        return http_invalid;
+    }
+
+    // Read in the data:
+    //
+    BUFFER buffer = NULL;
+    
+    if (0 == read_line(http->socket, &buffer))
+    {
+        buffer_free(buffer);
         return http_invalid;
     }
 
@@ -346,6 +371,8 @@ http_method parse_method_url(http_data *http, char *line, size_t size)
     clear_memory(method, sizeof(method));
     int offset = 0;
 
+    const char *line = buffer_data(buffer);
+    
     for (int i = 0; !isspace(line[i]) && (i < sizeof(method)); i++)
     {
         method[i] = line[i];
@@ -388,12 +415,13 @@ http_method parse_method_url(http_data *http, char *line, size_t size)
     }
     else
     {
+        buffer_free(buffer);
         return http_invalid;
     }
 
     // Fetch the URL
     //
-    char *query = line + offset;
+    const char *query = line + offset;
     char *url = http->request.url;
     
     // Skip over the ' 's and the tabs
@@ -453,6 +481,7 @@ http_method parse_method_url(http_data *http, char *line, size_t size)
             }
         }
     }
+    buffer_free(buffer);
     return http->request.method;
 }
 
@@ -471,21 +500,21 @@ char *clean_string(char *value)
     return value;
 }
 
-size_t parse_headers(http_data *http, char *line, size_t size)
+size_t parse_headers(http_data *http)
 {
     size_t content_size = 0;
-    
-    clear_memory(line, size);
     size_t line_len = 0;
-
+    
     // Read the headers...
     //
-    while ((line_len = read_line(http->socket, line, size)))
+
+    BUFFER buffer = NULL;
+    while ((line_len = read_line(http->socket, &buffer)))
     {
         // Find the key and the value
         //
-        char *key = line;
-        char *value = line;
+        char *key = buffer_data(buffer);
+        char *value = buffer_data(buffer);
         
         // Look for the ':'
         //
@@ -543,6 +572,7 @@ size_t parse_headers(http_data *http, char *line, size_t size)
         }
     }
     
+    buffer_free(buffer);
     return content_size;
 }
 
@@ -552,30 +582,16 @@ size_t parse_headers(http_data *http, char *line, size_t size)
 
 bool read_request(http_data *http)
 {
-    char line[MAX_HTTP_HEADER_LINE_LENGTH];
-    clear_memory(line, sizeof(line));
-
-    // Read the Method:
-    //
-    size_t line_len = read_line(http->socket, line, sizeof(line));
-    
-    if (0 == line_len)
-    {
-        return false;
-    }
-
-    assert(strlen(line) == line_len);
-
     // Validate the Method:
     //
-    if (http_invalid == parse_method_url(http, line, line_len))
+    if (http_invalid == parse_method_url(http))
     {
         return false;
     }
     
     // Read the headers...
     //
-    http->request.content_size = parse_headers(http, line, sizeof(line));
+    http->request.content_size = parse_headers(http);
     
     // Get the content
     //
@@ -646,24 +662,22 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
     
     // Output Response Headers
     //
-    char buf[MAX_HTTP_HEADER_LINE_LENGTH];
-    clear_memory(&buf, sizeof(buf));
+    char *buffer = NULL;
     
-    int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 %d\r\n", http_error_code);
-    send(http->socket, buf, bytes, 0);
+    int bytes = asprintf(&buffer, "HTTP/1.0 %d\r\n", http_error_code);
+    send_free(http->socket, &buffer, bytes);
+    
     
     for (int index = 0; index < http->response.param_index; index++)
     {
-        clear_memory(&buf, sizeof(buf));
-        bytes = snprintf(buf, sizeof(buf), "%s: %s\r\n",
+        bytes = asprintf(&buffer, "%s: %s\r\n",
                          http->response.params[index].key,
                          http->response.params[index].value);
-        send(http->socket, buf, bytes, 0);
+        send_free(http->socket, &buffer, bytes);
     }
     
-    clear_memory(&buf, sizeof(buf));
-    bytes = snprintf(buf, sizeof(buf), "\r\n");
-    send(http->socket, buf, bytes, 0);
+    bytes = asprintf(&buffer, "\r\n");
+    send_free(http->socket, &buffer, bytes);
     
     // Output the data payload
     //
