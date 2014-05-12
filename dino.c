@@ -322,11 +322,6 @@ void response_send(DHANDLE dhandle, const char *data, size_t size, const char *f
 
 int response_printf(DHANDLE dhandle, const char *function, int line, const char *fmt, ...)
 {
-    // FTM let's say RESPONSE_PRINTF_MAX_STRING_SIZE
-    //
-    char result[RESPONSE_PRINTF_MAX_STRING_SIZE];
-    clear_memory(result, sizeof(result));
-
     // Points to each unnamed arg in turn
     //
     va_list ap;
@@ -335,14 +330,22 @@ int response_printf(DHANDLE dhandle, const char *function, int line, const char 
     //
     va_start(ap, fmt);
 
-    // sprintf with variable params
+    // vasprintf with variable params
     //
-    vsprintf(result, fmt, ap);
-
-    // now call the send method
-    //
-    response_send(dhandle, result, strlen(result), function, line);
-
+    char *result = NULL;
+    if (vasprintf(&result, fmt, ap))
+    {
+        if (NULL != result)
+        {
+            // now call the send method
+            //
+            response_send(dhandle, result, strlen(result), function, line);
+        
+            // Free teh memory
+            free(result);
+        }
+    }
+    
     va_end(ap); /* clean up when done */
 
     return 0;
