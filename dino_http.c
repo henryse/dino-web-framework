@@ -101,102 +101,114 @@ dino_route *list_method_find(dino_route *list, http_method method, stack_char_pt
 // Errors
 //
 
+void send_free(int client, char *buffer, size_t bytes)
+{
+    if (NULL != buffer)
+    {
+        if (bytes)
+        {
+            send(client, buffer, bytes, 0);
+        }
+        free(buffer);
+    }
+}
+
 void bad_request(int client)
 {
-    char buf[MAX_ERROR_LENGTH];
+    char *buffer = NULL;
     
-    int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 400 BAD REQUEST\r\n");
-    send(client, buf, bytes, 0);
-
-    bytes = snprintf(buf, sizeof(buf), "Content-type: text/html\r\n");
-    send(client, buf, bytes, 0);
+    size_t bytes = asprintf(&buffer, "HTTP/1.0 400 BAD REQUEST\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "Content-type: text/html\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "<P>Your browser sent a bad request, ");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "such as a POST without a Content-Length.\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "<P>Your browser sent a bad request, ");
+    send_free(client, buffer, bytes);
+    
+    bytes = asprintf(&buffer, "such as a POST without a Content-Length.\r\n");
+    send_free(client, buffer, bytes);
 }
 
 void cannot_execute(int client)
 {
-    char buf[MAX_ERROR_LENGTH];
+    char *buffer = NULL;
     
-    int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 500 Internal Server Error\r\n");
-    send(client, buf, bytes, 0);
+    int bytes = asprintf(&buffer, "HTTP/1.0 500 Internal Server Error\r\n");
+    send_free(client, buffer, bytes);
 
-    bytes = snprintf(buf, sizeof(buf), "Content-type: text/html\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "Content-type: text/html\r\n");
+    send_free(client, buffer, bytes);
 
-    bytes = snprintf(buf, sizeof(buf), "\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "\r\n");
+    send_free(client, buffer, bytes);
 
-    bytes = snprintf(buf, sizeof(buf), "<P>Error prohibited CGI execution.\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "<P>Error prohibited CGI execution.\r\n");
+    send_free(client, buffer, bytes);
 }
 
 void not_found(int client)
 {
-    char buf[MAX_ERROR_LENGTH];
+    char *buffer = NULL;
     
-    int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 404 NOT FOUND\r\n");
-    send(client, buf, bytes, 0);
+    int bytes = asprintf(&buffer, "HTTP/1.0 404 NOT FOUND\r\n");
+    send_free(client, buffer, bytes);
 
-    bytes = snprintf(buf, sizeof(buf), DINO_VERSION);
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, DINO_VERSION);
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "Content-Type: text/html\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "Content-Type: text/html\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "<HTML><TITLE>Not Found</TITLE>\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "<HTML><TITLE>Not Found</TITLE>\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "<BODY><P>The server could not fulfill\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "<BODY><P>The server could not fulfill\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "your request because the resource specified\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "your request because the resource specified\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "is unavailable or nonexistent.\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "is unavailable or nonexistent.\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "</BODY></HTML>\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "</BODY></HTML>\r\n");
+    send_free(client, buffer, bytes);
 }
 
 void unimplemented(int client)
 {
-    char buf[MAX_ERROR_LENGTH];
+    char *buffer = NULL;
     
-    int bytes = snprintf(buf, sizeof(buf), "HTTP/1.0 501 Method Not Implemented\r\n");
-    send(client, buf, bytes, 0);
+    int bytes = asprintf(&buffer, "HTTP/1.0 501 Method Not Implemented\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), DINO_VERSION);
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, DINO_VERSION);
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "Content-Type: text/html\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "Content-Type: text/html\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "<HTML><HEAD><TITLE>Method Not Implemented\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "<HTML><HEAD><TITLE>Method Not Implemented\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "</TITLE></HEAD>\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "</TITLE></HEAD>\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "<BODY><P>HTTP request method not supported.\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "<BODY><P>HTTP request method not supported.\r\n");
+    send_free(client, buffer, bytes);
     
-    bytes = snprintf(buf, sizeof(buf), "</BODY></HTML>\r\n");
-    send(client, buf, bytes, 0);
+    bytes = asprintf(&buffer, "</BODY></HTML>\r\n");
+    send_free(client, buffer, bytes);
 }
 
 void log_error(const char *sc)
