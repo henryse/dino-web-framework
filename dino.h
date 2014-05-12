@@ -46,7 +46,6 @@ bool dino_route_trace   (DHANDLE dhandle, http_verb_func verb_func, const char *
 bool dino_route_connect (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
 
 bool dino_start         (DHANDLE dhandle, const char *function, int line);
-bool dino_stop          (DHANDLE dhandle, const char *function, int line);
 
 void response_send      (DHANDLE dhandle, const char *data, size_t size, const char *function, int line);
 void response_send      (DHANDLE dhandle, const char *data, size_t size, const char *function, int line);
@@ -81,7 +80,6 @@ size_t      params_count(DHANDLE dhandle);
 #define DINO_CONFIG_END } while(0)
 
 #define DINO_START  dino_start(dhandle, __FUNCTION__, __LINE__);
-#define DINO_STOP   dino_stop(dhandle, __FUNCTION__, __LINE__);
 
 // Declarations for Methods to be invoked for a given route.
 //
@@ -109,5 +107,4 @@ size_t      params_count(DHANDLE dhandle);
 //
 #define DINO_VARS   dhandle
 #define DINO_DEF_VARS   DHANDLE dhandle
-#define RESPONSE_PRINTF_MAX_STRING_SIZE 1024
 #endif

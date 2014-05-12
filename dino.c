@@ -295,17 +295,6 @@ bool dino_start(DHANDLE dhandle, const char *function, int line)
     return true;
 }
 
-bool dino_stop(DHANDLE dhandle, const char *function, int line)
-{
-    if(NULL == dhandle)
-    {
-        fprintf(stderr, "ERROR:[%s:%d] Unable to stop Dino... \n\r", function, line);
-        return false;
-    }
-    
-    return true;
-}
-
 void response_send(DHANDLE dhandle, const char *data, size_t size, const char *function, int line)
 {
     http_response *response = cast_dhandle_response(dhandle);
@@ -346,7 +335,9 @@ int response_printf(DHANDLE dhandle, const char *function, int line, const char 
         }
     }
     
-    va_end(ap); /* clean up when done */
+    // clean up when done
+    //
+    va_end(ap);
 
     return 0;
 }
