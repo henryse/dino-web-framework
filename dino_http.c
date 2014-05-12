@@ -726,6 +726,8 @@ void accept_request(dino_site *psite, int socket)
     close(socket);
 }
 
+int g_server_socket = 0;
+
 void dino_start_http(dino_site *psite)
 {
     if (NULL == psite)
@@ -738,13 +740,13 @@ void dino_start_http(dino_site *psite)
     socklen_t sockaddr_client_length = sizeof(sockaddr_client);
     clear_memory(&sockaddr_client, sockaddr_client_length);
     
-    int server_socket = startup_connection(psite);
+    g_server_socket = startup_connection(psite);
     
     fprintf(stdout, "Dino has taking the stage on port %d\n\r", psite->port);
     
-    while (1)
+    while (g_dino_keep_running)
     {
-        int client_socket = accept(server_socket, (struct sockaddr *)&sockaddr_client, &sockaddr_client_length);
+        int client_socket = accept(g_server_socket, (struct sockaddr *)&sockaddr_client, &sockaddr_client_length);
         if (client_socket == -1)
         {
             log_error("accept");
@@ -753,5 +755,10 @@ void dino_start_http(dino_site *psite)
         accept_request(psite, client_socket);
     }
     
-    close(server_socket);
+    close(g_server_socket);
+}
+
+void dino_stop_http()
+{
+    close(g_server_socket);
 }

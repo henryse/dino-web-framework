@@ -132,4 +132,8 @@ typedef union dino_handle_type
 //
 void dino_start_http(dino_site *psite);
 
+// Stop Server
+void dino_stop_http();
+
+extern bool g_dino_keep_running;
 #endif

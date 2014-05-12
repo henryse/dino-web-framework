@@ -27,6 +27,7 @@
 #include <string.h>
 #include <strings.h>
 #include <stdarg.h>
+#include <signal.h>
 
 #include "dino_buffer.h"
 #include "dino.h"
@@ -282,6 +283,15 @@ bool dino_route_connect(DHANDLE dhandle, http_verb_func verb_func, const char *n
     return true;
 }
 
+bool g_dino_keep_running = true;
+
+void dino_signal_handler(int value)
+{
+    fprintf(stderr, "Shutting down the service, signal: %d\n\r", value );
+    g_dino_keep_running = false;
+    dino_stop_http();
+}
+
 bool dino_start(DHANDLE dhandle, const char *function, int line)
 {
     if(NULL == dhandle)
@@ -289,6 +299,13 @@ bool dino_start(DHANDLE dhandle, const char *function, int line)
         fprintf(stderr, "ERROR:[%s:%d] Unable to start Dino, the dhandle is invlaid.\n\r", function, line );
         return false;
     }
+    
+    signal(SIGABRT, dino_signal_handler);
+    signal(SIGFPE, dino_signal_handler);
+    signal(SIGILL, dino_signal_handler);
+    signal(SIGINT, dino_signal_handler);
+    signal(SIGSEGV, dino_signal_handler);
+    signal(SIGTERM, dino_signal_handler);
     
     dino_start_http(cast_dhandle_site(dhandle));
 
