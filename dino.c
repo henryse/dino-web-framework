@@ -322,7 +322,7 @@ int response_printf(DHANDLE dhandle, const char *function, int line, const char 
     // vasprintf with variable params
     //
     char *result = NULL;
-    if (vasprintf(&result, fmt, ap))
+    if (vasprintf(&result, fmt, ap) > 0)
     {
         if (NULL != result)
         {
@@ -330,7 +330,7 @@ int response_printf(DHANDLE dhandle, const char *function, int line, const char 
             //
             response_send(dhandle, result, strlen(result), function, line);
         
-            // Free teh memory
+            // Free the memory
             free(result);
         }
     }
