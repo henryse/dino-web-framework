@@ -13,7 +13,9 @@ TODO List
 
 () How to do unit tests?
 
-() Get RESPONSE_PRINTF working
+() Fix Parameters so they can resize instead of being a fixed size.
+
+() Add SIG KILL support so we can clean up the socket when the process breaks.
 
 Getting Started
 ====
