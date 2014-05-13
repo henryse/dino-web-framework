@@ -307,7 +307,7 @@ size_t read_line(int socket, BUFFER *buffer)
                     c = '\n';
                 }
             }
-            *buffer = buffer_append(*buffer, &c, 1);
+            *buffer = buffer_append_char(*buffer, c);
         }
         else
         {
@@ -315,13 +315,13 @@ size_t read_line(int socket, BUFFER *buffer)
         }
     }
     
-    if ( buffer_size(*buffer))
+    if ( buffer_data_size(*buffer))
     {
         c = '\0';
-        *buffer = buffer_append(*buffer, &c, 1);
+        *buffer = buffer_append_char(*buffer, '\0');
     }
     
-    return buffer_size(*buffer);
+    return buffer_data_size(*buffer);
 }
 
 size_t read_data(int socket, char *data, size_t size)
@@ -349,8 +349,51 @@ size_t read_data(int socket, char *data, size_t size)
 // Parsers
 //
 
+http_method map_string_to_http_method(const char* method)
+{
+    http_method result = http_invalid;
+    
+    if (0 == strcasecmp(method, "GET"))
+    {
+        result = http_get;
+    }
+    else if (0 == strcasecmp(method, "POST"))
+    {
+        result = http_post;
+    }
+    else if (0 == strcasecmp(method, "PUT"))
+    {
+        result = http_put;
+    }
+    else if (0 == strcasecmp(method, "DELETE"))
+    {
+        result = http_delete;
+    }
+    else if (0 == strcasecmp(method, "OPTIONS"))
+    {
+        result = http_options;
+    }
+    else if (0 == strcasecmp(method, "HEAD"))
+    {
+        result = http_head;
+    }
+    else if (0 == strcasecmp(method, "TRACE"))
+    {
+        result = http_trace;
+    }
+    else if (0 == strcasecmp(method, "CONNECT"))
+    {
+        result = http_connect;
+    }
+   
+    return result;
+}
+
+
 http_method parse_method_url(http_data *http)
 {
+    // Should not happen:
+    //
     if ( NULL == http )
     {
         return http_invalid;
@@ -372,7 +415,7 @@ http_method parse_method_url(http_data *http)
     clear_memory(method, sizeof(method));
     int offset = 0;
 
-    const char *line = buffer_data(buffer);
+    const char *line = buffer_data_ptr(buffer);
     
     for (int i = 0; !isspace(line[i]) && (i < sizeof(method)); i++)
     {
@@ -380,41 +423,9 @@ http_method parse_method_url(http_data *http)
         offset++;
     }
 
-    http->request.method = http_invalid;
+    http->request.method = map_string_to_http_method(method);
     
-    if (0 == strcasecmp(method, "GET"))
-    {
-        http->request.method = http_get;
-    }
-    else if (0 == strcasecmp(method, "POST"))
-    {
-        http->request.method = http_post;
-    }
-    else if (0 == strcasecmp(method, "PUT"))
-    {
-        http->request.method = http_put;
-    }
-    else if (0 == strcasecmp(method, "DELETE"))
-    {
-        http->request.method = http_delete;
-    }
-    else if (0 == strcasecmp(method, "OPTIONS"))
-    {
-        http->request.method = http_options;
-    }
-    else if (0 == strcasecmp(method, "HEAD"))
-    {
-        http->request.method = http_head;
-    }
-    else if (0 == strcasecmp(method, "TRACE"))
-    {
-        http->request.method = http_trace;
-    }
-    else if (0 == strcasecmp(method, "CONNECT"))
-    {
-        http->request.method = http_connect;
-    }
-    else
+    if (http_invalid == http->request.method )
     {
         buffer_free(buffer);
         return http_invalid;
@@ -423,7 +434,7 @@ http_method parse_method_url(http_data *http)
     // Fetch the URL
     //
     const char *query = line + offset;
-    char *url = http->request.url;
+    BUFFER buffer_url = NULL;
     
     // Skip over the ' 's and the tabs
     //
@@ -434,10 +445,19 @@ http_method parse_method_url(http_data *http)
     
     while ( *query != '\0' && *query != '?' && *query != ' ' && *query != '\t')
     {
-        *url = *query;
+        buffer_append_char(buffer_url, *query);
         query++;
-        url++;
     }
+    
+    // Allocate and copy url to buffer
+    //
+    http->request.url = malloc_and_clear(buffer_data_size(buffer_url) + 1);
+    strncpy(http->request.url, buffer_data_ptr(buffer_url), buffer_data_size(buffer_url));
+
+    // Free the URL Buffer
+    //
+    buffer_free(buffer_url);
+    buffer_url = NULL;
     
     if (*query == '?')
     {
@@ -447,19 +467,22 @@ http_method parse_method_url(http_data *http)
         
         offset = 0;
         
-        char params_buffer[HTTP_URL_SIZE];
-        while(!isspace(*query) && *query != 0 && offset < sizeof(http->request.url) )
+        BUFFER buffer_params = NULL;
+        
+        while( !isspace(*query) && *query != 0 )
         {
-            params_buffer[offset] = *query;
+            buffer_params = buffer_append_char(buffer_params, *query);
             offset++;
             query++;
         }
+
+        buffer_params = buffer_append_char(buffer_params, '\0');
 
         // Parse the URL parameters
         //
         char *brkt = NULL;
 
-        for (char *param = strtok_r(params_buffer, "&", &brkt);
+        for (char *param = strtok_r(buffer_data_ptr(buffer_params), "&", &brkt);
              param;
              param = strtok_r(NULL, "&", &brkt))
         {
@@ -481,6 +504,8 @@ http_method parse_method_url(http_data *http)
                 http->request.param_index++;
             }
         }
+        
+        buffer_free(buffer_params);
     }
     buffer_free(buffer);
     return http->request.method;
@@ -514,8 +539,8 @@ size_t parse_headers(http_data *http)
     {
         // Find the key and the value
         //
-        char *key = buffer_data(buffer);
-        char *value = buffer_data(buffer);
+        char *key = buffer_data_ptr(buffer);
+        char *value = buffer_data_ptr(buffer);
         
         // Look for the ':'
         //
@@ -682,11 +707,23 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
     
     // Output the data payload
     //
-    send(http->socket, buffer_data(http->response.buffer_handle), buffer_size(http->response.buffer_handle), 0);
+    send(http->socket, buffer_data_ptr(http->response.buffer_handle), buffer_data_size(http->response.buffer_handle), 0);
     
     // Free the buffer
     //
     buffer_free(http->response.buffer_handle);
+}
+
+void free_request(dino_handle *dhandle)
+{
+    if ( NULL != dhandle)
+    {
+        if ( dhandle->http.request.url)
+        {
+            free(dhandle->http.request.url);
+            dhandle->http.request.url = NULL;
+        }
+    }
 }
 
 void accept_request(dino_site *psite, int socket)
@@ -699,6 +736,7 @@ void accept_request(dino_site *psite, int socket)
 
     if(!read_request(&dhandle.http))
     {
+        free_request(&dhandle);
         bad_request(socket);
         return;
     }
@@ -723,6 +761,7 @@ void accept_request(dino_site *psite, int socket)
     }
 
     stack_ptr_free(url_stack);
+    free_request(&dhandle);
 
     close(socket);
 }

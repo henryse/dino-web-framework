@@ -126,7 +126,7 @@ void buffer_free(BUFFER buffer_handle)
     }
 }
 
-BUFFER buffer_append(BUFFER buffer_handle, const char *data, size_t size)
+BUFFER buffer_append_data(BUFFER buffer_handle, const char *data, size_t size)
 {
     http_buffer *buffer = (http_buffer *)buffer_handle;
 
@@ -152,7 +152,12 @@ BUFFER buffer_append(BUFFER buffer_handle, const char *data, size_t size)
     return buffer;
 }
 
-char* buffer_data(BUFFER buffer_handle)
+BUFFER buffer_append_char(BUFFER buffer_handle, const char c)
+{
+    return buffer_append_data(buffer_handle, &c, 1);
+}
+
+char* buffer_data_ptr(BUFFER buffer_handle)
 {
     if(buffer_handle != NULL)
     {
@@ -164,7 +169,7 @@ char* buffer_data(BUFFER buffer_handle)
     return NULL;
 }
 
-size_t buffer_size(BUFFER buffer_handle)
+size_t buffer_data_size(BUFFER buffer_handle)
 {
     if(buffer_handle != NULL)
     {

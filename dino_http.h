@@ -31,7 +31,6 @@
 #define HTTP_MAX_PARAMS 32
 #define HTTP_MAX_KEY_SIZE 128
 #define HTTP_MAX_VALUE_SIZE 128
-#define HTTP_URL_SIZE 1024
 
 // List of methods
 //
@@ -94,7 +93,7 @@ typedef struct http_request_struct
     char *data;
 
     http_method method;
-    char url[HTTP_URL_SIZE];
+    char *url;
 
     int param_index;
     http_key_value params[HTTP_MAX_PARAMS];

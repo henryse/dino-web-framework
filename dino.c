@@ -321,7 +321,7 @@ void response_send(DHANDLE dhandle, const char *data, size_t size, const char *f
     
     if (NULL != response )
     {
-        response->buffer_handle = buffer_append(response->buffer_handle, data, size);
+        response->buffer_handle = buffer_append_data(response->buffer_handle, data, size);
     }
     else
     {
