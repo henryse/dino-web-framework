@@ -28,8 +28,6 @@
 
 // HTTP Defines used:
 //
-#define HOST_STRING_SIZE 1024
-#define MAX_ERROR_LENGTH 1024
 #define HTTP_MAX_PARAMS 32
 #define HTTP_MAX_KEY_SIZE 128
 #define HTTP_MAX_VALUE_SIZE 128
@@ -85,7 +83,7 @@ typedef struct dino_site_struct
 
     u_short port;
     dino_route *list;
-    char host[HOST_STRING_SIZE];
+    char *host;
 }dino_site;
 
 // Request structure

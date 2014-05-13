@@ -193,7 +193,9 @@ DHANDLE dino_config_start(unsigned int port,  char *host)
     dino_site *psite = (dino_site *)malloc_and_clear(sizeof(dino_site));
     if (NULL != psite)
     {
-        strncpy(psite->host, host, sizeof(psite->host));
+        psite->host = malloc_and_clear(strlen(host) + 1);
+        strncpy(psite->host, host, strlen(host));
+        
         psite->port = port;
         psite->list = NULL;
         psite->handle_type = dino_handle_site;
