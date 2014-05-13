@@ -445,7 +445,7 @@ http_method parse_method_url(http_data *http)
     
     while ( *query != '\0' && *query != '?' && *query != ' ' && *query != '\t')
     {
-        buffer_append_char(buffer_url, *query);
+        buffer_url = buffer_append_char(buffer_url, *query);
         query++;
     }
     
@@ -708,10 +708,6 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
     // Output the data payload
     //
     send(http->socket, buffer_data_ptr(http->response.buffer_handle), buffer_data_size(http->response.buffer_handle), 0);
-    
-    // Free the buffer
-    //
-    buffer_free(http->response.buffer_handle);
 }
 
 void free_request(dino_handle *dhandle)
@@ -723,11 +719,16 @@ void free_request(dino_handle *dhandle)
             free(dhandle->http.request.url);
             dhandle->http.request.url = NULL;
         }
+
+        buffer_free(dhandle->http.response.buffer_handle);
+        dhandle->http.response.buffer_handle = NULL;
     }
 }
 
 void accept_request(dino_site *psite, int socket)
 {
+    // Setup DHANDLE:
+    //
     dino_handle dhandle;
     clear_memory(&dhandle, sizeof(dhandle));
     
@@ -761,6 +762,9 @@ void accept_request(dino_site *psite, int socket)
     }
 
     stack_ptr_free(url_stack);
+    
+    // Free DHANDLE
+    //
     free_request(&dhandle);
 
     close(socket);
