@@ -25,6 +25,7 @@
 #ifndef dino_dino_http_h
 #define dino_dino_http_h
 #include "dino_utils.h"
+#include "dino_strmap.h"
 
 // HTTP Defines used:
 //
@@ -61,11 +62,12 @@ typedef struct dino_route_struct
 
 // HTTP Parametgers/key value paire.
 //
-typedef struct http_key_value_struct
-{
-    char key[HTTP_MAX_KEY_SIZE];
-    char value[HTTP_MAX_VALUE_SIZE];
-}http_key_value;
+//typedef struct http_key_value_struct
+//{
+//    char key[HTTP_MAX_KEY_SIZE];
+//    char value[HTTP_MAX_VALUE_SIZE];
+//}http_key_value;
+
 
 typedef enum dino_handle_type_enum
 {
@@ -95,8 +97,10 @@ typedef struct http_request_struct
     http_method method;
     char *url;
 
-    int param_index;
-    http_key_value params[HTTP_MAX_PARAMS];
+//    int param_index;
+//    http_key_value params[HTTP_MAX_PARAMS];
+    
+    StrMap *params_map;
 }http_request;
 
 // Response structure
@@ -105,8 +109,10 @@ typedef struct http_response_struct
 {
     BUFFER buffer_handle;
 
-    int param_index;
-    http_key_value params[HTTP_MAX_PARAMS];
+//    int param_index;
+//    http_key_value params[HTTP_MAX_PARAMS];
+    
+    StrMap *params_map;
 }http_response;
 
 typedef struct http_data_struct

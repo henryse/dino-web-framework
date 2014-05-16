@@ -11,16 +11,19 @@
 #include "dino.h"
 
 
+bool enum_params(DHANDLE dhandle, const char *key, const char *value, const void *obj)
+{
+    RESPONSE_SEND(key, strlen(key));
+    RESPONSE_SEND(":", 1);
+    RESPONSE_SEND(value, strlen(value));
+    RESPONSE_SEND("\n\r", 2);
+    
+    return true;
+}
+
 GET(amor)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-		
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
 
     char *lyrics = "When the moon hits you eye like a big %s %s pizza pie\n That's amore!\n\r";
     char *ingredientOne = "pineapple pepperoni";
@@ -46,13 +49,7 @@ void sway_test(DINO_DEF_VARS)
 
 GET(sway)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
 
     sway_test(DINO_VARS);
     
@@ -67,13 +64,7 @@ GET(sway)
 
 POST(main)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
 
     char *data = "Hello From POST!\n";
     
@@ -92,13 +83,7 @@ POST(main)
 
 DELETE(main)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
 
     char *data = "Hello From DELETE!\n";
     
@@ -117,13 +102,7 @@ DELETE(main)
 
 PUT(main)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
 
     char *data = "Hello From PUT!\n";
     
@@ -142,13 +121,7 @@ PUT(main)
 
 OPTIONS(main)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
 
     char *data = "Hello From OPTIONS!\n";
     
@@ -167,13 +140,7 @@ OPTIONS(main)
 
 HEAD(main)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
 
     char *data = "Hello From HEAD!\n";
     
@@ -192,13 +159,8 @@ HEAD(main)
 
 TRACE(main)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
+
 
     char *data = "Hello From TRACE!\n";
     
@@ -217,13 +179,7 @@ TRACE(main)
 
 CONNECT(volare)
 {
-    for (int i = 0; i < PARAMS_COUNT; i++)
-    {
-        RESPONSE_SEND(PARAM_KEY(i), strlen(PARAM_KEY(i)));
-        RESPONSE_SEND(":", 1);
-        RESPONSE_SEND(PARAM_VALUE(i), strlen(PARAM_VALUE(i)));
-        RESPONSE_SEND("\n\r", 2);
-    }
+    PARAMS_ENUMERATE(enum_params, NULL);
 
     char *data = "Hello From CONNECT!\n";
     
@@ -242,7 +198,7 @@ CONNECT(volare)
 
 int main(int argc, const char * argv[])
 {
-    int port = 3030;
+    int port = 3031;
     char *host = "localhost";
     
     DINO_CONFIG_START(port, host);

@@ -315,7 +315,7 @@ bool dino_start(DHANDLE dhandle, const char *function, int line)
     return true;
 }
 
-void response_send(DHANDLE dhandle, const char *data, size_t size, const char *function, int line)
+void response_send(DHANDLE dhandle, const char *data, size_t size)
 {
     http_response *response = cast_dhandle_response(dhandle);
     
@@ -325,11 +325,11 @@ void response_send(DHANDLE dhandle, const char *data, size_t size, const char *f
     }
     else
     {
-        fprintf(stderr, "ERROR:[%s:%d] resposne_handle is NULL... \n\r", function, line);
+        fprintf(stderr, "ERROR: resposne_handle is NULL... \n\r");
     }
 }
 
-int response_printf(DHANDLE dhandle, const char *function, int line, const char *fmt, ...)
+int response_printf(DHANDLE dhandle, const char *fmt, ...)
 {
     // Points to each unnamed arg in turn
     //
@@ -348,7 +348,7 @@ int response_printf(DHANDLE dhandle, const char *function, int line, const char 
         {
             // now call the send method
             //
-            response_send(dhandle, result, strlen(result), function, line);
+            response_send(dhandle, result, strlen(result));
         
             // Free the memory
             free(result);
@@ -362,48 +362,24 @@ int response_printf(DHANDLE dhandle, const char *function, int line, const char 
     return 0;
 }
 
-void response_header_set(DHANDLE dhandle, const char *key, const char *value, const char *function, int line)
+void response_header_set(DHANDLE dhandle, const char *key, const char *value)
 {
     http_response *response = cast_dhandle_response(dhandle);
     
     if ( NULL != response )
     {
-
         if (key && *key)
         {
-            bool found_key = false;
-            int index = 0;
-            for (; index < response->param_index; index++)
-            {
-                if (0 == strncmp(response->params[index].key, key, sizeof(response->params[index].key)))
-                {
-                    found_key = true;
-                    break;
-                }
-            }
-            
-            if (index < HTTP_MAX_PARAMS)
-            {
-                strncpy(response->params[index].key, key, sizeof(response->params[index].key));
-                if (value && *value)
-                {
-                    strncpy(response->params[index].value, value, sizeof(response->params[index].value));
-                }
-                
-                if (!found_key)
-                {
-                    response->param_index++;
-                }
-            }
+            sm_put(response->params_map, key, value);
         }
         else
         {
-            fprintf(stderr, "ERROR:[%s:%d] HTTP_MAX_PARAMS exceeded... \n\r", function, line);
+            fprintf(stderr, "ERROR: HTTP_MAX_PARAMS exceeded... \n\r");
         }
     }
     else
     {
-        fprintf(stderr, "ERROR:[%s:%d] resposne_handle is NULL... \n\r", function, line);
+        fprintf(stderr, "ERROR: resposne_handle is NULL... \n\r");
     }
 }
 
@@ -413,13 +389,7 @@ const char *params_get(DHANDLE dhandle, const char *key)
 
     if ( NULL != request )
     {
-        for (int index = 0; index < request->param_index; index++)
-        {
-            if (0 == strncmp( request->params[index].key, key, sizeof( request->params[index].key)))
-            {
-                return request->params[index].value;
-            }
-        }
+        return sm_get_value(request->params_map, key);
     }
     
     return "";
@@ -430,36 +400,44 @@ size_t params_count(DHANDLE dhandle)
     http_request *request = cast_dhandle_request(dhandle);
     if (NULL != request)
     {
-        return request->param_index;
+        return sm_get_count(request->params_map);
     }
     
     return 0;
 }
 
-const char *param_key(DHANDLE dhandle, size_t index)
+typedef struct dino_callback_param_struct
 {
-    http_request *request = cast_dhandle_request(dhandle);
-    if (NULL != request)
+    DHANDLE dhandle;
+    dino_enum_func callback;
+    const void *obj;
+}dino_callback_param_type;
+
+bool param_enum(const char *key, const char *value, const void *obj)
+{
+    if (NULL == obj)
     {
-        if (index < request->param_index)
-        {
-            return request->params[index].key;
-        }
+        return false;
     }
-    
-    return "";
+    dino_callback_param_type *param_callback = (dino_callback_param_type *)obj;
+    return param_callback->callback(param_callback->dhandle, key, value, param_callback->obj);
 }
 
-const char *param_value(DHANDLE dhandle, size_t index)
+void params_enumerate(DHANDLE dhandle, dino_enum_func callback, const void *obj)
 {
     http_request *request = cast_dhandle_request(dhandle);
+
     if (NULL != request)
-    {        
-        if (index < request->param_index)
-        {
-            return request->params[index].value;
-        }
+    {
+        dino_callback_param_type callback_data;
+        clear_memory(&callback_data, sizeof(callback_data));
+        callback_data.callback = callback;
+        callback_data.dhandle = dhandle;
+        callback_data.obj = obj;
+        
+        sm_enum(request->params_map, param_enum, &callback_data);
+        
     }
-    
-    return "";
 }
+
+

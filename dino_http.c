@@ -490,19 +490,7 @@ http_method parse_method_url(http_data *http)
             char *key = strtok_r(param, "=", &brkt2);
             char *value = strtok_r(NULL, "=", &brkt2);
 
-            if (key && *key && http->request.param_index < HTTP_MAX_PARAMS)
-            {
-                strncpy(http->request.params[http->request.param_index].key,
-                        key,
-                        sizeof(http->request.params[http->request.param_index].key));
-                if (value && *value)
-                {
-                    strncpy(http->request.params[http->request.param_index].value,
-                            value,
-                            sizeof(http->request.params[http->request.param_index].value));
-                }
-                http->request.param_index++;
-            }
+            sm_put(http->request.params_map, key, value);
         }
         
         buffer_free(buffer_params);
@@ -557,28 +545,9 @@ size_t parse_headers(http_data *http)
         key = clean_string(key);
         value = clean_string(value);
         
-        // Copy to parameter list
-        //
-        if (key && *key && http->request.param_index < HTTP_MAX_PARAMS)
+        if (!sm_put(http->request.params_map, key, value))
         {
-            strncpy(http->request.params[http->request.param_index].key,
-                    key,
-                    sizeof(http->request.params[http->request.param_index].key));
-            if (value && *value)
-            {
-                // Copy over the "value"
-                //
-                strncpy(http->request.params[http->request.param_index].value,
-                        value,
-                        sizeof(http->request.params[http->request.param_index].value));
-            }
-            http->request.param_index++;
-        }
-        else if (http->request.param_index >= HTTP_MAX_PARAMS)
-        {
-            fprintf(stderr, "WARNING: More than %d parameters found, ignorning: %s\n\r",
-                    HTTP_MAX_PARAMS,
-                    key);
+            fprintf(stderr, "WARNING: Unable to add to params list...\n\r");
         }
         
         // Check to see if we have hit the end...
@@ -649,23 +618,23 @@ bool bind_url_params(http_request *request, dino_route *route, stack_char_ptr *u
         //
         if (route->stack->ptrs[index][0] == ':')
         {
-            if (request->param_index < HTTP_MAX_PARAMS)
-            {
-                strncpy(request->params[request->param_index].key,
-                        route->stack->ptrs[index],
-                        sizeof(request->params[request->param_index].key));
-                if (url_stack->ptrs[index] && *url_stack->ptrs[index])
-                {
-                    strncpy(request->params[request->param_index].value,
-                            url_stack->ptrs[index],
-                            sizeof(request->params[request->param_index].value));
-                }
-                request->param_index++;
-            }
-
+            sm_put(request->params_map, route->stack->ptrs[index], url_stack->ptrs[index]);
             continue;
         }        
     }
+    
+    return true;
+}
+
+bool param_output(const char *key, const char *value, const void *obj)
+{
+    http_data *http = (http_data *)obj;
+    
+    char *buffer = NULL;
+    
+    int bytes = asprintf(&buffer, "%s: %s\r\n", key, value);
+    
+    send_free(http->socket, &buffer, bytes);
     
     return true;
 }
@@ -693,14 +662,7 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
     int bytes = asprintf(&buffer, "HTTP/1.0 %d\r\n", http_error_code);
     send_free(http->socket, &buffer, bytes);
     
-    
-    for (int index = 0; index < http->response.param_index; index++)
-    {
-        bytes = asprintf(&buffer, "%s: %s\r\n",
-                         http->response.params[index].key,
-                         http->response.params[index].value);
-        send_free(http->socket, &buffer, bytes);
-    }
+    sm_enum(http->response.params_map, param_output, http);
     
     bytes = asprintf(&buffer, "\r\n");
     send_free(http->socket, &buffer, bytes);
@@ -708,6 +670,15 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
     // Output the data payload
     //
     send(http->socket, buffer_data_ptr(http->response.buffer_handle), buffer_data_size(http->response.buffer_handle), 0);
+}
+
+void init_request(dino_handle *dhandle)
+{
+    clear_memory(dhandle, sizeof(dhandle));
+    dhandle->http.handle_type = dino_handle_http;
+
+    dhandle->http.request.params_map = sm_new(32);
+    dhandle->http.response.params_map = sm_new(32);
 }
 
 void free_request(dino_handle *dhandle)
@@ -722,6 +693,12 @@ void free_request(dino_handle *dhandle)
 
         buffer_free(dhandle->http.response.buffer_handle);
         dhandle->http.response.buffer_handle = NULL;
+        
+        sm_delete(dhandle->http.request.params_map);
+        dhandle->http.request.params_map = NULL;
+        
+        sm_delete(dhandle->http.response.params_map);
+        dhandle->http.response.params_map = NULL;
     }
 }
 
@@ -730,9 +707,8 @@ void accept_request(dino_site *psite, int socket)
     // Setup DHANDLE:
     //
     dino_handle dhandle;
-    clear_memory(&dhandle, sizeof(dhandle));
+    init_request(&dhandle);
     
-    dhandle.http.handle_type = dino_handle_http;
     dhandle.http.socket = socket;
 
     if(!read_request(&dhandle.http))
