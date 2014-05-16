@@ -95,12 +95,13 @@ void        params_enumerate    (DHANDLE dhandle, dino_enum_func callback,const 
 #define TRACE(route_name)     int trace_##route_name(DHANDLE dhandle)
 #define CONNECT(route_name)   int connect_##route_name(DHANDLE dhandle)
 
-// Operations
+// Sending Responses
 //
 #define RESPONSE_SEND(data, size)   response_send(dhandle, data, size)
 #define RESPONSE_PRINTF(fmt, ...)   response_printf(dhandle, fmt, ##__VA_ARGS__)
 #define RSP_HEADER_SET(key, value)  response_header_set(dhandle, key, value)
 
+// Parameter Enumeration 
 #define PARAMS(key)                        params_get(dhandle, key)
 #define PARAMS_COUNT                       params_count(dhandle)
 #define PARAMS_ENUMERATE(callback, obj)    params_enumerate(dhandle, callback, obj)
