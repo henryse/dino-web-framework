@@ -164,8 +164,12 @@ Configuration
 ----
 
 DINO_CONFIG_START(port, host)
+This line is required to declare the begining of the route configuration.  
+port - TCP Port to listen on
+host - host or ip address t listen on
 
 ROUTE_GET(route_name, path)
+
 
 ROUTE_POST(route_name, path)
 
@@ -210,7 +214,7 @@ TRACE(route_name)
 
 CONNECT(route_name)
 
-Operations
+Sending Responses
 ----
 
 RESPONSE_SEND(data, size)
@@ -219,13 +223,15 @@ RESPONSE_PRINTF(restrict, ...)
 
 RSP_HEADER_SET(key, value)
 
+Parameter Enumeration
+----
+
 PARAMS(key)
 
 PARAMS_COUNT
 
-PARAM_KEY(index)
+PARAMS_ENUMERATE(callback, obj) 
 
-PARAM_VALUE(index)
 
 Helpers
 ----
@@ -234,4 +240,4 @@ Params list to pass dino parameters
 
 DINO_VARS
 
-DINO_DEF_VARS
+DINO_DECLARE_VARS
