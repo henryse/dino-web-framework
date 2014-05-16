@@ -38,7 +38,7 @@
 #include "dino_http.h"
 #include "dino_utils.h"
 
-#define DINO_VERSION "Server: dinohttpd/0.1\r\n"
+#define DINO_VERSION "Server: dinohttp/0.1\r\n"
 
 dino_route *list_method_find(dino_route *list, http_method method, stack_char_ptr *url_stack)
 {
@@ -229,11 +229,11 @@ void log_error(const char *sc, const char *function, int line)
 
 int startup_connection(dino_site *psite)
 {
-    int httpd = 0;
+    int sockfd = 0;
     struct sockaddr_in name;
 
-    httpd = socket(PF_INET, SOCK_STREAM, 0);
-    if (httpd == -1)
+    sockfd = socket(PF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1)
     {
         log_error("socket", __FUNCTION__, __LINE__);
     }
@@ -244,42 +244,44 @@ int startup_connection(dino_site *psite)
         name.sin_port = htons(psite->port);
         name.sin_addr.s_addr = htonl(INADDR_ANY);
         
-        if (bind(httpd, (struct sockaddr *)&name, sizeof(name)) < 0)
+        if (bind(sockfd, (struct sockaddr *)&name, sizeof(name)) < 0)
         {
             log_error("bind", __FUNCTION__, __LINE__);
-            close(httpd);
-            httpd = -1;
+            close(sockfd);
+            sockfd = -1;
         }
         else
         {
             if (0 == psite->port)
             {
                 socklen_t namelen = sizeof(name);
-                if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
+                if (getsockname(sockfd, (struct sockaddr *)&name, &namelen) == -1)
                 {
                     log_error("getsockname", __FUNCTION__, __LINE__);
-                    close(httpd);
-                    httpd = -1;
+                    close(sockfd);
+                    sockfd = -1;
                 }
                 else
                 {
+                    int set = 1;
+                    setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
                     psite->port = ntohs(name.sin_port);
                 }
             }
             
-            if (httpd != -1)
+            if (sockfd != -1)
             {
-                if (listen(httpd, 5) < 0)
+                if (listen(sockfd, 5) < 0)
                 {
                     log_error("listen", __FUNCTION__, __LINE__);
-                    close(httpd);
-                    httpd = -1;
+                    close(sockfd);
+                    sockfd = -1;
                 }
             }
         }
     }
     
-    return(httpd);
+    return(sockfd);
 }
 
 //
