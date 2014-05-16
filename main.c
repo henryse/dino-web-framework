@@ -11,7 +11,7 @@
 #include "dino.h"
 
 
-bool enum_params(DHANDLE dhandle, const char *key, const char *value, const void *obj)
+bool enum_params(DINO_DECLARE_VARS, const char *key, const char *value, const void *obj)
 {
     RESPONSE_SEND(key, strlen(key));
     RESPONSE_SEND(":", 1);
@@ -40,7 +40,7 @@ GET(amor)
     return HTTP_ERROR_CODE_OK;
 }
 
-void sway_test(DINO_DEF_VARS)
+void sway_test(DINO_DECLARE_VARS)
 {
     char *data = "Hello From GET sway_test!\n";
     

@@ -107,6 +107,6 @@ void        params_enumerate    (DHANDLE dhandle, dino_enum_func callback,const 
 
 // Params list to pass dino parameters
 //
-#define DINO_VARS   dhandle
-#define DINO_DEF_VARS   DHANDLE dhandle
+#define DINO_VARS           dhandle
+#define DINO_DECLARE_VARS   DHANDLE dhandle
 #endif
