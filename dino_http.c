@@ -490,7 +490,7 @@ http_method parse_method_url(http_data *http)
             char *key = strtok_r(param, "=", &brkt2);
             char *value = strtok_r(NULL, "=", &brkt2);
 
-            sm_put(http->request.params_map, key, value);
+            dino_sm_put(http->request.params_map, key, value);
         }
         
         buffer_free(buffer_params);
@@ -545,7 +545,7 @@ size_t parse_headers(http_data *http)
         key = clean_string(key);
         value = clean_string(value);
         
-        if (!sm_put(http->request.params_map, key, value))
+        if (!dino_sm_put(http->request.params_map, key, value))
         {
             fprintf(stderr, "WARNING: Unable to add to params list...\n\r");
         }
@@ -618,7 +618,7 @@ bool bind_url_params(http_request *request, dino_route *route, stack_char_ptr *u
         //
         if (route->stack->ptrs[index][0] == ':')
         {
-            sm_put(request->params_map, route->stack->ptrs[index], url_stack->ptrs[index]);
+            dino_sm_put(request->params_map, route->stack->ptrs[index], url_stack->ptrs[index]);
             continue;
         }        
     }
@@ -662,7 +662,7 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
     int bytes = asprintf(&buffer, "HTTP/1.0 %d\r\n", http_error_code);
     send_free(http->socket, &buffer, bytes);
     
-    sm_enum(http->response.params_map, param_output, http);
+    dino_sm_enum(http->response.params_map, param_output, http);
     
     bytes = asprintf(&buffer, "\r\n");
     send_free(http->socket, &buffer, bytes);
@@ -677,8 +677,8 @@ void init_request(dino_handle *dhandle)
     clear_memory(dhandle, sizeof(dhandle));
     dhandle->http.handle_type = dino_handle_http;
 
-    dhandle->http.request.params_map = sm_new(32);
-    dhandle->http.response.params_map = sm_new(32);
+    dhandle->http.request.params_map = dino_sm_new(32);
+    dhandle->http.response.params_map = dino_sm_new(32);
 }
 
 void free_request(dino_handle *dhandle)
@@ -694,10 +694,10 @@ void free_request(dino_handle *dhandle)
         buffer_free(dhandle->http.response.buffer_handle);
         dhandle->http.response.buffer_handle = NULL;
         
-        sm_delete(dhandle->http.request.params_map);
+        dino_sm_delete(dhandle->http.request.params_map);
         dhandle->http.request.params_map = NULL;
         
-        sm_delete(dhandle->http.response.params_map);
+        dino_sm_delete(dhandle->http.response.params_map);
         dhandle->http.response.params_map = NULL;
     }
 }

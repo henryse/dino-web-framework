@@ -61,7 +61,7 @@ typedef struct StrMap StrMap;
  *
  * Return value: None.
  */
-typedef bool(*sm_enum_func)(const char *key, const char *value, const void *obj);
+typedef bool(*dino_sm_enum_func)(const char *key, const char *value, const void *obj);
 
 /*
  * Creates a string map.
@@ -74,7 +74,7 @@ typedef bool(*sm_enum_func)(const char *key, const char *value, const void *obj)
  * Return value: A pointer to a string map object,
  * or null if a new string map could not be allocated.
  */
-StrMap * sm_new(unsigned int capacity);
+StrMap * dino_sm_new(unsigned int capacity);
 
 /*
  * Releases all memory held by a string map object.
@@ -87,7 +87,7 @@ StrMap * sm_new(unsigned int capacity);
  *
  * Return value: None.
  */
-void sm_delete(StrMap *map);
+void dino_sm_delete(StrMap *map);
 
 /*
  * Returns the value associated with the supplied key.
@@ -110,8 +110,8 @@ void sm_delete(StrMap *map);
  * is 1 if an associated value was found and completely copied into the output buffer,
  * 0 otherwise.
  */
-size_t sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf);
-const char *sm_get_value(const StrMap *map, const char *key);
+size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf);
+const char *dino_sm_get_value(const StrMap *map, const char *key);
 
 /*
  * Queries the existence of a key.
@@ -125,7 +125,7 @@ const char *sm_get_value(const StrMap *map, const char *key);
  *
  * Return value: true if the key exists, false otherwise.
  */
-bool sm_exists(const StrMap *map, const char *key);
+bool dino_sm_exists(const StrMap *map, const char *key);
 
 /*
  * Associates a value with the supplied key. If the key is already
@@ -145,7 +145,7 @@ bool sm_exists(const StrMap *map, const char *key);
  *
  * Return value: true if the association succeeded, false otherwise.
  */
-bool sm_put(StrMap *map, const char *key, const char *value);
+bool dino_sm_put(StrMap *map, const char *key, const char *value);
 
 /*
  * Returns the number of associations between keys and values.
@@ -156,7 +156,7 @@ bool sm_put(StrMap *map, const char *key, const char *value);
  *
  * Return value: The number of associations between keys and values.
  */
-int sm_get_count(const StrMap *map);
+int dino_sm_get_count(const StrMap *map);
 
 /*
  * An enumerator over all associations between keys and values.
@@ -175,7 +175,7 @@ int sm_get_count(const StrMap *map);
  *
  * Return value: true if enumeration completed, false otherwise.
  */
-bool sm_enum(const StrMap *map, sm_enum_func enum_func, const void *obj);
+bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *obj);
 
 #endif
 

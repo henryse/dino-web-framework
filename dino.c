@@ -370,7 +370,7 @@ void response_header_set(DHANDLE dhandle, const char *key, const char *value)
     {
         if (key && *key)
         {
-            sm_put(response->params_map, key, value);
+            dino_sm_put(response->params_map, key, value);
         }
         else
         {
@@ -389,7 +389,7 @@ const char *params_get(DHANDLE dhandle, const char *key)
 
     if ( NULL != request )
     {
-        return sm_get_value(request->params_map, key);
+        return dino_sm_get_value(request->params_map, key);
     }
     
     return "";
@@ -400,7 +400,7 @@ size_t params_count(DHANDLE dhandle)
     http_request *request = cast_dhandle_request(dhandle);
     if (NULL != request)
     {
-        return sm_get_count(request->params_map);
+        return dino_sm_get_count(request->params_map);
     }
     
     return 0;
@@ -435,7 +435,7 @@ void params_enumerate(DHANDLE dhandle, dino_enum_func callback, const void *obj)
         callback_data.dhandle = dhandle;
         callback_data.obj = obj;
         
-        sm_enum(request->params_map, param_enum, &callback_data);
+        dino_sm_enum(request->params_map, param_enum, &callback_data);
         
     }
 }

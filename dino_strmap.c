@@ -58,7 +58,7 @@ struct StrMap {
 static Pair * get_pair(Bucket *bucket, const char *key);
 static unsigned long hash(const char *str);
 
-StrMap * sm_new(unsigned int capacity)
+StrMap * dino_sm_new(unsigned int capacity)
 {
 	StrMap *map = malloc(sizeof(StrMap));
 
@@ -80,7 +80,7 @@ StrMap * sm_new(unsigned int capacity)
 	return map;
 }
 
-void sm_delete(StrMap *map)
+void dino_sm_delete(StrMap *map)
 {
 	Pair *pair;
     
@@ -111,7 +111,7 @@ void sm_delete(StrMap *map)
 	free(map);
 }
 
-const char *sm_get_value(const StrMap *map, const char *key)
+const char *dino_sm_get_value(const StrMap *map, const char *key)
 {
 	unsigned int index;
 	Bucket *bucket;
@@ -136,7 +136,7 @@ const char *sm_get_value(const StrMap *map, const char *key)
     return pair->value;
 }
 
-size_t sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf)
+size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf)
 {
 	unsigned int index;
 	Bucket *bucket;
@@ -174,7 +174,7 @@ size_t sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_
     return 1;
 }
 
-bool sm_exists(const StrMap *map, const char *key)
+bool dino_sm_exists(const StrMap *map, const char *key)
 {
 	if (map == NULL)
     {
@@ -197,7 +197,7 @@ bool sm_exists(const StrMap *map, const char *key)
 	return true;
 }
 
-bool sm_put(StrMap *map, const char *key, const char *value)
+bool dino_sm_put(StrMap *map, const char *key, const char *value)
 {
 	size_t key_len, value_len, index;
 	Bucket *bucket;
@@ -299,7 +299,7 @@ bool sm_put(StrMap *map, const char *key, const char *value)
 	return true;
 }
 
-int sm_get_count(const StrMap *map)
+int dino_sm_get_count(const StrMap *map)
 {
 	if (map == NULL)
     {
@@ -328,7 +328,7 @@ int sm_get_count(const StrMap *map)
 	return count;
 }
 
-bool sm_enum(const StrMap *map, sm_enum_func enum_func, const void *obj)
+bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *obj)
 {
 	if (map == NULL)
     {
