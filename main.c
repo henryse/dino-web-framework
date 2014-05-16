@@ -18,12 +18,17 @@ bool enum_params(DINO_DECLARE_VARS, const char *key, const char *value, const vo
     RESPONSE_SEND(value, strlen(value));
     RESPONSE_SEND("\n\r", 2);
     
+    if ( obj )
+    {
+        RESPONSE_PRINTF(obj);
+    }
+    
     return true;
 }
 
 GET(amor)
 {
-    PARAMS_ENUMERATE(enum_params, NULL);
+    PARAMS_ENUMERATE(enum_params, "Check Pass");
 
     char *lyrics = "When the moon hits you eye like a big %s %s pizza pie\n That's amore!\n\r";
     char *ingredientOne = "pineapple pepperoni";
@@ -198,7 +203,7 @@ CONNECT(volare)
 
 int main(int argc, const char * argv[])
 {
-    int port = 3031;
+    int port = 3030;
     char *host = "localhost";
     
     DINO_CONFIG_START(port, host);

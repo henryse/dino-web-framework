@@ -217,9 +217,10 @@ void unimplemented(int client)
     send_free(client, &buffer, bytes);;
 }
 
-void log_error(const char *sc)
+void log_error(const char *sc, const char *function, int line)
 {
     perror(sc);
+    fprintf(stderr, "SYSTEM ERROR[%s:%d]\n\r", function, line);
 }
 
 //
@@ -234,36 +235,50 @@ int startup_connection(dino_site *psite)
     httpd = socket(PF_INET, SOCK_STREAM, 0);
     if (httpd == -1)
     {
-        log_error("socket");
+        log_error("socket", __FUNCTION__, __LINE__);
     }
-    
-    memset(&name, 0, sizeof(name));
-    name.sin_family = AF_INET;
-    name.sin_port = htons(psite->port);
-    name.sin_addr.s_addr = htonl(INADDR_ANY);
-    
-    if (bind(httpd, (struct sockaddr *)&name, sizeof(name)) < 0)
+    else
     {
-        log_error("bind");
-    }
-    
-    // Dynamically allocate the port?
-    //
-    if (0 == psite->port)
-    {
-        socklen_t namelen = sizeof(name);
-        if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
-        {
-            log_error("getsockname");
-        }
+        memset(&name, 0, sizeof(name));
+        name.sin_family = AF_INET;
+        name.sin_port = htons(psite->port);
+        name.sin_addr.s_addr = htonl(INADDR_ANY);
         
-        psite->port = ntohs(name.sin_port);
+        if (bind(httpd, (struct sockaddr *)&name, sizeof(name)) < 0)
+        {
+            log_error("bind", __FUNCTION__, __LINE__);
+            close(httpd);
+            httpd = -1;
+        }
+        else
+        {
+            if (0 == psite->port)
+            {
+                socklen_t namelen = sizeof(name);
+                if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
+                {
+                    log_error("getsockname", __FUNCTION__, __LINE__);
+                    close(httpd);
+                    httpd = -1;
+                }
+                else
+                {
+                    psite->port = ntohs(name.sin_port);
+                }
+            }
+            
+            if (httpd != -1)
+            {
+                if (listen(httpd, 5) < 0)
+                {
+                    log_error("listen", __FUNCTION__, __LINE__);
+                    close(httpd);
+                    httpd = -1;
+                }
+            }
+        }
     }
     
-    if (listen(httpd, 5) < 0)
-    {
-        log_error("listen");
-    }
     return(httpd);
 }
 
@@ -643,7 +658,7 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
 {
     if (NULL == http || NULL == route || NULL == url_stack)
     {
-        log_error("invoke_method: Invlaid inputs... NULL");
+        log_error("invoke_method: Invlaid inputs... NULL", __FUNCTION__, __LINE__);
         return;
     }
     
@@ -713,36 +728,38 @@ void accept_request(dino_site *psite, int socket)
 
     if(!read_request(&dhandle.http))
     {
-        free_request(&dhandle);
         bad_request(socket);
-        return;
-    }
-    
-    // Parse the URL Parameters.
-    //
-    stack_char_ptr *url_stack = stack_ptr_parse(NULL, dhandle.http.request.url, "/");
-
-    // Search for a match...
-    //
-    dino_route *route = list_method_find(psite->list, dhandle.http.request.method, url_stack);
-    
-    // Do we have a route?
-    //
-    if (NULL != route)
-    {
-        invoke_method(route, &dhandle.http, url_stack);
     }
     else
     {
-        fprintf(stderr, "ERROR: Path %s not found\n\r", dhandle.http.request.url);
-    }
+        // Parse the URL Parameters.
+        //
+        stack_char_ptr *url_stack = stack_ptr_parse(NULL, dhandle.http.request.url, "/");
 
-    stack_ptr_free(url_stack);
+        // Search for a match...
+        //
+        dino_route *route = list_method_find(psite->list, dhandle.http.request.method, url_stack);
+        
+        // Do we have a route?
+        //
+        if (NULL != route)
+        {
+            invoke_method(route, &dhandle.http, url_stack);
+        }
+        else
+        {
+            fprintf(stderr, "ERROR: Path %s not found\n\r", dhandle.http.request.url);
+        }
+
+        stack_ptr_free(url_stack);
+    }
     
     // Free DHANDLE
     //
     free_request(&dhandle);
 
+    // Close Socket
+    //
     close(socket);
 }
 
@@ -762,20 +779,25 @@ void dino_start_http(dino_site *psite)
     
     g_server_socket = startup_connection(psite);
     
-    fprintf(stdout, "Dino has taking the stage on port %d\n\r", psite->port);
-    
-    while (g_dino_keep_running)
+    if (-1 != g_server_socket )
     {
-        int client_socket = accept(g_server_socket, (struct sockaddr *)&sockaddr_client, &sockaddr_client_length);
-        if (client_socket == -1)
+        fprintf(stdout, "Dino has taking the stage on port %d\n\r", psite->port);
+        
+        while (g_dino_keep_running)
         {
-            log_error("accept");
+            int client_socket = accept(g_server_socket, (struct sockaddr *)&sockaddr_client, &sockaddr_client_length);
+            if (client_socket == -1)
+            {
+                log_error("accept", __FUNCTION__, __LINE__);
+            }
+            else
+            {
+                accept_request(psite, client_socket);
+            }
         }
         
-        accept_request(psite, client_socket);
+        close(g_server_socket);
     }
-    
-    close(g_server_socket);
 }
 
 void dino_stop_http()
