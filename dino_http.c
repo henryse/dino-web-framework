@@ -786,7 +786,7 @@ void dino_start_http(dino_site *psite)
         while (g_dino_keep_running)
         {
             int client_socket = accept(g_server_socket, (struct sockaddr *)&sockaddr_client, &sockaddr_client_length);
-            if (client_socket == -1)
+            if (-1 == client_socket)
             {
                 log_error("accept", __FUNCTION__, __LINE__);
             }
