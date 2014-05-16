@@ -85,14 +85,14 @@ BUFFER buffer_alloc_initialize(size_t size)
 
 BUFFER buffer_realloc(BUFFER buffer_handle, size_t size)
 {
-    if ( buffer_handle == NULL )
+    if ( NULL == buffer_handle )
     {
         return buffer_alloc_initialize(size);
     }
     
     http_buffer *buffer = (http_buffer *)buffer_handle;
     
-    if( buffer->data == NULL)
+    if( NULL == buffer->data )
     {
         buffer_initialize(buffer_handle, size);
     }

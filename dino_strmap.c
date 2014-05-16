@@ -62,7 +62,7 @@ StrMap * dino_sm_new(unsigned int capacity)
 {
 	StrMap *map = malloc(sizeof(StrMap));
 
-	if (map == NULL)
+	if (NULL == map)
     {
 		return NULL;
 	}
@@ -70,7 +70,7 @@ StrMap * dino_sm_new(unsigned int capacity)
     map->count = capacity;
 	map->buckets = malloc(map->count * sizeof(Bucket));
 	
-    if (map->buckets == NULL)
+    if (NULL == map->buckets)
     {
 		free(map);
 		return NULL;
@@ -84,7 +84,7 @@ void dino_sm_delete(StrMap *map)
 {
 	Pair *pair;
     
-	if (map == NULL)
+	if (NULL == map)
     {
 		return;
 	}
@@ -117,18 +117,18 @@ const char *dino_sm_get_value(const StrMap *map, const char *key)
 	Bucket *bucket;
 	Pair *pair;
     
-	if (map == NULL)
+	if (NULL == map)
     {
 		return "";
 	}
-	if (key == NULL)
+	if (NULL == key)
     {
 		return "";
 	}
 	index = hash(key) % map->count;
 	bucket = &(map->buckets[index]);
 	pair = get_pair(bucket, key);
-	if (pair == NULL)
+	if (NULL == pair)
     {
 		return "";
 	}
@@ -142,26 +142,26 @@ size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned i
 	Bucket *bucket;
 	Pair *pair;
     
-	if (map == NULL)
+	if (NULL == map)
     {
 		return 0;
 	}
-	if (key == NULL)
+	if (NULL == key)
     {
 		return 0;
 	}
 	index = hash(key) % map->count;
 	bucket = &(map->buckets[index]);
 	pair = get_pair(bucket, key);
-	if (pair == NULL)
+	if (NULL == pair )
     {
 		return 0;
 	}
-	if (out_buf == NULL && n_out_buf == 0)
+	if (NULL == out_buf && n_out_buf == 0)
     {
 		return strlen(pair->value) + 1;
 	}
-	if (out_buf == NULL)
+	if (NULL == out_buf )
     {
 		return 0;
 	}
@@ -176,11 +176,11 @@ size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned i
 
 bool dino_sm_exists(const StrMap *map, const char *key)
 {
-	if (map == NULL)
+	if (NULL == map)
     {
 		return false;
 	}
-	if (key == NULL)
+	if (NULL == key)
     {
 		return false;
 	}
@@ -189,7 +189,7 @@ bool dino_sm_exists(const StrMap *map, const char *key)
 	Bucket *bucket = &(map->buckets[index]);
 	Pair *pair = get_pair(bucket, key);
     
-	if (pair == NULL)
+	if (NULL == pair )
     {
 		return false;
 	}
@@ -205,12 +205,12 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 	char *tmp_value;
 	char *new_key, *new_value;
     
-	if (map == NULL)
+	if (NULL == map)
     {
 		return false;
 	}
     
-	if (key == NULL || value == NULL)
+	if (NULL == key || NULL == value )
     {
 		return false;
 	}
@@ -235,7 +235,7 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 			 * space for the new larger value.
 			 */
 			tmp_value = realloc(pair->value, (value_len + 1) * sizeof(char));
-			if (tmp_value == NULL)
+			if (NULL == tmp_value )
             {
 				return false;
 			}
@@ -248,13 +248,13 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
     
 	/* Allocate space for a new key and value */
 	new_key = malloc((key_len + 1) * sizeof(char));
-	if (new_key == NULL)
+	if (NULL == new_key )
     {
 		return false;
 	}
     
 	new_value = malloc((value_len + 1) * sizeof(char));
-	if (new_value == NULL)
+	if (NULL == new_value )
     {
 		free(new_key);
 		return false;
@@ -267,7 +267,8 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 		 * key-value pair.
 		 */
 		bucket->pairs = malloc(sizeof(Pair));
-		if (bucket->pairs == NULL) {
+		if (NULL == bucket->pairs )
+        {
 			free(new_key);
 			free(new_value);
 			return false;
@@ -280,7 +281,8 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 		 * key, so create a new key-value pair.
 		 */
 		tmp_pairs = realloc(bucket->pairs, (bucket->count + 1) * sizeof(Pair));
-		if (tmp_pairs == NULL) {
+		if (NULL == tmp_pairs )
+        {
 			free(new_key);
 			free(new_value);
 			return false;
@@ -301,7 +303,7 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 
 int dino_sm_get_count(const StrMap *map)
 {
-	if (map == NULL)
+	if (NULL == map)
     {
 		return 0;
 	}
@@ -330,12 +332,12 @@ int dino_sm_get_count(const StrMap *map)
 
 bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *obj)
 {
-	if (map == NULL)
+	if (NULL == map)
     {
 		return false;
 	}
 	
-    if (enum_func == NULL)
+    if (NULL == enum_func)
     {
 		return true;
 	}
