@@ -224,7 +224,7 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 	 * an existing value in a key-value pair in the bucket.
 	 */
 	
-    if ((pair = get_pair(bucket, key)) != NULL)
+    if (NULL != (pair = get_pair(bucket, key)))
     {
 		/* The bucket contains a pair that matches the provided key,
 		 * change the value for that pair to the new value.
@@ -383,7 +383,7 @@ static Pair * get_pair(Bucket *bucket, const char *key)
 	i = 0;
 	while (i < n)
     {
-		if (pair->key != NULL && pair->value != NULL)
+		if (NULL != pair->key && NULL != pair->value )
         {
 			if (strcmp(pair->key, key) == 0)
             {
