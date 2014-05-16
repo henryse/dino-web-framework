@@ -27,12 +27,6 @@
 #include "dino_utils.h"
 #include "dino_strmap.h"
 
-// HTTP Defines used:
-//
-#define HTTP_MAX_PARAMS 32
-#define HTTP_MAX_KEY_SIZE 128
-#define HTTP_MAX_VALUE_SIZE 128
-
 // List of methods
 //
 typedef enum http_method_enum
@@ -59,15 +53,6 @@ typedef struct dino_route_struct
     char *path;
     stack_char_ptr *stack;
 }dino_route;
-
-// HTTP Parametgers/key value paire.
-//
-//typedef struct http_key_value_struct
-//{
-//    char key[HTTP_MAX_KEY_SIZE];
-//    char value[HTTP_MAX_VALUE_SIZE];
-//}http_key_value;
-
 
 typedef enum dino_handle_type_enum
 {
@@ -96,9 +81,6 @@ typedef struct http_request_struct
 
     http_method method;
     char *url;
-
-//    int param_index;
-//    http_key_value params[HTTP_MAX_PARAMS];
     
     StrMap *params_map;
 }http_request;
@@ -108,9 +90,6 @@ typedef struct http_request_struct
 typedef struct http_response_struct
 {
     BUFFER buffer_handle;
-
-//    int param_index;
-//    http_key_value params[HTTP_MAX_PARAMS];
     
     StrMap *params_map;
 }http_response;

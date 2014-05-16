@@ -561,7 +561,7 @@ size_t parse_headers(http_data *http)
         
         // OK look of content length
         //
-        if (0 == strncmp(key, "Content-Length", HTTP_MAX_KEY_SIZE))
+        if (0 == strncmp(key, "Content-Length", 32))
         {
             content_size = atol(value);
         }

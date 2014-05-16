@@ -374,7 +374,7 @@ void response_header_set(DHANDLE dhandle, const char *key, const char *value)
         }
         else
         {
-            fprintf(stderr, "ERROR: HTTP_MAX_PARAMS exceeded... \n\r");
+            fprintf(stderr, "ERROR: Invlaid key, must have at least one character...\n\r");
         }
     }
     else
