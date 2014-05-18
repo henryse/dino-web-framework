@@ -288,11 +288,12 @@ bool DENO_EXPORT dino_route_connect(DHANDLE dhandle, http_verb_func verb_func, c
 
 bool g_dino_keep_running = true;
 
-void dino_signal_handler(int value)
+void dino_signal_shutdown(int value)
 {
     fprintf(stderr, "Shutting down the service, signal: %d\n\r", value );
     g_dino_keep_running = false;
     dino_stop_http();
+    exit(value);
 }
 
 void dino_signal_SIGPIPE(int value)
@@ -308,12 +309,12 @@ bool DENO_EXPORT dino_start(DHANDLE dhandle, const char *function, int line)
         return false;
     }
     
-    signal(SIGABRT, dino_signal_handler);
-    signal(SIGFPE, dino_signal_handler);
-    signal(SIGILL, dino_signal_handler);
-    signal(SIGINT, dino_signal_handler);
-    signal(SIGSEGV, dino_signal_handler);
-    signal(SIGTERM, dino_signal_handler);
+    signal(SIGABRT, dino_signal_shutdown);
+    signal(SIGFPE, dino_signal_shutdown);
+    signal(SIGILL, dino_signal_shutdown);
+    signal(SIGINT, dino_signal_shutdown);
+    signal(SIGSEGV, dino_signal_shutdown);
+    signal(SIGTERM, dino_signal_shutdown);
     signal(SIGPIPE, dino_signal_SIGPIPE);
     
     dino_start_http(cast_dhandle_site(dhandle));
