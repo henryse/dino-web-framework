@@ -689,7 +689,7 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
 
 void init_request(dino_handle *dhandle)
 {
-    clear_memory(dhandle, sizeof(dhandle));
+    clear_memory(dhandle, sizeof(dino_handle));
     dhandle->http.handle_type = dino_handle_http;
 
     dhandle->http.request.params_map = dino_sm_new(32);

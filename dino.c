@@ -437,7 +437,7 @@ void DENO_EXPORT params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
     if (NULL != request)
     {
         dino_callback_param_type callback_data;
-        clear_memory(&callback_data, sizeof(callback_data));
+        clear_memory(&callback_data, sizeof(dino_callback_param_type));
         callback_data.callback = callback;
         callback_data.dhandle = dhandle;
         callback_data.obj = obj;
