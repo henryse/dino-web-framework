@@ -122,7 +122,7 @@ dino_route* list_add_new_item(dino_route **head)
     //
     if (NULL == *head)
     {
-        *head = (dino_route*)malloc_and_clear(sizeof(dino_route));
+        *head = (dino_route*)memory_alloc(sizeof(dino_route));
         return *head;
     }
 
@@ -132,7 +132,7 @@ dino_route* list_add_new_item(dino_route **head)
 
     while( ptr->next != NULL ) { ptr = ptr->next; }
 
-    ptr->next = (dino_route*)malloc_and_clear(sizeof(dino_route));
+    ptr->next = (dino_route*)memory_alloc(sizeof(dino_route));
 
     return ptr->next;
 }
@@ -167,13 +167,13 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
     //
     const char *method_name = http_method_prefix_string(method);
     
-    ppath->name = malloc_and_clear(strlen(method_name) + strlen(name) + 1);
+    ppath->name = memory_alloc(strlen(method_name) + strlen(name) + 1);
     strncpy(ppath->name, method_name, strlen(method_name));
     strncat(ppath->name, name, strlen(name));
     
     // Store the path
     //
-    ppath->path = malloc_and_clear(strlen(path) + 1);
+    ppath->path = memory_alloc(strlen(path) + 1);
     strncpy(ppath->path, path, strlen(path));
     
     // Parse the path, we need to see if there are any :[name] directives
@@ -190,10 +190,10 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
 
 DHANDLE DENO_EXPORT dino_config_start(unsigned int port,  char *host)
 {
-    dino_site *psite = (dino_site *)malloc_and_clear(sizeof(dino_site));
+    dino_site *psite = (dino_site *)memory_alloc(sizeof(dino_site));
     if (NULL != psite)
     {
-        psite->host = malloc_and_clear(strlen(host) + 1);
+        psite->host = memory_alloc(strlen(host) + 1);
         strncpy(psite->host, host, strlen(host));
         
         psite->port = port;
@@ -358,7 +358,7 @@ int DENO_EXPORT response_printf(DHANDLE dhandle, const char *fmt, ...)
             response_send(dhandle, result, strlen(result));
         
             // Free the memory
-            free(result);
+            memory_free(result);
         }
     }
     
@@ -437,7 +437,7 @@ void DENO_EXPORT params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
     if (NULL != request)
     {
         dino_callback_param_type callback_data;
-        clear_memory(&callback_data, sizeof(dino_callback_param_type));
+        memory_clear(&callback_data, sizeof(dino_callback_param_type));
         callback_data.callback = callback;
         callback_data.dhandle = dhandle;
         callback_data.obj = obj;

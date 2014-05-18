@@ -203,7 +203,7 @@ CONNECT(volare)
 
 int main(int argc, const char * argv[])
 {
-    int port = 3033;
+    int port = 3031;
     char *host = "localhost";
     
     DINO_CONFIG_START(port, host);

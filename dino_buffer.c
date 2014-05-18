@@ -65,18 +65,18 @@ void buffer_initialize(BUFFER buffer_handle, size_t size)
         
         if (buffer->data)
         {
-            free(buffer->data);
+            memory_free(buffer->data);
         }
         
         buffer->allocated = calculate_allocated_size(size);
-        buffer->data = malloc_and_clear(buffer->allocated);
+        buffer->data = memory_alloc(buffer->allocated);
         buffer->used = size;
     }
 }
 
 BUFFER buffer_alloc_initialize(size_t size)
 {
-    http_buffer *buffer = malloc_and_clear(sizeof(http_buffer));
+    http_buffer *buffer = memory_alloc(sizeof(http_buffer));
     
     buffer_initialize(buffer, size);
     
@@ -101,7 +101,7 @@ BUFFER buffer_realloc(BUFFER buffer_handle, size_t size)
         if (buffer->allocated < size)
         {
             buffer->allocated = calculate_allocated_size(size);
-            buffer->data = realloc(buffer->data, buffer->allocated);
+            buffer->data = memory_realloc(buffer->data, buffer->allocated);
         }
 
         buffer->used = size;
@@ -119,10 +119,10 @@ void buffer_free(BUFFER buffer_handle)
         {
             buffer->allocated = 0;
             buffer->used = 0;
-            free(buffer->data);
+            memory_free(buffer->data);
         }
         
-        free(buffer);
+        memory_free(buffer);
     }
 }
 

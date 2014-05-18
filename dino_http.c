@@ -113,7 +113,7 @@ void send_free(int client, char **buffer, int bytes)
         
         if (*buffer)
         {
-            free(*buffer);
+            memory_free(*buffer);
             *buffer = NULL;
         }
     }
@@ -341,7 +341,7 @@ size_t read_line(int socket, BUFFER *buffer)
 
 size_t read_data(int socket, char *data, size_t size)
 {
-    clear_memory(data, size);
+    memory_clear(data, size);
     
     size_t i = 0;
     char c = '\0';
@@ -427,7 +427,7 @@ http_method parse_method_url(http_data *http)
     // Obtain the method
     //
     char method[32];
-    clear_memory(method, sizeof(method));
+    memory_clear(method, sizeof(method));
     int offset = 0;
 
     const char *line = buffer_data_ptr(buffer);
@@ -466,7 +466,7 @@ http_method parse_method_url(http_data *http)
     
     // Allocate and copy url to buffer
     //
-    http->request.url = malloc_and_clear(buffer_data_size(buffer_url) + 1);
+    http->request.url = memory_alloc(buffer_data_size(buffer_url) + 1);
     strncpy(http->request.url, buffer_data_ptr(buffer_url), buffer_data_size(buffer_url));
 
     // Free the URL Buffer
@@ -607,7 +607,7 @@ bool read_request(http_data *http)
     //
     if (http->request.content_size)
     {
-        http->request.data = malloc_and_clear(http->request.content_size);
+        http->request.data = memory_alloc(http->request.content_size);
         size_t total = read_data(http->socket, http->request.data, http->request.content_size);
         assert(total == http->request.content_size);
         http->request.content_size = total;
@@ -689,7 +689,7 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
 
 void init_request(dino_handle *dhandle)
 {
-    clear_memory(dhandle, sizeof(dino_handle));
+    memory_clear(dhandle, sizeof(dino_handle));
     dhandle->http.handle_type = dino_handle_http;
 
     dhandle->http.request.params_map = dino_sm_new(32);
@@ -702,7 +702,7 @@ void free_request(dino_handle *dhandle)
     {
         if ( dhandle->http.request.url)
         {
-            free(dhandle->http.request.url);
+            memory_free(dhandle->http.request.url);
             dhandle->http.request.url = NULL;
         }
 
@@ -775,7 +775,9 @@ void dino_start_http(dino_site *psite)
     
     struct sockaddr_in sockaddr_client;
     socklen_t sockaddr_client_length = sizeof(sockaddr_client);
-    clear_memory(&sockaddr_client, sockaddr_client_length);
+    memory_clear(&sockaddr_client, sockaddr_client_length);
+    
+    memory_cache_alloc(1024 * 16);
     
     g_server_socket = startup_connection(psite);
     
@@ -786,6 +788,7 @@ void dino_start_http(dino_site *psite)
         while (g_dino_keep_running)
         {
             int client_socket = accept(g_server_socket, (struct sockaddr *)&sockaddr_client, &sockaddr_client_length);
+            
             if (-1 == client_socket)
             {
                 log_error("accept", __FUNCTION__, __LINE__);
@@ -794,10 +797,14 @@ void dino_start_http(dino_site *psite)
             {
                 accept_request(psite, client_socket);
             }
+            
+            memory_cache_clear();
         }
         
         close(g_server_socket);
     }
+    
+    memory_cache_free();
 }
 
 void dino_stop_http()

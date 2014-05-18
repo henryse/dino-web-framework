@@ -25,28 +25,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <stdbool.h>
 #include "dino_utils.h"
 
-void *clear_memory(void *p, size_t n)
+typedef struct memory_cache_type
 {
-    if (NULL != p)
-    {
-        bzero(p, n);
-    }
-    
-    return p;
-}
+    size_t size;
+    size_t freed;
+    unsigned char *buffer;
+}memory_cache;
 
-void *malloc_and_clear(size_t n)
-{
-    return clear_memory(malloc(n), n);
-}
+typedef memory_cache *memory_cache_handle;
+
+memory_cache_handle g_mem_cache = NULL;
 
 stack_char_ptr *stack_ptr_alloc(const char *data)
 {
-    stack_char_ptr *stack = (stack_char_ptr *)malloc_and_clear(sizeof(stack_char_ptr));
+    stack_char_ptr *stack = (stack_char_ptr *)memory_alloc(sizeof(stack_char_ptr));
     
-    stack->data = malloc_and_clear(strlen(data) + 1);
+    stack->data = memory_alloc(strlen(data) + 1);
     memcpy(stack->data, data, strlen(data));
     
     return stack;
@@ -58,15 +55,15 @@ void stack_ptr_free(stack_char_ptr *stack)
     {
         if (NULL != stack->ptrs)
         {
-            free(stack->ptrs);
+            memory_free(stack->ptrs);
         }
         
         if (NULL != stack->data)
         {
-            free(stack->data);
+            memory_free(stack->data);
         }
         
-        free(stack);
+        memory_free(stack);
     }
 }
 
@@ -75,7 +72,7 @@ stack_char_ptr *stack_ptr_push(stack_char_ptr *stack, char *ptr)
     if (NULL != stack)
     {
         stack->count++;
-        stack->ptrs = (char **)realloc(stack->ptrs, stack->count * sizeof(char *));
+        stack->ptrs = (char **)memory_realloc(stack->ptrs, stack->count * sizeof(char *));
         stack->ptrs[stack->count - 1] = ptr;
     }
     
@@ -99,3 +96,102 @@ stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, const char *data, const c
 
     return stack;
 }
+
+void *memory_clear(void *p, size_t n)
+{
+    if (NULL != p)
+    {
+        bzero(p, n);
+    }
+    
+    return p;
+}
+
+bool is_memory_cache_ptr(void *p)
+{
+    if ( NULL == g_mem_cache)
+        return false;
+    
+    return (p >= (void *)g_mem_cache->buffer && p < (void *)(g_mem_cache->buffer + g_mem_cache->size));
+}
+
+void *memory_alloc(size_t n)
+{
+    void *p = NULL;
+    
+    // See if it will fit in the cache:
+    //
+    if (NULL != g_mem_cache && n < g_mem_cache->freed)
+    {
+        p = g_mem_cache->buffer + (g_mem_cache->size - g_mem_cache->freed);
+        g_mem_cache->freed -= n;
+    }
+    else
+    {
+        // If not allocate from memory.
+        //
+        p = malloc(n);
+    }
+    
+    return memory_clear(p, n);
+}
+
+void *memory_realloc(void *p, size_t n)
+{
+    void *new_p = NULL;
+    if (is_memory_cache_ptr(p))
+    {
+        if ( n < g_mem_cache->freed )
+        {
+            // It wil still fit in the cache...
+            //
+            new_p = memory_alloc(n);
+        }
+        else
+        {
+            // allocate in memory and copy the bits.
+            new_p = malloc(n);
+        }
+        memcpy(new_p, p, n);
+    }
+    else
+    {
+        new_p =realloc(p,n);
+    }
+    
+    return new_p;
+}
+
+void memory_free(void *p)
+{
+    if(!is_memory_cache_ptr(p))
+    {
+        free(p);
+    }
+}
+
+void memory_cache_alloc(size_t n)
+{
+    if (NULL == g_mem_cache)
+    {
+        g_mem_cache = malloc(sizeof(memory_cache));
+        memory_clear(g_mem_cache, sizeof(memory_cache));
+        
+        g_mem_cache->buffer = malloc(n);
+        g_mem_cache->size = n;
+        g_mem_cache->freed = n;
+    }
+}
+
+void memory_cache_clear()
+{
+    g_mem_cache->freed = g_mem_cache->size;
+}
+
+void memory_cache_free()
+{
+    free(g_mem_cache->buffer);
+    free(g_mem_cache);
+}
+
+

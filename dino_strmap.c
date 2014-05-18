@@ -35,6 +35,7 @@
  *    along with strmap.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "dino_strmap.h"
+#include "dino_utils.h"
 
 typedef struct Pair Pair;
 
@@ -60,7 +61,7 @@ static unsigned long hash(const char *str);
 
 StrMap * dino_sm_new(unsigned int capacity)
 {
-	StrMap *map = malloc(sizeof(StrMap));
+	StrMap *map = memory_alloc(sizeof(StrMap));
 
 	if (NULL == map)
     {
@@ -68,11 +69,11 @@ StrMap * dino_sm_new(unsigned int capacity)
 	}
 	
     map->count = capacity;
-	map->buckets = malloc(map->count * sizeof(Bucket));
+	map->buckets = memory_alloc(map->count * sizeof(Bucket));
 	
     if (NULL == map->buckets)
     {
-		free(map);
+		memory_free(map);
 		return NULL;
 	}
     
@@ -98,17 +99,17 @@ void dino_sm_delete(StrMap *map)
 		unsigned int j = 0;
 		while(j < m)
         {
-			free(pair->key);
-			free(pair->value);
+			memory_free(pair->key);
+			memory_free(pair->value);
 			pair++;
 			j++;
 		}
-		free(bucket->pairs);
+		memory_free(bucket->pairs);
 		bucket++;
 		i++;
 	}
-	free(map->buckets);
-	free(map);
+	memory_free(map->buckets);
+	memory_free(map);
 }
 
 const char *dino_sm_get_value(const StrMap *map, const char *key)
@@ -234,7 +235,7 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 			/* If the new value is larger than the old value, re-allocate
 			 * space for the new larger value.
 			 */
-			tmp_value = realloc(pair->value, (value_len + 1) * sizeof(char));
+			tmp_value = memory_realloc(pair->value, (value_len + 1) * sizeof(char));
 			if (NULL == tmp_value )
             {
 				return false;
@@ -247,16 +248,16 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 	}
     
 	/* Allocate space for a new key and value */
-	new_key = malloc((key_len + 1) * sizeof(char));
+	new_key = memory_alloc((key_len + 1) * sizeof(char));
 	if (NULL == new_key )
     {
 		return false;
 	}
     
-	new_value = malloc((value_len + 1) * sizeof(char));
+	new_value = memory_alloc((value_len + 1) * sizeof(char));
 	if (NULL == new_value )
     {
-		free(new_key);
+		memory_free(new_key);
 		return false;
 	}
 	
@@ -266,11 +267,11 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 		/* The bucket is empty, lazily allocate space for a single
 		 * key-value pair.
 		 */
-		bucket->pairs = malloc(sizeof(Pair));
+		bucket->pairs = memory_alloc(sizeof(Pair));
 		if (NULL == bucket->pairs )
         {
-			free(new_key);
-			free(new_value);
+			memory_free(new_key);
+			memory_free(new_value);
 			return false;
 		}
 		bucket->count = 1;
@@ -280,11 +281,11 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 		/* The bucket wasn't empty but no pair existed that matches the provided
 		 * key, so create a new key-value pair.
 		 */
-		tmp_pairs = realloc(bucket->pairs, (bucket->count + 1) * sizeof(Pair));
+		tmp_pairs = memory_realloc(bucket->pairs, (bucket->count + 1) * sizeof(Pair));
 		if (NULL == tmp_pairs )
         {
-			free(new_key);
-			free(new_value);
+			memory_free(new_key);
+			memory_free(new_value);
 			return false;
 		}
 		bucket->pairs = tmp_pairs;
