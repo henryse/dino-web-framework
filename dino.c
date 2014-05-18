@@ -188,7 +188,7 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
     return true;
 }
 
-DHANDLE dino_config_start(unsigned int port,  char *host)
+DHANDLE DENO_EXPORT dino_config_start(unsigned int port,  char *host)
 {
     dino_site *psite = (dino_site *)malloc_and_clear(sizeof(dino_site));
     if (NULL != psite)
@@ -204,7 +204,7 @@ DHANDLE dino_config_start(unsigned int port,  char *host)
     return psite;
 }
 
-bool dino_route_get(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
+bool DENO_EXPORT dino_route_get(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
 {
     if (!add_method_to_site(http_get, dhandle, verb_func, name, path))
     {
@@ -215,7 +215,7 @@ bool dino_route_get(DHANDLE dhandle, http_verb_func verb_func, const char *name,
     return true;
 }
 
-bool dino_route_post(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
+bool DENO_EXPORT dino_route_post(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
 {
     if (!add_method_to_site(http_post, dhandle, verb_func, name, path))
     {
@@ -226,7 +226,7 @@ bool dino_route_post(DHANDLE dhandle, http_verb_func verb_func, const char *name
     return true;
 }
 
-bool dino_route_delete(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
+bool DENO_EXPORT dino_route_delete(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
 {
     if (!add_method_to_site(http_delete, dhandle, verb_func, name, path))
     {
@@ -236,7 +236,7 @@ bool dino_route_delete(DHANDLE dhandle, http_verb_func verb_func, const char *na
     return true;
 }
 
-bool dino_route_put(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
+bool DENO_EXPORT dino_route_put(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
 {
     if (!add_method_to_site(http_put, dhandle, verb_func, name, path))
     {
@@ -246,7 +246,7 @@ bool dino_route_put(DHANDLE dhandle, http_verb_func verb_func, const char *name,
     return true;
 }
 
-bool dino_route_options(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
+bool DENO_EXPORT dino_route_options(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
 {
     if (!add_method_to_site(http_options, dhandle, verb_func, name, path))
     {
@@ -256,7 +256,7 @@ bool dino_route_options(DHANDLE dhandle, http_verb_func verb_func, const char *n
     return true;
 }
 
-bool dino_route_head(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
+bool DENO_EXPORT dino_route_head(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
 {
     if (!add_method_to_site(http_head, dhandle, verb_func, name, path))
     {
@@ -266,7 +266,7 @@ bool dino_route_head(DHANDLE dhandle, http_verb_func verb_func, const char *name
     return true;
 }
 
-bool dino_route_trace(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
+bool DENO_EXPORT dino_route_trace(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
 {
     if (!add_method_to_site(http_trace, dhandle, verb_func, name, path))
     {
@@ -276,7 +276,7 @@ bool dino_route_trace(DHANDLE dhandle, http_verb_func verb_func, const char *nam
     return true;
 }
 
-bool dino_route_connect(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
+bool DENO_EXPORT dino_route_connect(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path, const char *function, int line)
 {
     if (!add_method_to_site(http_connect, dhandle, verb_func, name, path))
     {
@@ -295,7 +295,12 @@ void dino_signal_handler(int value)
     dino_stop_http();
 }
 
-bool dino_start(DHANDLE dhandle, const char *function, int line)
+void dino_signal_SIGPIPE(int value)
+{
+    fprintf(stderr, "SIGPIPE failure: %d\n\r", value );
+}
+
+bool DENO_EXPORT dino_start(DHANDLE dhandle, const char *function, int line)
 {
     if(NULL == dhandle)
     {
@@ -309,13 +314,14 @@ bool dino_start(DHANDLE dhandle, const char *function, int line)
     signal(SIGINT, dino_signal_handler);
     signal(SIGSEGV, dino_signal_handler);
     signal(SIGTERM, dino_signal_handler);
+    signal(SIGPIPE, dino_signal_SIGPIPE);
     
     dino_start_http(cast_dhandle_site(dhandle));
 
     return true;
 }
 
-void response_send(DHANDLE dhandle, const char *data, size_t size)
+void DENO_EXPORT response_send(DHANDLE dhandle, const char *data, size_t size)
 {
     http_response *response = cast_dhandle_response(dhandle);
     
@@ -329,7 +335,7 @@ void response_send(DHANDLE dhandle, const char *data, size_t size)
     }
 }
 
-int response_printf(DHANDLE dhandle, const char *fmt, ...)
+int DENO_EXPORT response_printf(DHANDLE dhandle, const char *fmt, ...)
 {
     // Points to each unnamed arg in turn
     //
@@ -362,7 +368,7 @@ int response_printf(DHANDLE dhandle, const char *fmt, ...)
     return 0;
 }
 
-void response_header_set(DHANDLE dhandle, const char *key, const char *value)
+void DENO_EXPORT response_header_set(DHANDLE dhandle, const char *key, const char *value)
 {
     http_response *response = cast_dhandle_response(dhandle);
     
@@ -383,7 +389,7 @@ void response_header_set(DHANDLE dhandle, const char *key, const char *value)
     }
 }
 
-const char *params_get(DHANDLE dhandle, const char *key)
+const char * DENO_EXPORT params_get(DHANDLE dhandle, const char *key)
 {
     http_request *request = cast_dhandle_request(dhandle);
 
@@ -395,7 +401,7 @@ const char *params_get(DHANDLE dhandle, const char *key)
     return "";
 }
 
-size_t params_count(DHANDLE dhandle)
+size_t DENO_EXPORT params_count(DHANDLE dhandle)
 {
     http_request *request = cast_dhandle_request(dhandle);
     if (NULL != request)
@@ -423,7 +429,7 @@ bool param_enum(const char *key, const char *value, const void *obj)
     return param_callback->callback(param_callback->dhandle, key, value, param_callback->obj);
 }
 
-void params_enumerate(DHANDLE dhandle, dino_enum_func callback, const void *obj)
+void DENO_EXPORT params_enumerate(DHANDLE dhandle, dino_enum_func callback, const void *obj)
 {
     http_request *request = cast_dhandle_request(dhandle);
 

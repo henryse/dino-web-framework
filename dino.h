@@ -27,6 +27,13 @@
 #include <stdbool.h>
 #include "http_error.h"
 
+#ifndef DENO_EXTERN
+#define DENO_EXTERN extern
+#endif
+#ifndef DENO_EXPORT
+#define DENO_EXPORT
+#endif
+
 // Types
 //
 typedef void *DHANDLE;
@@ -39,29 +46,29 @@ typedef int (*http_verb_func)(DHANDLE);
 // Low Level Bindings for Routes API  (WARNING: for Binding and Routes please use the MACROS below)
 //
 DHANDLE dino_config_start(unsigned int port,  char *host);
-bool dino_route_get     (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
-bool dino_route_post    (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
-bool dino_route_delete  (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
-bool dino_route_put     (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
-bool dino_route_options (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
-bool dino_route_head    (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
-bool dino_route_trace   (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
-bool dino_route_connect (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool DENO_EXTERN dino_route_get     (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool DENO_EXTERN dino_route_post    (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool DENO_EXTERN dino_route_delete  (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool DENO_EXTERN dino_route_put     (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool DENO_EXTERN dino_route_options (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool DENO_EXTERN dino_route_head    (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool DENO_EXTERN dino_route_trace   (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
+bool DENO_EXTERN dino_route_connect (DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path, const char *function, int line);
 
-bool dino_start         (DHANDLE dhandle, const char *function, int line);
+bool DENO_EXTERN dino_start         (DHANDLE dhandle, const char *function, int line);
 
 // Low Level input/output API
 //
-void response_send              (DHANDLE dhandle, const char *data, size_t size);
-int  response_printf            (DHANDLE dhandle, const char *fmt, ...);
-void response_header_set        (DHANDLE dhandle, const char *key, const char *value);
+void DENO_EXTERN response_send              (DHANDLE dhandle, const char *data, size_t size);
+int  DENO_EXTERN response_printf            (DHANDLE dhandle, const char *fmt, ...);
+void DENO_EXTERN response_header_set        (DHANDLE dhandle, const char *key, const char *value);
 
 // Low Level Parameter/enumeration API
 //
-const char *params_get          (DHANDLE dhandle, const char *key);
-size_t      params_count        (DHANDLE dhandle);
+const char DENO_EXTERN *params_get          (DHANDLE dhandle, const char *key);
+size_t     DENO_EXTERN params_count        (DHANDLE dhandle);
 typedef bool(*dino_enum_func)   (DHANDLE dhandle, const char *key, const char *value, const void *obj);
-void        params_enumerate    (DHANDLE dhandle, dino_enum_func callback,const void *obj);
+void       DENO_EXTERN params_enumerate    (DHANDLE dhandle, dino_enum_func callback,const void *obj);
 
 // MACRO API, this API is intended to not change.  Thus it is safer to use the MACROS when writting your applications then
 // to use the raw functions described above.

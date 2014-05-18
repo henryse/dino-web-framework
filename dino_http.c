@@ -263,8 +263,6 @@ int startup_connection(dino_site *psite)
                 }
                 else
                 {
-                    int set = 1;
-                    setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
                     psite->port = ntohs(name.sin_port);
                 }
             }

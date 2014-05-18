@@ -67,7 +67,7 @@ typedef struct dino_site_struct
 {
     dino_handle_type handle_type;
 
-    u_short port;
+    unsigned short port;
     dino_route *list;
     char *host;
 }dino_site;
