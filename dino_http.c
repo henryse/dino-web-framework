@@ -802,5 +802,10 @@ void dino_start_http(dino_site *psite)
 
 void dino_stop_http()
 {
-    close(g_server_socket);
+    int socket = g_server_socket;
+    g_server_socket = -1;
+    
+    close(socket);
+    
+    sleep(500);
 }
