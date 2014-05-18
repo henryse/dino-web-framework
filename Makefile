@@ -42,7 +42,7 @@ error:
 endif
 
 INCLUDE_DIRS += /usr/include
-SOURCEFILES := ./dino.c ./dino_buffer.c ./dino_http.c ./dino_utils.c ./main.c
+SOURCEFILES := ./dino.c ./dino_buffer.c ./dino_http.c ./dino_utils.c ./dino_strmap.c ./main.c
 EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
