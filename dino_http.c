@@ -778,7 +778,7 @@ void dino_start_http(dino_site *psite)
     memory_clear(&sockaddr_client, sockaddr_client_length);
     
     memory_cache_alloc(1024 * 16);
-    
+
     g_server_socket = startup_connection(psite);
     
     if (-1 != g_server_socket )

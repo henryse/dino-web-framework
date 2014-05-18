@@ -138,33 +138,30 @@ void *memory_alloc(size_t n)
 
 void *memory_realloc(void *p, size_t n)
 {
-    void *new_p = NULL;
+    if (NULL == p)
+    {
+        return memory_alloc(n);
+    }
+    
     if (is_memory_cache_ptr(p))
     {
         if ( n < g_mem_cache->freed )
         {
             // It wil still fit in the cache...
             //
-            new_p = memory_alloc(n);
+            void *new_p = g_mem_cache->buffer + (g_mem_cache->size - g_mem_cache->freed);
+            g_mem_cache->freed -= n;
+            memcpy(new_p, p, n);
+            return new_p;
         }
-        else
-        {
-            // allocate in memory and copy the bits.
-            new_p = malloc(n);
-        }
-        memcpy(new_p, p, n);
-    }
-    else
-    {
-        new_p =realloc(p,n);
     }
     
-    return new_p;
+    return realloc(p,n);
 }
 
 void memory_free(void *p)
 {
-    if(!is_memory_cache_ptr(p))
+    if(NULL != p && !is_memory_cache_ptr(p))
     {
         free(p);
     }
