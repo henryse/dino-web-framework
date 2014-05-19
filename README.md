@@ -11,16 +11,13 @@ TODO List
 
 () Fill out documentation.
 
-() How to do unit tests?
+() Use curl or wget to create unit tests.
 
-() Fix Parameters so they can resize instead of being a fixed size.
+() Need to find a way to parse results from curl or wget
 
-() Add SIG KILL support so we can clean up the socket when the process breaks.
+# Getting Started
 
-Getting Started
-====
-
-The inspiration for the framework came from Sinatra, hence the name Dino or Dean Martin. 
+The inspiration for this framework came from folks at Sinatra, hence the name Dino or Dean Martin. 
 
 Dino is a simple web framework for quickly creating web applications in C with minimal effort.  
 
@@ -43,7 +40,8 @@ int main(int argc, const char * argv[])
     char *host = "localhost";
     
     DINO_CONFIG_START(port, host);
-        ROUTE_GET(amor, "/")
+        ROUTE_GET(amor, "/amor")
+        ROUTE_GET(base, "/")
     DINO_CONFIG_END;
     
     DINO_START;
@@ -60,6 +58,15 @@ GET(amor)
     char *lyrics = "When the moon hits you eye like a big pizza pie\n That's amore!\n";
     
     RESPONSE_SEND(lyrics, strlen(lyrics));
+
+    return HTTP_ERROR_CODE_OK;
+}
+
+GET(base)
+{
+    char *response = "Welcome Home!";
+    
+    RESPONSE_PRINTF("Response %s\n", response);
 
     return HTTP_ERROR_CODE_OK;
 }
@@ -81,13 +88,23 @@ GET(amor)
     return HTTP_ERROR_CODE_OK;
 }
 
+GET(base)
+{
+    char *response = "Welcome Home!";
+    
+    RESPONSE_PRINTF("Response %s\n", response);
+
+    return HTTP_ERROR_CODE_OK;
+}
+
 int main(int argc, const char * argv[])
 {
     int port = 3030;
     char *host = "localhost";
     
     DINO_CONFIG_START(port, host);
-        ROUTE_GET(amor, "/")
+    ROUTE_GET(amor, "/amor")
+    ROUTE_GET(base, "/")
     DINO_CONFIG_END;
     
     DINO_START;
@@ -98,11 +115,31 @@ int main(int argc, const char * argv[])
 
 That's it! Fire up a browser and point it at http://localhost:3030
 
-Parameters (Params)
-----
+# Parameters (Params)
 
-Routes
-----
+Dino considers HTTP headers and parameters on the command line to all be "parameters".  They are stored as key:value pairs.  The key:value pairs are stored in a string hash map.  The parameters can be accessed via API Macros:
+
+~~~C
+const char *PARAMS(key)
+size_t PARAMS_COUNT                    
+void PARAMS_ENUMERATE(callback, obj) 
+~~~
+
+## PARAMS
+
+If you want the "first" given value for the "key".  Please note that if there is more than one, you will only get the first on that was found. 
+
+In order to iterate through the list you can use PARAMS_ENUMERATE.
+
+
+## PARAMS_COUNT
+
+Then total number of key:value pairs in this request.
+
+## PARAMS_ENUMERATE
+
+
+#Routes
 
 In Dino, a route is an HTTP method paired with a URL-matching pattern. Each route is associated a call back function defined in a CONFIG block:
 
