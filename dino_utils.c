@@ -110,7 +110,9 @@ void *memory_clear(void *p, size_t n)
 bool is_memory_cache_ptr(void *p)
 {
     if ( NULL == g_mem_cache)
+    {
         return false;
+    }
     
     return (p >= (void *)g_mem_cache->buffer && p < (void *)(g_mem_cache->buffer + g_mem_cache->size));
 }

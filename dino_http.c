@@ -717,53 +717,70 @@ void free_request(dino_handle *dhandle)
     }
 }
 
-void accept_request(dino_site *psite, int socket)
+void accept_request(dino_site *psite, dino_handle *dhandle)
 {
     // Setup DHANDLE:
     //
-    dino_handle dhandle;
-    init_request(&dhandle);
-    
-    dhandle.http.socket = socket;
-
-    if(!read_request(&dhandle.http))
+    if(!read_request(&dhandle->http))
     {
-        bad_request(socket);
+        bad_request(dhandle->http.socket);
     }
     else
     {
         // Parse the URL Parameters.
         //
-        stack_char_ptr *url_stack = stack_ptr_parse(NULL, dhandle.http.request.url, "/");
+        stack_char_ptr *url_stack = stack_ptr_parse(NULL, dhandle->http.request.url, "/");
 
         // Search for a match...
         //
-        dino_route *route = list_method_find(psite->list, dhandle.http.request.method, url_stack);
+        dino_route *route = list_method_find(psite->list, dhandle->http.request.method, url_stack);
         
         // Do we have a route?
         //
         if (NULL != route)
         {
-            invoke_method(route, &dhandle.http, url_stack);
+            invoke_method(route, &dhandle->http, url_stack);
         }
         else
         {
-            fprintf(stderr, "ERROR: Path %s not found\n\r", dhandle.http.request.url);
+            fprintf(stderr, "ERROR: Path %s not found\n\r", dhandle->http.request.url);
         }
 
         stack_ptr_free(url_stack);
     }
+}
+
+int g_server_socket = 0;
+
+void dino_process_request(dino_site *psite, int socket)
+{
+    dino_handle dhandle;
+    init_request(&dhandle);
     
+    if (-1 == socket)
+    {
+        log_error("accept", __FUNCTION__, __LINE__);
+    }
+    else
+    {
+        dhandle.http.socket = socket;
+        accept_request(psite, &dhandle);
+    }
+    
+    // Clear the cache memory...
+    // This assumes that there is no memory allocations
+    // that will be presisted across calls.
+    //
+    memory_cache_clear();
+
     // Free DHANDLE
     //
     free_request(&dhandle);
-
+    
     // Close Socket
     //
     close(socket);
 }
-
-int g_server_socket = 0;
 
 void dino_start_http(dino_site *psite)
 {
@@ -789,16 +806,7 @@ void dino_start_http(dino_site *psite)
         {
             int client_socket = accept(g_server_socket, (struct sockaddr *)&sockaddr_client, &sockaddr_client_length);
             
-            if (-1 == client_socket)
-            {
-                log_error("accept", __FUNCTION__, __LINE__);
-            }
-            else
-            {
-                accept_request(psite, client_socket);
-            }
-            
-            memory_cache_clear();
+            dino_process_request(psite, client_socket);
         }
         
         close(g_server_socket);
