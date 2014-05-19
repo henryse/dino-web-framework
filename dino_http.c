@@ -814,5 +814,5 @@ void dino_stop_http()
     
     close(socket);
     
-    sleep(500);
+    sleep(2);
 }
