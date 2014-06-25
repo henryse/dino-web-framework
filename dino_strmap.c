@@ -230,24 +230,25 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
     
     size_t key_len = strlen(key);
 	size_t value_len = strlen(value);
-	/* Get a pointer to the bucket the key string hashes to */
+	// Get a pointer to the bucket the key string hashes to
+    //
 	size_t index = hash(key) % map->count;
 	Bucket *bucket = &(map->buckets[index]);
-	/* Check if we can handle insertion by simply replacing
-	 * an existing value in a key-value pair in the bucket.
-	 */
 	
+    // Check if we can handle insertion by simply replacing
+    // an existing value in a key-value pair in the bucket.
+    //
 	Pair *pair = NULL;
     if (NULL != (pair = get_pair(bucket, key)))
     {
-		/* The bucket contains a pair that matches the provided key,
-		 * change the value for that pair to the new value.
-		 */
+		// The bucket contains a pair that matches the provided key,
+        //change the value for that pair to the new value.
+        //
         if (strlen(pair->value) < value_len)
         {
-			/* If the new value is larger than the old value, re-allocate
-			 * space for the new larger value.
-			 */
+			// If the new value is larger than the old value, re-allocate
+            // space for the new larger value.
+            //
 			char *tmp_value = memory_realloc(pair->value, (value_len + 1) * sizeof(char));
 			if (NULL == tmp_value )
             {
@@ -260,7 +261,8 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 		return true;
 	}
     
-	/* Allocate space for a new key and value */
+	// Allocate space for a new key and value
+    //
 	char *new_key = memory_alloc((key_len + 1) * sizeof(char));
 	if (NULL == new_key )
     {
@@ -274,12 +276,13 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 		return false;
 	}
 	
-    /* Create a key-value pair */
+    // Create a key-value pair
+    //
 	if (bucket->count == 0)
     {
-		/* The bucket is empty, lazily allocate space for a single
-		 * key-value pair.
-		 */
+		// The bucket is empty, lazily allocate space for a single
+        // key-value pair.
+        //
 		bucket->pairs = memory_alloc(sizeof(Pair));
 		if (NULL == bucket->pairs )
         {
@@ -291,9 +294,9 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 	}
 	else
     {
-		/* The bucket wasn't empty but no pair existed that matches the provided
-		 * key, so create a new key-value pair.
-		 */
+		// The bucket wasn't empty but no pair existed that matches the provided
+        // key, so create a new key-value pair.
+        //
 		Pair *tmp_pairs = memory_realloc(bucket->pairs, (bucket->count + 1) * sizeof(Pair));
 		if (NULL == tmp_pairs )
         {
@@ -304,12 +307,14 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 		bucket->pairs = tmp_pairs;
 		bucket->count++;
 	}
-	/* Get the last pair in the chain for the bucket */
-	pair = &(bucket->pairs[bucket->count - 1]);
+	// Get the last pair in the chain for the bucket
+	//
+    pair = &(bucket->pairs[bucket->count - 1]);
 	pair->key = new_key;
 	pair->value = new_value;
     
-	/* Copy the key and its value into the key-value pair */
+	// Copy the key and its value into the key-value pair
+    //
 	strcpy(pair->key, key);
 	strcpy(pair->value, value);
 	return true;
@@ -379,10 +384,9 @@ exit:;
 	return true;
 }
 
-/*
- * Returns a pair from the bucket that matches the provided key,
- * or null if no such pair exist.
- */
+// Returns a pair from the bucket that matches the provided key,
+// or null if no such pair exist.
+//
 static Pair * get_pair(Bucket *bucket, const char *key)
 {
 	unsigned int n = bucket->count;
@@ -408,9 +412,8 @@ static Pair * get_pair(Bucket *bucket, const char *key)
 	return NULL;
 }
 
-/*
- * Returns a hash code for the provided string.
- */
+// Returns a hash code for the provided string.
+//
 static unsigned long hash(const char *str)
 {
 	unsigned long hash = 5381;
