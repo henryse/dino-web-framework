@@ -146,6 +146,7 @@ bool dino_sm_exists(const StrMap *map, const char *key);
  * Return value: true if the association succeeded, false otherwise.
  */
 bool dino_sm_put(StrMap *map, const char *key, const char *value);
+bool dino_sm_add(StrMap *map, const char *key, const char *value);
 
 /*
  * Returns the number of associations between keys and values.

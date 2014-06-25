@@ -377,7 +377,7 @@ void DENO_EXPORT response_header_set(DHANDLE dhandle, const char *key, const cha
     {
         if (key && *key)
         {
-            dino_sm_put(response->params_map, key, value);
+            dino_sm_add(response->params_map, key, value);
         }
         else
         {

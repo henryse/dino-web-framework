@@ -9,6 +9,7 @@
  *	      ANSI C compatibility
  *	  2.0.1 - improved documentation
  *    2.0.2 - henryse - integreated into Dino project
+ *    2.0.3 - henryse - add support for comma deliminated list.
  *
  *    strmap.c
  *
@@ -35,6 +36,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with strmap.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdio.h>
 #include "dino_strmap.h"
 #include "dino_utils.h"
 
@@ -113,14 +115,11 @@ void dino_sm_delete(StrMap *map)
 
 const char *dino_sm_get_value(const StrMap *map, const char *key)
 {
-	if (NULL == map)
+	if (NULL == map || NULL == key)
     {
 		return "";
 	}
-	if (NULL == key)
-    {
-		return "";
-	}
+
 	unsigned int index = hash(key) % map->count;
 	Bucket *bucket = &(map->buckets[index]);
 	Pair *pair = get_pair(bucket, key);
@@ -134,14 +133,11 @@ const char *dino_sm_get_value(const StrMap *map, const char *key)
 
 size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf)
 {
-	if (NULL == map)
+	if (NULL == map || NULL == key)
     {
 		return 0;
 	}
-	if (NULL == key)
-    {
-		return 0;
-	}
+
 	unsigned int index = hash(key) % map->count;
 	Bucket *bucket = &(map->buckets[index]);
 	Pair *pair = get_pair(bucket, key);
@@ -168,11 +164,7 @@ size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned i
 
 bool dino_sm_exists(const StrMap *map, const char *key)
 {
-	if (NULL == map)
-    {
-		return false;
-	}
-	if (NULL == key)
+	if (NULL == map || NULL == key)
     {
 		return false;
 	}
@@ -189,18 +181,53 @@ bool dino_sm_exists(const StrMap *map, const char *key)
 	return true;
 }
 
+bool dino_sm_add(StrMap *map, const char *key, const char *value)
+{
+	if (NULL == map || NULL == key || NULL == value )
+    {
+		return false;
+	}
+
+    // TODO: Should we do string strip space?
+    //
+
+    // If it an empty string, just ignore it.
+    //
+    if (0 == strlen(value))
+    {
+        return true;
+    }
+    
+    // Check to see if it exists.
+    //
+    if (dino_sm_exists( map, key ))
+    {
+        // Get the current value
+        //
+        char *new_value = NULL;
+        
+        asprintf(&new_value, "%s, %s", dino_sm_get_value(map,key), value);
+        
+        bool result = false;
+        if ( new_value )
+        {
+            result = dino_sm_put(map, key, new_value);
+            free(new_value);
+        }
+        
+        return result;
+    }
+    
+    return dino_sm_put(map, key, value);
+}
+
 bool dino_sm_put(StrMap *map, const char *key, const char *value)
 {
-	if (NULL == map)
+	if (NULL == map || NULL == key || NULL == value )
     {
 		return false;
 	}
     
-	if (NULL == key || NULL == value )
-    {
-		return false;
-	}
-	
     size_t key_len = strlen(key);
 	size_t value_len = strlen(value);
 	/* Get a pointer to the bucket the key string hashes to */
@@ -216,7 +243,7 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value)
 		/* The bucket contains a pair that matches the provided key,
 		 * change the value for that pair to the new value.
 		 */
-		if (strlen(pair->value) < value_len)
+        if (strlen(pair->value) < value_len)
         {
 			/* If the new value is larger than the old value, re-allocate
 			 * space for the new larger value.

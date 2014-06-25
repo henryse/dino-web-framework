@@ -505,7 +505,7 @@ http_method parse_method_url(http_data *http)
             char *key = strtok_r(param, "=", &brkt2);
             char *value = strtok_r(NULL, "=", &brkt2);
 
-            dino_sm_put(http->request.params_map, key, value);
+            dino_sm_add(http->request.params_map, key, value);
         }
         
         buffer_free(buffer_params);
@@ -560,7 +560,7 @@ size_t parse_headers(http_data *http)
         key = clean_string(key);
         value = clean_string(value);
         
-        if (!dino_sm_put(http->request.params_map, key, value))
+        if (!dino_sm_add(http->request.params_map, key, value))
         {
             fprintf(stderr, "WARNING: Unable to add to params list...\n\r");
         }
@@ -633,7 +633,7 @@ bool bind_url_params(http_request *request, dino_route *route, stack_char_ptr *u
         //
         if (route->stack->ptrs[index][0] == ':')
         {
-            dino_sm_put(request->params_map, route->stack->ptrs[index], url_stack->ptrs[index]);
+            dino_sm_add(request->params_map, route->stack->ptrs[index], url_stack->ptrs[index]);
             continue;
         }        
     }
