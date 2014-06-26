@@ -188,16 +188,31 @@ bool dino_sm_add(StrMap *map, const char *key, const char *value)
 		return false;
 	}
 
-    // TODO: Should we do string strip space?
-    //
-
+    size_t length = strlen(value);
+    
     // If it an empty string, just ignore it.
     //
-    if (0 == strlen(value))
+    if (0 == length)
     {
         return true;
     }
+
+    // Create a local copy
+    //
+    char *local_value = alloca(length + 1);
+    strcpy(local_value, value);
     
+    // Trim out the "white space"
+    //
+    local_value = trim_whitespace(local_value);
+
+    // Is there anyting left?
+    //
+    if (0 == strlen(local_value))
+    {
+        return true;
+    }
+
     // Check to see if it exists.
     //
     if (dino_sm_exists( map, key ))
@@ -206,7 +221,7 @@ bool dino_sm_add(StrMap *map, const char *key, const char *value)
         //
         char *new_value = NULL;
         
-        asprintf(&new_value, "%s, %s", dino_sm_get_value(map,key), value);
+        asprintf(&new_value, "%s, %s", dino_sm_get_value(map,key), local_value);
         
         bool result = false;
         if ( new_value )

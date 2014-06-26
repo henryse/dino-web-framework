@@ -26,6 +26,7 @@
 #include <string.h>
 #include <strings.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include "dino_utils.h"
 
 typedef struct memory_cache_type
@@ -191,6 +192,36 @@ void memory_cache_free()
 {
     free(g_mem_cache->buffer);
     free(g_mem_cache);
+}
+
+char *trim_whitespace(char *str)
+{
+    char *end;
+
+    // Trim leading space
+    //
+    while(isspace(*str))
+    {
+        str++;
+    }
+
+    // All spaces?
+    //
+    if(*str == 0)
+    {
+        return str;
+    }
+
+    // Trim trailing space
+    //
+    end = str + strlen(str) - 1;
+    while(end > str && isspace(*end)) end--;
+
+    // Write new null terminator
+    //
+    *(end+1) = 0;
+
+    return str;
 }
 
 

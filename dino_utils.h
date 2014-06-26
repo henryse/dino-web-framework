@@ -45,4 +45,6 @@ void memory_cache_free();
 void            stack_ptr_free(stack_char_ptr *stack);
 stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, const char *data, const char *delim);
 
+char *trim_whitespace(char *str);
+
 #endif
