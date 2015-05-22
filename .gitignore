@@ -1,25 +1,15 @@
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+#Ignore Mac OS X DS Store
+.DS_Store
 
-# Libraries
-*.lib
-*.a
+#Ignore build directory
+/target/
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+# IDEA project
+/.idea/
+/out/
+*.iml
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-dino_utils.c
+# Eclipse files
+.classpath
+.project
+/.settings/
