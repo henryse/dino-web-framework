@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.2)
+project(DinoLibrary)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+set(SOURCE_FILES
+    dino.c
+    dino.h
+    dino_buffer.c
+    dino_buffer.h
+    dino_http.c
+    dino_http.h
+    dino_strmap.c
+    dino_strmap.h
+    dino_utils.h
+    dino_utils.c
+    http_error.h)
+
+add_library(DinoLibrary STATIC ${SOURCE_FILES})
+
+
+
+# install(TARGETS DinoLibrary DESTINATION "lib")
+# install(FILES dino.h http_error.h DESTINATION "../include")
