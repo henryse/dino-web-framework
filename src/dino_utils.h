@@ -25,24 +25,28 @@
 #ifndef dino_dino_utils_h
 #define dino_dino_utils_h
 
-typedef struct stack_char_ptr_struct
-{
+typedef struct stack_char_ptr_struct {
     char *data;
     size_t count;
     char **ptrs;
-}stack_char_ptr;
+} stack_char_ptr;
 
 void *memory_clear(void *p, size_t n);
+
 void *memory_alloc(size_t n);
+
 void *memory_realloc(void *p, size_t n);
 
 void memory_free(void *p);
 
 void memory_cache_alloc(size_t n);
+
 void memory_cache_clear();
+
 void memory_cache_free();
 
-void            stack_ptr_free(stack_char_ptr *stack);
+void stack_ptr_free(stack_char_ptr *stack);
+
 stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, const char *data, const char *delim);
 
 char *trim_whitespace(char *str);

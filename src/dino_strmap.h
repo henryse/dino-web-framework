@@ -34,6 +34,8 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with strmap.  If not, see <http://www.gnu.org/licenses/>.
  */
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #ifndef _STRMAP_H_
 #define _STRMAP_H_
 
@@ -74,7 +76,7 @@ typedef bool(*dino_sm_enum_func)(const char *key, const char *value, const void 
  * Return value: A pointer to a string map object,
  * or null if a new string map could not be allocated.
  */
-StrMap * dino_sm_new(unsigned int capacity);
+StrMap *dino_sm_new(unsigned int capacity);
 
 /*
  * Releases all memory held by a string map object.
@@ -111,6 +113,7 @@ void dino_sm_delete(StrMap *map);
  * 0 otherwise.
  */
 size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf);
+
 const char *dino_sm_get_value(const StrMap *map, const char *key);
 
 /*
@@ -146,6 +149,7 @@ bool dino_sm_exists(const StrMap *map, const char *key);
  * Return value: true if the association succeeded, false otherwise.
  */
 bool dino_sm_put(StrMap *map, const char *key, const char *value);
+
 bool dino_sm_add(StrMap *map, const char *key, const char *value);
 
 /*
@@ -349,3 +353,4 @@ bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *ob
  Library.
  
  */
+#pragma clang diagnostic pop

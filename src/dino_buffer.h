@@ -25,14 +25,16 @@
 #ifndef dino_buffer_h
 #define dino_buffer_h
 
-typedef void * BUFFER;
+typedef void *BUFFER;
 
-BUFFER      buffer_append_data  (BUFFER buffer_handle, const char *data, size_t size);
-BUFFER      buffer_append_char  (BUFFER buffer_handle, const char c);
+BUFFER buffer_append_data(BUFFER buffer_handle, const char *data, size_t size);
 
-void        buffer_free         (BUFFER buffer_handle);
+BUFFER buffer_append_char(BUFFER buffer_handle, const char c);
 
-char*       buffer_data_ptr     (BUFFER buffer_handle);
-size_t      buffer_data_size    (BUFFER buffer_handle);
+void buffer_free(BUFFER buffer_handle);
+
+char *buffer_data_ptr(BUFFER buffer_handle);
+
+size_t buffer_data_size(BUFFER buffer_handle);
 
 #endif

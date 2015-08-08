@@ -3,7 +3,7 @@ TODO List
 
 () Convert into a lib
 
-() Make Autoconf work.
+() Make Autoconf or CMakeLists work.
 
 () Create \lib directory for lib files.
 
@@ -17,7 +17,9 @@ TODO List
 
 # Getting Started
 
-The inspiration for this framework came from folks at Sinatra, hence the name Dino or Dean Martin. 
+In my professional career I use Java and C++ but my favorite two languages are C and Ruby.   I wanted to create a simple web server framework for my Raspberry PI that would be simple and memory efficient.  This is not intended as High Performance Framework like NGINX or a Reactor Pattern Like JavaRX.  It is simply an easy to use frame work to create simple web services for small systems.
+
+The inspiration for this framework came from folks at Sinatra, hence it is named of after that other famous member of the rat pack: Dino or Dean Martin. 
 
 Dino is a simple web framework for quickly creating web applications in C with minimal effort.  
 
@@ -137,7 +139,6 @@ In order to iterate through the list you can use PARAMS_ENUMERATE.
 Then total number of key:value pairs in this request.
 
 ## PARAMS_ENUMERATE
-
 
 #Routes
 

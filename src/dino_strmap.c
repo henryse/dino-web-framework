@@ -8,8 +8,8 @@
  *	  2.0.0 - changed function prefix from strmap to sm to ensure
  *	      ANSI C compatibility
  *	  2.0.1 - improved documentation
- *    2.0.2 - henryse - integreated into Dino project
- *    2.0.3 - henryse - add support for comma deliminated list.
+ *    2.0.2 - henryse - integrated into Dino project
+ *    2.0.3 - henryse - add support for comma delimited list.
  *
  *    strmap.c
  *
@@ -40,160 +40,142 @@
 #include "dino_strmap.h"
 #include "dino_utils.h"
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+
 typedef struct Pair Pair;
 
 typedef struct Bucket Bucket;
 
 struct Pair {
-	char *key;
-	char *value;
+    char *key;
+    char *value;
 };
 
 struct Bucket {
-	unsigned int count;
-	Pair *pairs;
+    unsigned int count;
+    Pair *pairs;
 };
 
 struct StrMap {
-	unsigned int count;
-	Bucket *buckets;
+    unsigned int count;
+    Bucket *buckets;
 };
 
-static Pair * get_pair(Bucket *bucket, const char *key);
+static Pair *get_pair(Bucket *bucket, const char *key);
+
 static unsigned long hash(const char *str);
 
-StrMap * dino_sm_new(unsigned int capacity)
-{
-	StrMap *map = memory_alloc(sizeof(StrMap));
+StrMap *dino_sm_new(unsigned int capacity) {
+    StrMap *map = memory_alloc(sizeof(StrMap));
 
-	if (NULL == map)
-    {
-		return NULL;
-	}
-	
+    if (NULL == map) {
+        return NULL;
+    }
+
     map->count = capacity;
-	map->buckets = memory_alloc(map->count * sizeof(Bucket));
-	
-    if (NULL == map->buckets)
-    {
-		memory_free(map);
-		return NULL;
-	}
-    
-	memset(map->buckets, 0, map->count * sizeof(Bucket));
-	return map;
+    map->buckets = memory_alloc(map->count * sizeof(Bucket));
+
+    if (NULL == map->buckets) {
+        memory_free(map);
+        return NULL;
+    }
+
+    memset(map->buckets, 0, map->count * sizeof(Bucket));
+    return map;
 }
 
-void dino_sm_delete(StrMap *map)
-{
-	if (NULL == map)
-    {
-		return;
-	}
-	unsigned int n = map->count;
-	Bucket *bucket = map->buckets;
-	unsigned int i = 0;
-	while (i < n)
-    {
-		unsigned int m = bucket->count;
-		Pair *pair = bucket->pairs;
-		unsigned int j = 0;
-		while(j < m)
-        {
-			memory_free(pair->key);
-			memory_free(pair->value);
-			pair++;
-			j++;
-		}
-		memory_free(bucket->pairs);
-		bucket++;
-		i++;
-	}
-	memory_free(map->buckets);
-	memory_free(map);
+void dino_sm_delete(StrMap *map) {
+    if (NULL == map) {
+        return;
+    }
+    unsigned int n = map->count;
+    Bucket *bucket = map->buckets;
+    unsigned int i = 0;
+    while (i < n) {
+        unsigned int m = bucket->count;
+        Pair *pair = bucket->pairs;
+        unsigned int j = 0;
+        while (j < m) {
+            memory_free(pair->key);
+            memory_free(pair->value);
+            pair++;
+            j++;
+        }
+        memory_free(bucket->pairs);
+        bucket++;
+        i++;
+    }
+    memory_free(map->buckets);
+    memory_free(map);
 }
 
-const char *dino_sm_get_value(const StrMap *map, const char *key)
-{
-	if (NULL == map || NULL == key)
-    {
-		return "";
-	}
+const char *dino_sm_get_value(const StrMap *map, const char *key) {
+    if (NULL == map || NULL == key) {
+        return "";
+    }
 
-	unsigned int index = hash(key) % map->count;
-	Bucket *bucket = &(map->buckets[index]);
-	Pair *pair = get_pair(bucket, key);
-	if (NULL == pair)
-    {
-		return "";
-	}
-    
+    unsigned int index = (unsigned int) (hash(key) % map->count);
+    Bucket *bucket = &(map->buckets[index]);
+    Pair *pair = get_pair(bucket, key);
+    if (NULL == pair) {
+        return "";
+    }
+
     return pair->value;
 }
 
-size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf)
-{
-	if (NULL == map || NULL == key)
-    {
-		return 0;
-	}
+size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf) {
+    if (NULL == map || NULL == key) {
+        return 0;
+    }
 
-	unsigned int index = hash(key) % map->count;
-	Bucket *bucket = &(map->buckets[index]);
-	Pair *pair = get_pair(bucket, key);
-	if (NULL == pair )
-    {
-		return 0;
-	}
-	if (NULL == out_buf && n_out_buf == 0)
-    {
-		return strlen(pair->value) + 1;
-	}
-	if (NULL == out_buf )
-    {
-		return 0;
-	}
-	if (strlen(pair->value) >= n_out_buf)
-    {
-		return 0;
-	}
-	strcpy(out_buf, pair->value);
-	
+    unsigned int index = (unsigned int) (hash(key) % map->count);
+    Bucket *bucket = &(map->buckets[index]);
+    Pair *pair = get_pair(bucket, key);
+    if (NULL == pair) {
+        return 0;
+    }
+    if (NULL == out_buf && n_out_buf == 0) {
+        return strlen(pair->value) + 1;
+    }
+    if (NULL == out_buf) {
+        return 0;
+    }
+    if (strlen(pair->value) >= n_out_buf) {
+        return 0;
+    }
+    strcpy(out_buf, pair->value);
+
     return 1;
 }
 
-bool dino_sm_exists(const StrMap *map, const char *key)
-{
-	if (NULL == map || NULL == key)
-    {
-		return false;
-	}
-    
-	unsigned int index = hash(key) % map->count;
-	Bucket *bucket = &(map->buckets[index]);
-	Pair *pair = get_pair(bucket, key);
-    
-	if (NULL == pair )
-    {
-		return false;
-	}
-    
-	return true;
+bool dino_sm_exists(const StrMap *map, const char *key) {
+    if (NULL == map || NULL == key) {
+        return false;
+    }
+
+    unsigned int index = (unsigned int) (hash(key) % map->count);
+    Bucket *bucket = &(map->buckets[index]);
+    Pair *pair = get_pair(bucket, key);
+
+    if (NULL == pair) {
+        return false;
+    }
+
+    return true;
 }
 
-bool dino_sm_add(StrMap *map, const char *key, const char *value)
-{
-	if (NULL == map || NULL == key || NULL == value )
-    {
-		return false;
-	}
+bool dino_sm_add(StrMap *map, const char *key, const char *value) {
+    if (NULL == map || NULL == key || NULL == value) {
+        return false;
+    }
 
     size_t length = strlen(value);
-    
+
     // If it an empty string, just ignore it.
     //
-    if (0 == length)
-    {
+    if (0 == length) {
         return true;
     }
 
@@ -201,244 +183,213 @@ bool dino_sm_add(StrMap *map, const char *key, const char *value)
     //
     char *local_value = alloca(length + 1);
     strcpy(local_value, value);
-    
+
     // Trim out the "white space"
     //
     local_value = trim_whitespace(local_value);
 
     // Is there anyting left?
     //
-    if (0 == strlen(local_value))
-    {
+    if (0 == strlen(local_value)) {
         return true;
     }
 
     // Check to see if it exists.
     //
-    if (dino_sm_exists( map, key ))
-    {
+    if (dino_sm_exists(map, key)) {
         // Get the current value
         //
         char *new_value = NULL;
-        
-        asprintf(&new_value, "%s, %s", dino_sm_get_value(map,key), local_value);
-        
+
+        asprintf(&new_value, "%s, %s", dino_sm_get_value(map, key), local_value);
+
         bool result = false;
-        if ( new_value )
-        {
+        if (new_value) {
             result = dino_sm_put(map, key, new_value);
             free(new_value);
         }
-        
+
         return result;
     }
-    
+
     return dino_sm_put(map, key, value);
 }
 
-bool dino_sm_put(StrMap *map, const char *key, const char *value)
-{
-	if (NULL == map || NULL == key || NULL == value )
-    {
-		return false;
-	}
-    
+bool dino_sm_put(StrMap *map, const char *key, const char *value) {
+    if (NULL == map || NULL == key || NULL == value) {
+        return false;
+    }
+
     size_t key_len = strlen(key);
-	size_t value_len = strlen(value);
-	// Get a pointer to the bucket the key string hashes to
+    size_t value_len = strlen(value);
+    // Get a pointer to the bucket the key string hashes to
     //
-	size_t index = hash(key) % map->count;
-	Bucket *bucket = &(map->buckets[index]);
-	
+    size_t index = hash(key) % map->count;
+    Bucket *bucket = &(map->buckets[index]);
+
     // Check if we can handle insertion by simply replacing
     // an existing value in a key-value pair in the bucket.
     //
-	Pair *pair = NULL;
-    if (NULL != (pair = get_pair(bucket, key)))
-    {
-		// The bucket contains a pair that matches the provided key,
+    Pair *pair = NULL;
+    if (NULL != (pair = get_pair(bucket, key))) {
+        // The bucket contains a pair that matches the provided key,
         //change the value for that pair to the new value.
         //
-        if (strlen(pair->value) < value_len)
-        {
-			// If the new value is larger than the old value, re-allocate
+        if (strlen(pair->value) < value_len) {
+            // If the new value is larger than the old value, re-allocate
             // space for the new larger value.
             //
-			char *tmp_value = memory_realloc(pair->value, (value_len + 1) * sizeof(char));
-			if (NULL == tmp_value )
-            {
-				return false;
-			}
-			pair->value = tmp_value;
-		}
-		/* Copy the new value into the pair that matches the key */
-		strcpy(pair->value, value);
-		return true;
-	}
-    
-	// Allocate space for a new key and value
+            char *tmp_value = memory_realloc(pair->value, (value_len + 1) * sizeof(char));
+            if (NULL == tmp_value) {
+                return false;
+            }
+            pair->value = tmp_value;
+        }
+        /* Copy the new value into the pair that matches the key */
+        strcpy(pair->value, value);
+        return true;
+    }
+
+    // Allocate space for a new key and value
     //
-	char *new_key = memory_alloc((key_len + 1) * sizeof(char));
-	if (NULL == new_key )
-    {
-		return false;
-	}
-    
-	char *new_value = memory_alloc((value_len + 1) * sizeof(char));
-	if (NULL == new_value )
-    {
-		memory_free(new_key);
-		return false;
-	}
-	
+    char *new_key = memory_alloc((key_len + 1) * sizeof(char));
+    if (NULL == new_key) {
+        return false;
+    }
+
+    char *new_value = memory_alloc((value_len + 1) * sizeof(char));
+    if (NULL == new_value) {
+        memory_free(new_key);
+        return false;
+    }
+
     // Create a key-value pair
     //
-	if (bucket->count == 0)
-    {
-		// The bucket is empty, lazily allocate space for a single
+    if (bucket->count == 0) {
+        // The bucket is empty, lazily allocate space for a single
         // key-value pair.
         //
-		bucket->pairs = memory_alloc(sizeof(Pair));
-		if (NULL == bucket->pairs )
-        {
-			memory_free(new_key);
-			memory_free(new_value);
-			return false;
-		}
-		bucket->count = 1;
-	}
-	else
-    {
-		// The bucket wasn't empty but no pair existed that matches the provided
+        bucket->pairs = memory_alloc(sizeof(Pair));
+        if (NULL == bucket->pairs) {
+            memory_free(new_key);
+            memory_free(new_value);
+            return false;
+        }
+        bucket->count = 1;
+    }
+    else {
+        // The bucket wasn't empty but no pair existed that matches the provided
         // key, so create a new key-value pair.
         //
-		Pair *tmp_pairs = memory_realloc(bucket->pairs, (bucket->count + 1) * sizeof(Pair));
-		if (NULL == tmp_pairs )
-        {
-			memory_free(new_key);
-			memory_free(new_value);
-			return false;
-		}
-		bucket->pairs = tmp_pairs;
-		bucket->count++;
-	}
-	// Get the last pair in the chain for the bucket
-	//
-    pair = &(bucket->pairs[bucket->count - 1]);
-	pair->key = new_key;
-	pair->value = new_value;
-    
-	// Copy the key and its value into the key-value pair
+        Pair *tmp_pairs = memory_realloc(bucket->pairs, (bucket->count + 1) * sizeof(Pair));
+        if (NULL == tmp_pairs) {
+            memory_free(new_key);
+            memory_free(new_value);
+            return false;
+        }
+        bucket->pairs = tmp_pairs;
+        bucket->count++;
+    }
+    // Get the last pair in the chain for the bucket
     //
-	strcpy(pair->key, key);
-	strcpy(pair->value, value);
-	return true;
+    pair = &(bucket->pairs[bucket->count - 1]);
+    pair->key = new_key;
+    pair->value = new_value;
+
+    // Copy the key and its value into the key-value pair
+    //
+    strcpy(pair->key, key);
+    strcpy(pair->value, value);
+    return true;
 }
 
-int dino_sm_get_count(const StrMap *map)
-{
-	if (NULL == map)
-    {
-		return 0;
-	}
-	
+int dino_sm_get_count(const StrMap *map) {
+    if (NULL == map) {
+        return 0;
+    }
+
     Bucket *bucket = map->buckets;
     unsigned int n = map->count;
-	unsigned int i = 0;
-	unsigned int count = 0;
-    
-	while (i < n)
-    {
-		Pair *pair = bucket->pairs;
-		unsigned int m = bucket->count;
-		unsigned int j = 0;
-		while (j < m)
-        {
-			count++;
-			pair++;
-			j++;
-		}
-		bucket++;
-		i++;
-	}
-	return count;
+    unsigned int i = 0;
+    unsigned int count = 0;
+
+    while (i < n) {
+        Pair *pair = bucket->pairs;
+        unsigned int m = bucket->count;
+        unsigned int j = 0;
+        while (j < m) {
+            count++;
+            pair++;
+            j++;
+        }
+        bucket++;
+        i++;
+    }
+    return count;
 }
 
-bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *obj)
-{
-	if (NULL == map)
-    {
-		return false;
-	}
-	
-    if (NULL == enum_func)
-    {
-		return true;
-	}
-	Bucket *bucket = map->buckets;
-	unsigned int n = map->count;
-	unsigned int i = 0;
-	while (i < n)
-    {
-		Pair *pair = bucket->pairs;
-		unsigned int m = bucket->count;
-		unsigned int j = 0;
-		while (j < m)
-        {
-			if (!enum_func(pair->key, pair->value, obj))
-            {
+bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *obj) {
+    if (NULL == map) {
+        return false;
+    }
+
+    if (NULL == enum_func) {
+        return true;
+    }
+    Bucket *bucket = map->buckets;
+    unsigned int n = map->count;
+    unsigned int i = 0;
+    while (i < n) {
+        Pair *pair = bucket->pairs;
+        unsigned int m = bucket->count;
+        unsigned int j = 0;
+        while (j < m) {
+            if (!enum_func(pair->key, pair->value, obj)) {
                 goto exit;
             }
-			pair++;
-			j++;
-		}
-		bucket++;
-		i++;
-	}
-exit:;
-	return true;
+            pair++;
+            j++;
+        }
+        bucket++;
+        i++;
+    }
+    exit:;
+    return true;
 }
 
 // Returns a pair from the bucket that matches the provided key,
 // or null if no such pair exist.
 //
-static Pair * get_pair(Bucket *bucket, const char *key)
-{
-	unsigned int n = bucket->count;
-	if (n == 0)
-    {
-		return NULL;
-	}
-	Pair *pair = bucket->pairs;
-	unsigned int i = 0;
-	while (i < n)
-    {
-		if (NULL != pair->key && NULL != pair->value )
-        {
-			if (strcmp(pair->key, key) == 0)
-            {
-				return pair;
-			}
-		}
-		pair++;
-		i++;
-	}
-    
-	return NULL;
+static Pair *get_pair(Bucket *bucket, const char *key) {
+    unsigned int n = bucket->count;
+    if (n == 0) {
+        return NULL;
+    }
+    Pair *pair = bucket->pairs;
+    unsigned int i = 0;
+    while (i < n) {
+        if (NULL != pair->key && NULL != pair->value) {
+            if (strcmp(pair->key, key) == 0) {
+                return pair;
+            }
+        }
+        pair++;
+        i++;
+    }
+
+    return NULL;
 }
 
 // Returns a hash code for the provided string.
 //
-static unsigned long hash(const char *str)
-{
-	unsigned long hash = 5381;
-	int c = 0;
-	while ((c = *str++))
-    {
-		hash = ((hash << 5) + hash) + c;
-	}
-    
-	return hash;
+static unsigned long hash(const char *str) {
+    unsigned long hash = 5381;
+    int c = 0;
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c;
+    }
+
+    return hash;
 }
 
 /*
@@ -610,3 +561,4 @@ static unsigned long hash(const char *str)
  Library.
  
  */
+#pragma clang diagnostic pop

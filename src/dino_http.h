@@ -24,13 +24,13 @@
 
 #ifndef dino_dino_http_h
 #define dino_dino_http_h
+
 #include "dino_utils.h"
 #include "dino_strmap.h"
 
 // List of methods
 //
-typedef enum http_method_enum
-{
+typedef enum http_method_enum {
     http_invalid,
     http_get,
     http_post,
@@ -40,75 +40,70 @@ typedef enum http_method_enum
     http_head,
     http_trace,
     http_connect
-}http_method;
+} http_method;
 
 // Route describing a "path"
 //
-typedef struct dino_route_struct
-{
+typedef struct dino_route_struct {
     struct dino_route_struct *next;
     http_method method;
     http_verb_func verb_func;
     char *name;
     char *path;
     stack_char_ptr *stack;
-}dino_route;
+} dino_route;
 
-typedef enum dino_handle_type_enum
-{
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+typedef enum dino_handle_type_enum {
     dino_handle_invalid,
     dino_handle_site,
     dino_handle_http,
-}dino_handle_type;
+} dino_handle_type;
+#pragma clang diagnostic pop
 
 // Site
 //
-typedef struct dino_site_struct
-{
+typedef struct dino_site_struct {
     dino_handle_type handle_type;
 
     unsigned short port;
     dino_route *list;
     char *host;
-}dino_site;
+} dino_site;
 
 // Request structure
 //
-typedef struct http_request_struct
-{    
+typedef struct http_request_struct {
     size_t content_size;
     char *data;
 
     http_method method;
     char *url;
-    
+
     StrMap *params_map;
-}http_request;
+} http_request;
 
 // Response structure
 //
-typedef struct http_response_struct
-{
+typedef struct http_response_struct {
     BUFFER buffer_handle;
-    
-    StrMap *params_map;
-}http_response;
 
-typedef struct http_data_struct
-{
+    StrMap *params_map;
+} http_response;
+
+typedef struct http_data_struct {
     dino_handle_type handle_type;
 
     int socket;
 
     http_request request;
     http_response response;
-}http_data;
+} http_data;
 
-typedef union dino_handle_type
-{
-    dino_site site;
+typedef union dino_handle_type {
     http_data http;
-}dino_handle;
+} dino_handle;
 
 // Start server
 //
