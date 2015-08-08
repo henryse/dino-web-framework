@@ -28,7 +28,7 @@
 #define dino_dino_h
 
 #include <stdbool.h>
-#include "http_error.h"
+#include "dino_http_error.h"
 
 #ifndef DINO_EXTERN
 #define DINO_EXTERN extern

@@ -14,7 +14,7 @@ set(SOURCE_FILES
     dino_strmap.h
     dino_utils.h
     dino_utils.c
-    http_error.h)
+    dino_http_error.h)
 
 add_library(DinoLibrary STATIC ${SOURCE_FILES})
 
