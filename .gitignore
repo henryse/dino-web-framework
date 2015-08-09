@@ -7,9 +7,21 @@
 # IDEA project
 /.idea/
 /out/
-*.iml
 
 # Eclipse files
 .classpath
 .project
 /.settings/
+
+lib/CMakeFiles
+lib/cmake_install.cmake
+lib/CMakeCache.txt
+lib/Makefile
+lib/install_manifest.txt
+lib/libDinoLibrary.a
+
+example/CMakeFiles
+example/cmake_install.cmake
+example/CMakeCache.txt
+example/Makefile
+example/install_manifest.txt
