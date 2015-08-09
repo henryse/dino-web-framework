@@ -1,13 +1,5 @@
-TODO List
-====
 
-() Fill out documentation.
-
-() Use curl or wget to create unit tests.
-
-() Need to find a way to parse results from curl or wget
-
-# Getting Started
+# Welcome!
 
 In my professional career I use Java and C++ but my favorite two languages are C and Ruby.   I wanted to create a web server framework for my Raspberry PI that would be simple and memory efficient.  This is not intended as High Performance Framework like NGINX or a Reactor Pattern like JavaRX.  It is simply an easy to use frame work to create simple web services for small systems in C.
 
@@ -271,3 +263,13 @@ Params list to pass dino parameters
 DINO_VARS
 
 DINO_DECLARE_VARS
+
+TODO List
+====
+
+() Fill out documentation.
+
+() Use curl or wget to create unit tests.
+
+() Need to find a way to parse results from curl or wget
+
