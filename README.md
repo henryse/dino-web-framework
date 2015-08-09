@@ -179,6 +179,18 @@ http://host:port/red/glass
 
 Will cause :wine == red and :bottle == glass in the parameter list. 
 
+Installing
+====
+
+To install is simple, pull this project.   Use "cmake" to generate the necessary make files, and then run make:
+
+~~~
+cmake .
+make
+make install
+~~~
+
+
 API
 ====
 
@@ -263,6 +275,7 @@ Params list to pass dino parameters
 DINO_VARS
 
 DINO_DECLARE_VARS
+
 
 TODO List
 ====
