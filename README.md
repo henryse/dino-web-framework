@@ -1,9 +1,9 @@
 
 # Welcome!
 
-In my professional career I use Java and C++ but my favorite two languages are C and Ruby.   I wanted to create a web server framework for my Raspberry PI that would be simple and memory efficient.  This is not intended as High Performance Framework like NGINX or a Reactor Pattern like JavaRX.  It is simply an easy to use frame work to create simple web services for small systems in C.
+In my professional career I use Java and C++ but my favorite two languages are C and Ruby.   I wanted to create a web server framework for my Raspberry PI that would be simple and memory efficient.  This is not intended as High Performance Framework like NGINX or a Reactor Pattern like JavaRX.  It is simply an easy to use framework to create simple web services for small systems in C.
 
-The inspiration for this framework came from folks at Sinatra, hence it is named of after that other famous member of the rat pack: Dino or Dean Martin. 
+The inspiration for this framework came from folks at [Sinatra](http://www.sinatrarb.com), hence it is named of after that other famous member of the rat pack: Dino or Dean Martin. 
 
 Dino is a simple web framework for quickly creating web applications in C with minimal effort.  
 
