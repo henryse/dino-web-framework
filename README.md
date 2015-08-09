@@ -1,14 +1,6 @@
 TODO List
 ====
 
-() Convert into a lib
-
-() Make Autoconf or CMakeLists work.
-
-() Create \lib directory for lib files.
-
-() Create \sample directory for sample programs
-
 () Fill out documentation.
 
 () Use curl or wget to create unit tests.
@@ -17,7 +9,7 @@ TODO List
 
 # Getting Started
 
-In my professional career I use Java and C++ but my favorite two languages are C and Ruby.   I wanted to create a simple web server framework for my Raspberry PI that would be simple and memory efficient.  This is not intended as High Performance Framework like NGINX or a Reactor Pattern Like JavaRX.  It is simply an easy to use frame work to create simple web services for small systems.
+In my professional career I use Java and C++ but my favorite two languages are C and Ruby.   I wanted to create a web server framework for my Raspberry PI that would be simple and memory efficient.  This is not intended as High Performance Framework like NGINX or a Reactor Pattern like JavaRX.  It is simply an easy to use frame work to create simple web services for small systems in C.
 
 The inspiration for this framework came from folks at Sinatra, hence it is named of after that other famous member of the rat pack: Dino or Dean Martin. 
 
