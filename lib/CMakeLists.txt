@@ -22,3 +22,5 @@ add_library(DinoLibrary STATIC ${SOURCE_FILES})
 
 install(TARGETS DinoLibrary DESTINATION lib)
 install(FILES dino.h dino_http_error.h DESTINATION include)
+
+target_include_directories (DinoLibrary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
