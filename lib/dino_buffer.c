@@ -33,7 +33,7 @@ typedef struct http_buffer_struct {
     size_t allocated;
     size_t used;
     unsigned char *data;
-} http_buffer;
+} http_buffer_t;
 
 size_t calculate_allocated_size(size_t size) {
     // Figure out how many we can get...
@@ -55,7 +55,7 @@ size_t calculate_allocated_size(size_t size) {
 
 void buffer_initialize(BUFFER buffer_handle, size_t size) {
     if (NULL != buffer_handle) {
-        http_buffer *buffer = (http_buffer *) buffer_handle;
+        http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
 
         if (buffer->data) {
             memory_free(buffer->data);
@@ -68,7 +68,7 @@ void buffer_initialize(BUFFER buffer_handle, size_t size) {
 }
 
 BUFFER buffer_alloc_initialize(size_t size) {
-    http_buffer *buffer = memory_alloc(sizeof(http_buffer));
+    http_buffer_t *buffer = memory_alloc(sizeof(http_buffer_t));
 
     buffer_initialize(buffer, size);
 
@@ -80,7 +80,7 @@ BUFFER buffer_realloc(BUFFER buffer_handle, size_t size) {
         return buffer_alloc_initialize(size);
     }
 
-    http_buffer *buffer = (http_buffer *) buffer_handle;
+    http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
 
     if (NULL == buffer->data) {
         buffer_initialize(buffer_handle, size);
@@ -99,7 +99,7 @@ BUFFER buffer_realloc(BUFFER buffer_handle, size_t size) {
 
 void buffer_free(BUFFER buffer_handle) {
     if (NULL != buffer_handle) {
-        http_buffer *buffer = (http_buffer *) buffer_handle;
+        http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
         if (NULL != buffer->data) {
             buffer->allocated = 0;
             buffer->used = 0;
@@ -111,17 +111,17 @@ void buffer_free(BUFFER buffer_handle) {
 }
 
 BUFFER buffer_append_data(BUFFER buffer_handle, const char *data, size_t size) {
-    http_buffer *buffer = (http_buffer *) buffer_handle;
+    http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
 
     char *ptr = NULL;
     size_t used = 0;
 
     if (NULL == buffer) {
-        buffer = (http_buffer *) buffer_alloc_initialize(size);
+        buffer = (http_buffer_t *) buffer_alloc_initialize(size);
     }
     else {
         used = buffer->used;
-        buffer = (http_buffer *) buffer_realloc(buffer_handle, buffer->used + size);
+        buffer = (http_buffer_t *) buffer_realloc(buffer_handle, buffer->used + size);
     }
 
     if (NULL != buffer) {
@@ -138,7 +138,7 @@ BUFFER buffer_append_char(BUFFER buffer_handle, const char c) {
 
 char *buffer_data_ptr(BUFFER buffer_handle) {
     if (buffer_handle != NULL) {
-        http_buffer *buffer = (http_buffer *) buffer_handle;
+        http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
 
         return (char *) buffer->data;
     }
@@ -148,7 +148,7 @@ char *buffer_data_ptr(BUFFER buffer_handle) {
 
 size_t buffer_data_size(BUFFER buffer_handle) {
     if (buffer_handle != NULL) {
-        http_buffer *buffer = (http_buffer *) buffer_handle;
+        http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
 
         return buffer->used;
     }

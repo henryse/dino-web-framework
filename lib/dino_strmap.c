@@ -1,4 +1,4 @@
-/*
+#include <sys/cdefs.h>/*
  *    strmap version 2.0.1
  *
  *    ANSI C hash table for strings.
@@ -40,61 +40,54 @@
 #include "dino_strmap.h"
 #include "dino_utils.h"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-
-typedef struct Pair Pair;
-
-typedef struct Bucket Bucket;
-
-struct Pair {
+typedef struct pair_struct {
     char *key;
     char *value;
-};
+} pair_t;
 
-struct Bucket {
+typedef struct bucket_struct {
     unsigned int count;
-    Pair *pairs;
-};
+    pair_t *pairs;
+} bucket_t;
 
-struct StrMap {
+struct str_map_struct {
     unsigned int count;
-    Bucket *buckets;
+    bucket_t *buckets;
 };
 
-static Pair *get_pair(Bucket *bucket, const char *key);
+static pair_t *get_pair(bucket_t *bucket, const char *key);
 
 static unsigned long hash(const char *str);
 
-StrMap *dino_sm_new(unsigned int capacity) {
-    StrMap *map = memory_alloc(sizeof(StrMap));
+str_map_t *dino_sm_new(unsigned int capacity) {
+    str_map_t *map = memory_alloc(sizeof(str_map_t));
 
     if (NULL == map) {
         return NULL;
     }
 
     map->count = capacity;
-    map->buckets = memory_alloc(map->count * sizeof(Bucket));
+    map->buckets = memory_alloc(map->count * sizeof(bucket_t));
 
     if (NULL == map->buckets) {
         memory_free(map);
         return NULL;
     }
 
-    memset(map->buckets, 0, map->count * sizeof(Bucket));
+    memset(map->buckets, 0, map->count * sizeof(bucket_t));
     return map;
 }
 
-void dino_sm_delete(StrMap *map) {
+void dino_sm_delete(str_map_t *map) {
     if (NULL == map) {
         return;
     }
     unsigned int n = map->count;
-    Bucket *bucket = map->buckets;
+    bucket_t *bucket = map->buckets;
     unsigned int i = 0;
     while (i < n) {
         unsigned int m = bucket->count;
-        Pair *pair = bucket->pairs;
+        pair_t *pair = bucket->pairs;
         unsigned int j = 0;
         while (j < m) {
             memory_free(pair->key);
@@ -110,14 +103,14 @@ void dino_sm_delete(StrMap *map) {
     memory_free(map);
 }
 
-const char *dino_sm_get_value(const StrMap *map, const char *key) {
+const char *dino_sm_get_value(const str_map_t *map, const char *key) {
     if (NULL == map || NULL == key) {
         return "";
     }
 
     unsigned int index = (unsigned int) (hash(key) % map->count);
-    Bucket *bucket = &(map->buckets[index]);
-    Pair *pair = get_pair(bucket, key);
+    bucket_t *bucket = &(map->buckets[index]);
+    pair_t *pair = get_pair(bucket, key);
     if (NULL == pair) {
         return "";
     }
@@ -125,14 +118,14 @@ const char *dino_sm_get_value(const StrMap *map, const char *key) {
     return pair->value;
 }
 
-size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned int n_out_buf) {
+size_t  __unused dino_sm_get(const str_map_t *map, const char *key, char *out_buf, unsigned int n_out_buf) {
     if (NULL == map || NULL == key) {
         return 0;
     }
 
     unsigned int index = (unsigned int) (hash(key) % map->count);
-    Bucket *bucket = &(map->buckets[index]);
-    Pair *pair = get_pair(bucket, key);
+    bucket_t *bucket = &(map->buckets[index]);
+    pair_t *pair = get_pair(bucket, key);
     if (NULL == pair) {
         return 0;
     }
@@ -150,14 +143,14 @@ size_t dino_sm_get(const StrMap *map, const char *key, char *out_buf, unsigned i
     return 1;
 }
 
-bool dino_sm_exists(const StrMap *map, const char *key) {
+bool dino_sm_exists(const str_map_t *map, const char *key) {
     if (NULL == map || NULL == key) {
         return false;
     }
 
     unsigned int index = (unsigned int) (hash(key) % map->count);
-    Bucket *bucket = &(map->buckets[index]);
-    Pair *pair = get_pair(bucket, key);
+    bucket_t *bucket = &(map->buckets[index]);
+    pair_t *pair = get_pair(bucket, key);
 
     if (NULL == pair) {
         return false;
@@ -166,7 +159,7 @@ bool dino_sm_exists(const StrMap *map, const char *key) {
     return true;
 }
 
-bool dino_sm_add(StrMap *map, const char *key, const char *value) {
+bool dino_sm_add(str_map_t *map, const char *key, const char *value) {
     if (NULL == map || NULL == key || NULL == value) {
         return false;
     }
@@ -215,7 +208,7 @@ bool dino_sm_add(StrMap *map, const char *key, const char *value) {
     return dino_sm_put(map, key, value);
 }
 
-bool dino_sm_put(StrMap *map, const char *key, const char *value) {
+bool dino_sm_put(str_map_t *map, const char *key, const char *value) {
     if (NULL == map || NULL == key || NULL == value) {
         return false;
     }
@@ -225,12 +218,12 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value) {
     // Get a pointer to the bucket the key string hashes to
     //
     size_t index = hash(key) % map->count;
-    Bucket *bucket = &(map->buckets[index]);
+    bucket_t *bucket = &(map->buckets[index]);
 
     // Check if we can handle insertion by simply replacing
     // an existing value in a key-value pair in the bucket.
     //
-    Pair *pair = NULL;
+    pair_t *pair = NULL;
     if (NULL != (pair = get_pair(bucket, key))) {
         // The bucket contains a pair that matches the provided key,
         //change the value for that pair to the new value.
@@ -269,7 +262,7 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value) {
         // The bucket is empty, lazily allocate space for a single
         // key-value pair.
         //
-        bucket->pairs = memory_alloc(sizeof(Pair));
+        bucket->pairs = memory_alloc(sizeof(pair_t));
         if (NULL == bucket->pairs) {
             memory_free(new_key);
             memory_free(new_value);
@@ -281,7 +274,7 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value) {
         // The bucket wasn't empty but no pair existed that matches the provided
         // key, so create a new key-value pair.
         //
-        Pair *tmp_pairs = memory_realloc(bucket->pairs, (bucket->count + 1) * sizeof(Pair));
+        pair_t *tmp_pairs = memory_realloc(bucket->pairs, (bucket->count + 1) * sizeof(pair_t));
         if (NULL == tmp_pairs) {
             memory_free(new_key);
             memory_free(new_value);
@@ -303,18 +296,18 @@ bool dino_sm_put(StrMap *map, const char *key, const char *value) {
     return true;
 }
 
-int dino_sm_get_count(const StrMap *map) {
+int dino_sm_get_count(const str_map_t *map) {
     if (NULL == map) {
         return 0;
     }
 
-    Bucket *bucket = map->buckets;
+    bucket_t *bucket = map->buckets;
     unsigned int n = map->count;
     unsigned int i = 0;
     unsigned int count = 0;
 
     while (i < n) {
-        Pair *pair = bucket->pairs;
+        pair_t *pair = bucket->pairs;
         unsigned int m = bucket->count;
         unsigned int j = 0;
         while (j < m) {
@@ -328,7 +321,7 @@ int dino_sm_get_count(const StrMap *map) {
     return count;
 }
 
-bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *obj) {
+bool dino_sm_enum(const str_map_t *map, dino_sm_enum_func enum_func, const void *obj) {
     if (NULL == map) {
         return false;
     }
@@ -336,11 +329,11 @@ bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *ob
     if (NULL == enum_func) {
         return true;
     }
-    Bucket *bucket = map->buckets;
+    bucket_t *bucket = map->buckets;
     unsigned int n = map->count;
     unsigned int i = 0;
     while (i < n) {
-        Pair *pair = bucket->pairs;
+        pair_t *pair = bucket->pairs;
         unsigned int m = bucket->count;
         unsigned int j = 0;
         while (j < m) {
@@ -360,12 +353,12 @@ bool dino_sm_enum(const StrMap *map, dino_sm_enum_func enum_func, const void *ob
 // Returns a pair from the bucket that matches the provided key,
 // or null if no such pair exist.
 //
-static Pair *get_pair(Bucket *bucket, const char *key) {
+static pair_t *get_pair(bucket_t *bucket, const char *key) {
     unsigned int n = bucket->count;
     if (n == 0) {
         return NULL;
     }
-    Pair *pair = bucket->pairs;
+    pair_t *pair = bucket->pairs;
     unsigned int i = 0;
     while (i < n) {
         if (NULL != pair->key && NULL != pair->value) {
@@ -561,4 +554,3 @@ static unsigned long hash(const char *str) {
  Library.
  
  */
-#pragma clang diagnostic pop

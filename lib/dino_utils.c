@@ -28,18 +28,18 @@
 #include <ctype.h>
 #include "dino_utils.h"
 
-typedef struct memory_cache_type {
+typedef struct memory_cache_struct {
     size_t size;
     size_t freed;
     unsigned char *buffer;
-} memory_cache;
+} memory_cache_t;
 
-typedef memory_cache *memory_cache_handle;
+typedef memory_cache_t *memory_cache_handle;
 
 memory_cache_handle g_mem_cache = NULL;
 
-stack_char_ptr *stack_ptr_alloc(const char *data) {
-    stack_char_ptr *stack = (stack_char_ptr *) memory_alloc(sizeof(stack_char_ptr));
+stack_char_ptr_t *stack_ptr_alloc(const char *data) {
+    stack_char_ptr_t *stack = (stack_char_ptr_t *) memory_alloc(sizeof(stack_char_ptr_t));
 
     stack->data = memory_alloc(strlen(data) + 1);
     memcpy(stack->data, data, strlen(data));
@@ -47,10 +47,10 @@ stack_char_ptr *stack_ptr_alloc(const char *data) {
     return stack;
 }
 
-void stack_ptr_free(stack_char_ptr *stack) {
+void stack_ptr_free(stack_char_ptr_t *stack) {
     if (NULL != stack) {
-        if (NULL != stack->ptrs) {
-            memory_free(stack->ptrs);
+        if (NULL != stack->pointers) {
+            memory_free(stack->pointers);
         }
 
         if (NULL != stack->data) {
@@ -61,17 +61,17 @@ void stack_ptr_free(stack_char_ptr *stack) {
     }
 }
 
-stack_char_ptr *stack_ptr_push(stack_char_ptr *stack, char *ptr) {
+stack_char_ptr_t *stack_ptr_push(stack_char_ptr_t *stack, char *ptr) {
     if (NULL != stack) {
         stack->count++;
-        stack->ptrs = (char **) memory_realloc(stack->ptrs, stack->count * sizeof(char *));
-        stack->ptrs[stack->count - 1] = ptr;
+        stack->pointers = (char **) memory_realloc(stack->pointers, stack->count * sizeof(char *));
+        stack->pointers[stack->count - 1] = ptr;
     }
 
     return stack;
 }
 
-stack_char_ptr *stack_ptr_parse(stack_char_ptr *stack, const char *data, const char *delim) {
+stack_char_ptr_t *stack_ptr_parse(stack_char_ptr_t *stack, const char *data, const char *delim) {
     if (NULL == stack) {
         stack = stack_ptr_alloc(data);
     }
@@ -147,8 +147,8 @@ void memory_free(void *p) {
 
 void memory_cache_alloc(size_t n) {
     if (NULL == g_mem_cache) {
-        g_mem_cache = malloc(sizeof(memory_cache));
-        memory_clear(g_mem_cache, sizeof(memory_cache));
+        g_mem_cache = malloc(sizeof(memory_cache_t));
+        memory_clear(g_mem_cache, sizeof(memory_cache_t));
 
         g_mem_cache->buffer = malloc(n);
         g_mem_cache->size = n;

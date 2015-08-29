@@ -50,8 +50,8 @@ typedef struct dino_route_struct {
     http_verb_func verb_func;
     char *name;
     char *path;
-    stack_char_ptr *stack;
-} dino_route;
+    stack_char_ptr_t *stack;
+} dino_route_t;
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
@@ -59,18 +59,18 @@ typedef enum dino_handle_type_enum {
     dino_handle_invalid,
     dino_handle_site,
     dino_handle_http,
-} dino_handle_type;
+} dino_handle_type_t;
 #pragma clang diagnostic pop
 
 // Site
 //
 typedef struct dino_site_struct {
-    dino_handle_type handle_type;
+    dino_handle_type_t handle_type;
 
     unsigned short port;
-    dino_route *list;
+    dino_route_t *list;
     char *host;
-} dino_site;
+} dino_site_t;
 
 // Request structure
 //
@@ -81,33 +81,33 @@ typedef struct http_request_struct {
     http_method method;
     char *url;
 
-    StrMap *params_map;
-} http_request;
+    str_map_t *params_map;
+} http_request_t;
 
 // Response structure
 //
 typedef struct http_response_struct {
     BUFFER buffer_handle;
 
-    StrMap *params_map;
-} http_response;
+    str_map_t *params_map;
+} http_response_t;
 
 typedef struct http_data_struct {
-    dino_handle_type handle_type;
+    dino_handle_type_t handle_type;
 
     int socket;
 
-    http_request request;
-    http_response response;
-} http_data;
+    http_request_t request;
+    http_response_t response;
+} http_data_t;
 
-typedef union dino_handle_type {
-    http_data http;
-} dino_handle;
+typedef union {
+    http_data_t http;
+} dino_handle_t;
 
 // Start server
 //
-void dino_start_http(dino_site *psite);
+void dino_start_http(dino_site_t *psite);
 
 // Stop Server
 void dino_stop_http();

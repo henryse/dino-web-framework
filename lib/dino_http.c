@@ -37,7 +37,7 @@
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #define DINO_VERSION "Server: dinohttp/0.1\r\n"
 
-dino_route *list_method_find(dino_route *list, http_method method, stack_char_ptr *url_stack) {
+dino_route_t *list_method_find(dino_route_t *list, http_method method, stack_char_ptr_t *url_stack) {
     bool match = false;
 
     while (NULL != list) {
@@ -56,19 +56,19 @@ dino_route *list_method_find(dino_route *list, http_method method, stack_char_pt
                 for (; index < list->stack->count && index < url_stack->count; index++) {
                     // If it is a wild card then assume it is good!
                     //
-                    if (list->stack->ptrs[index][0] == '*') {
+                    if (list->stack->pointers[index][0] == '*') {
                         continue;
                     }
 
                     // Do we have a :param element?
                     //
-                    if (list->stack->ptrs[index][0] == ':') {
+                    if (list->stack->pointers[index][0] == ':') {
                         continue;
                     }
 
                     // Ok see if they are the same string
                     //
-                    if (0 != strcmp(list->stack->ptrs[index], url_stack->ptrs[index])) {
+                    if (0 != strcmp(list->stack->pointers[index], url_stack->pointers[index])) {
                         match = false;
                         break;
                     }
@@ -206,7 +206,7 @@ void log_error(const char *sc, const char *function, int line) {
 // Start up connection
 //
 
-int startup_connection(dino_site *psite) {
+int startup_connection(dino_site_t *psite) {
     int sockfd = 0;
     struct sockaddr_in name;
 
@@ -353,7 +353,7 @@ http_method map_string_to_http_method(const char *method) {
 }
 
 
-http_method parse_method_url(http_data *http) {
+http_method parse_method_url(http_data_t *http) {
     // Should not happen:
     //
     if (NULL == http) {
@@ -464,7 +464,7 @@ char *clean_string(char *value) {
     return value;
 }
 
-size_t parse_headers(http_data *http) {
+size_t parse_headers(http_data_t *http) {
     size_t content_size = 0;
 
     // Read the headers...
@@ -518,7 +518,7 @@ size_t parse_headers(http_data *http) {
 // Read in the request
 //
 
-bool read_request(http_data *http) {
+bool read_request(http_data_t *http) {
     // Validate the Method:
     //
     if (http_invalid == parse_method_url(http)) {
@@ -541,20 +541,20 @@ bool read_request(http_data *http) {
     return true;
 }
 
-bool bind_url_params(http_request *request, dino_route *route, stack_char_ptr *url_stack) {
+bool bind_url_params(http_request_t *request, dino_route_t *route, stack_char_ptr_t *url_stack) {
     // Now comapre the elements.
     //
     for (int index = 0; index < route->stack->count && index < url_stack->count; index++) {
         // If it is a wild card then Just skip it.
         //
-        if (route->stack->ptrs[index][0] == '*') {
+        if (route->stack->pointers[index][0] == '*') {
             continue;
         }
 
         // Do we have a :param element?
         //
-        if (route->stack->ptrs[index][0] == ':') {
-            dino_sm_add(request->params_map, route->stack->ptrs[index], url_stack->ptrs[index]);
+        if (route->stack->pointers[index][0] == ':') {
+            dino_sm_add(request->params_map, route->stack->pointers[index], url_stack->pointers[index]);
             continue;
         }
     }
@@ -563,7 +563,7 @@ bool bind_url_params(http_request *request, dino_route *route, stack_char_ptr *u
 }
 
 bool param_output(const char *key, const char *value, const void *obj) {
-    http_data *http = (http_data *) obj;
+    http_data_t *http = (http_data_t *) obj;
 
     char *buffer = NULL;
 
@@ -574,7 +574,7 @@ bool param_output(const char *key, const char *value, const void *obj) {
     return true;
 }
 
-void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack) {
+void invoke_method(dino_route_t *route, http_data_t *http, stack_char_ptr_t *url_stack) {
     if (NULL == http || NULL == route || NULL == url_stack) {
         log_error("invoke_method: Invlaid inputs... NULL", __FUNCTION__, __LINE__);
         return;
@@ -606,15 +606,15 @@ void invoke_method(dino_route *route, http_data *http, stack_char_ptr *url_stack
          0);
 }
 
-void init_request(dino_handle *dhandle) {
-    memory_clear(dhandle, sizeof(dino_handle));
+void init_request(dino_handle_t *dhandle) {
+    memory_clear(dhandle, sizeof(dino_handle_t));
     dhandle->http.handle_type = dino_handle_http;
 
     dhandle->http.request.params_map = dino_sm_new(32);
     dhandle->http.response.params_map = dino_sm_new(32);
 }
 
-void free_request(dino_handle *dhandle) {
+void free_request(dino_handle_t *dhandle) {
     if (NULL != dhandle) {
         if (dhandle->http.request.url) {
             memory_free(dhandle->http.request.url);
@@ -632,7 +632,7 @@ void free_request(dino_handle *dhandle) {
     }
 }
 
-void accept_request(dino_site *psite, dino_handle *dhandle) {
+void accept_request(dino_site_t *psite, dino_handle_t *dhandle) {
     // Setup DHANDLE:
     //
     if (!read_request(&dhandle->http)) {
@@ -641,11 +641,11 @@ void accept_request(dino_site *psite, dino_handle *dhandle) {
     else {
         // Parse the URL Parameters.
         //
-        stack_char_ptr *url_stack = stack_ptr_parse(NULL, dhandle->http.request.url, "/");
+        stack_char_ptr_t *url_stack = stack_ptr_parse(NULL, dhandle->http.request.url, "/");
 
         // Search for a match...
         //
-        dino_route *route = list_method_find(psite->list, dhandle->http.request.method, url_stack);
+        dino_route_t *route = list_method_find(psite->list, dhandle->http.request.method, url_stack);
 
         // Do we have a route?
         //
@@ -662,8 +662,8 @@ void accept_request(dino_site *psite, dino_handle *dhandle) {
 
 int g_server_socket = 0;
 
-void dino_process_request(dino_site *psite, int socket) {
-    dino_handle dhandle;
+void dino_process_request(dino_site_t *psite, int socket) {
+    dino_handle_t dhandle;
     init_request(&dhandle);
 
     if (-1 == socket) {
@@ -689,7 +689,7 @@ void dino_process_request(dino_site *psite, int socket) {
     close(socket);
 }
 
-void dino_start_http(dino_site *psite) {
+void dino_start_http(dino_site_t *psite) {
     if (NULL == psite) {
         fprintf(stderr, "[ERROR] The site is not defined..\n\r");
         return;

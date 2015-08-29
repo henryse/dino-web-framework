@@ -34,9 +34,9 @@
 // DHANDLE Casting helpers functions.
 //
 
-dino_site *cast_dhandle_site(DHANDLE dhandle) {
+dino_site_t *cast_dhandle_site(DHANDLE dhandle) {
     if (NULL != dhandle) {
-        dino_site *ptr = (dino_site *) dhandle;
+        dino_site_t *ptr = (dino_site_t *) dhandle;
 
         if (dino_handle_site == ptr->handle_type) {
             return ptr;
@@ -45,9 +45,9 @@ dino_site *cast_dhandle_site(DHANDLE dhandle) {
     return NULL;
 }
 
-http_request *cast_dhandle_request(DHANDLE dhandle) {
+http_request_t *cast_dhandle_request(DHANDLE dhandle) {
     if (NULL != dhandle) {
-        http_data *ptr = (http_data *) dhandle;
+        http_data_t *ptr = (http_data_t *) dhandle;
 
         if (dino_handle_http == ptr->handle_type) {
             return &ptr->request;
@@ -56,9 +56,9 @@ http_request *cast_dhandle_request(DHANDLE dhandle) {
     return NULL;
 }
 
-http_response *cast_dhandle_response(DHANDLE dhandle) {
+http_response_t *cast_dhandle_response(DHANDLE dhandle) {
     if (NULL != dhandle) {
-        http_data *ptr = (http_data *) dhandle;
+        http_data_t *ptr = (http_data_t *) dhandle;
 
         if (dino_handle_http == ptr->handle_type) {
             return &ptr->response;
@@ -94,7 +94,7 @@ const char *http_method_prefix_string(http_method method) {
     return "unknown_";
 }
 
-dino_route *list_add_new_item(dino_route **head) {
+dino_route_t *list_add_new_item(dino_route_t **head) {
     // List is invalid.
     //
     if (NULL == head) {
@@ -104,22 +104,22 @@ dino_route *list_add_new_item(dino_route **head) {
     // List is empty.
     //
     if (NULL == *head) {
-        *head = (dino_route *) memory_alloc(sizeof(dino_route));
+        *head = (dino_route_t *) memory_alloc(sizeof(dino_route_t));
         return *head;
     }
 
     // Add to the end of the list.
     //
-    dino_route *ptr = *head;
+    dino_route_t *ptr = *head;
 
     while (ptr->next != NULL) { ptr = ptr->next; }
 
-    ptr->next = (dino_route *) memory_alloc(sizeof(dino_route));
+    ptr->next = (dino_route_t *) memory_alloc(sizeof(dino_route_t));
 
     return ptr->next;
 }
 
-dino_route *list_find(dino_route *list, const char *name) {
+dino_route_t *list_find(dino_route_t *list, const char *name) {
     while (NULL != list && strncmp(name, list->name, strlen(list->name))) {
         list = list->next;
     }
@@ -133,13 +133,13 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
         return false;
     }
 
-    dino_site *psite = cast_dhandle_site(dhandle);
+    dino_site_t *psite = cast_dhandle_site(dhandle);
 
     if (NULL != list_find(psite->list, name)) {
         return false;
     }
 
-    dino_route *ppath = list_add_new_item(&psite->list);
+    dino_route_t *ppath = list_add_new_item(&psite->list);
 
     // Build name for method
     //
@@ -167,7 +167,7 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
 }
 
 DHANDLE DINO_EXPORT dino_config_start(unsigned short port, char *host) {
-    dino_site *psite = (dino_site *) memory_alloc(sizeof(dino_site));
+    dino_site_t *psite = (dino_site_t *) memory_alloc(sizeof(dino_site_t));
     if (NULL != psite) {
         psite->host = memory_alloc(strlen(host) + 1);
         strncpy(psite->host, host, strlen(host));
@@ -287,7 +287,7 @@ bool DINO_EXPORT dino_start(DHANDLE dhandle, const char *function, int line) {
 }
 
 void DINO_EXPORT response_send(DHANDLE dhandle, const char *data, size_t size) {
-    http_response *response = cast_dhandle_response(dhandle);
+    http_response_t *response = cast_dhandle_response(dhandle);
 
     if (NULL != response) {
         response->buffer_handle = buffer_append_data(response->buffer_handle, data, size);
@@ -328,7 +328,7 @@ int DINO_EXPORT response_printf(DHANDLE dhandle, const char *fmt, ...) {
 }
 
 void DINO_EXPORT response_header_set(DHANDLE dhandle, const char *key, const char *value) {
-    http_response *response = cast_dhandle_response(dhandle);
+    http_response_t *response = cast_dhandle_response(dhandle);
 
     if (NULL != response) {
         if (key && *key) {
@@ -344,7 +344,7 @@ void DINO_EXPORT response_header_set(DHANDLE dhandle, const char *key, const cha
 }
 
 const char *DINO_EXPORT params_get(DHANDLE dhandle, const char *key) {
-    http_request *request = cast_dhandle_request(dhandle);
+    http_request_t *request = cast_dhandle_request(dhandle);
 
     if (NULL != request) {
         return dino_sm_get_value(request->params_map, key);
@@ -354,7 +354,7 @@ const char *DINO_EXPORT params_get(DHANDLE dhandle, const char *key) {
 }
 
 size_t DINO_EXPORT params_count(DHANDLE dhandle) {
-    http_request *request = cast_dhandle_request(dhandle);
+    http_request_t *request = cast_dhandle_request(dhandle);
     if (NULL != request) {
         return (size_t) dino_sm_get_count(request->params_map);
     }
@@ -366,22 +366,22 @@ typedef struct dino_callback_param_struct {
     DHANDLE dhandle;
     dino_enum_func callback;
     const void *obj;
-} dino_callback_param_type;
+} dino_callback_param_t;
 
 bool param_enum(const char *key, const char *value, const void *obj) {
     if (NULL == obj) {
         return false;
     }
-    dino_callback_param_type *param_callback = (dino_callback_param_type *) obj;
+    dino_callback_param_t *param_callback = (dino_callback_param_t *) obj;
     return param_callback->callback(param_callback->dhandle, key, value, param_callback->obj);
 }
 
 void DINO_EXPORT params_enumerate(DHANDLE dhandle, dino_enum_func callback, const void *obj) {
-    http_request *request = cast_dhandle_request(dhandle);
+    http_request_t *request = cast_dhandle_request(dhandle);
 
     if (NULL != request) {
-        dino_callback_param_type callback_data;
-        memory_clear(&callback_data, sizeof(dino_callback_param_type));
+        dino_callback_param_t callback_data;
+        memory_clear(&callback_data, sizeof(dino_callback_param_t));
         callback_data.callback = callback;
         callback_data.dhandle = dhandle;
         callback_data.obj = obj;

@@ -43,7 +43,7 @@ typedef void *DHANDLE;
 
 typedef int (*http_verb_func)(DHANDLE);
 
-// Funcions used by macros below. It is safer to use the MACROS because we reserve the right
+// Functions used by macros below. It is safer to use the MACROS because we reserve the right
 // to change the function signatures whenever we want.
 //
 
