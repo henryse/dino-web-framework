@@ -13,15 +13,24 @@
 .project
 /.settings/
 
-lib/CMakeFiles
-lib/cmake_install.cmake
-lib/CMakeCache.txt
-lib/Makefile
-lib/install_manifest.txt
-lib/libDinoLibrary.a
+# Build Output
+/output/
 
-example/CMakeFiles
-example/cmake_install.cmake
-example/CMakeCache.txt
-example/Makefile
-example/install_manifest.txt
+# XCode project files
+/build.release/
+
+# CMake Output Files
+/lib/CMakeFiles/
+/lib/CMakeCache.txt
+/lib/install_manifest.txt
+/lib/libDinoLibrary.a
+/test/CMakeFiles/
+/example/CMakeFiles/
+/example/CMakeCache.txt
+/example/install_manifest.txt
+
+/CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+install_manifest.txt
