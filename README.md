@@ -1,4 +1,8 @@
 
+# Beta Branch
+
+Adding support for htts and events.
+
 # Welcome!
 
 In my professional career I use Java and C++ but my favorite two languages are C and Ruby.   I wanted to create a web server framework for my Raspberry PI that would be simple and memory efficient.  This is not intended as High Performance Framework like NGINX or a Reactor Pattern like JavaRX.  It is simply an easy to use framework to create simple web services for small systems in C.
