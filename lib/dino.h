@@ -1,3 +1,4 @@
+/**********************************************************************
 //    Copyright (c) 2014 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
@@ -21,6 +22,7 @@
 //    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //    OTHER DEALINGS IN THE SOFTWARE.
 //
+**********************************************************************/
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMacroInspection"

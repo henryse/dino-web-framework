@@ -1,3 +1,4 @@
+/**********************************************************************
 //    Copyright (c) 2014 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
@@ -21,6 +22,7 @@
 //    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //    OTHER DEALINGS IN THE SOFTWARE.
 //
+**********************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -139,29 +141,29 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
         return false;
     }
 
-    dino_route_t *ppath = list_add_new_item(&psite->list);
+    dino_route_t *ptr_path = list_add_new_item(&psite->list);
 
     // Build name for method
     //
     const char *method_name = http_method_prefix_string(method);
 
-    ppath->name = memory_alloc(strlen(method_name) + strlen(name) + 1);
-    strncpy(ppath->name, method_name, strlen(method_name));
-    strncat(ppath->name, name, strlen(name));
+    ptr_path->name = memory_alloc(strlen(method_name) + strlen(name) + 1);
+    strncpy(ptr_path->name, method_name, strlen(method_name));
+    strncat(ptr_path->name, name, strlen(name));
 
     // Store the path
     //
-    ppath->path = memory_alloc(strlen(path) + 1);
-    strncpy(ppath->path, path, strlen(path));
+    ptr_path->path = memory_alloc(strlen(path) + 1);
+    strncpy(ptr_path->path, path, strlen(path));
 
     // Parse the path, we need to see if there are any :[name] directives
     //
-    ppath->stack = stack_ptr_parse(ppath->stack, ppath->path, "/");
+    ptr_path->stack = stack_ptr_parse(ptr_path->stack, ptr_path->path, "/");
 
     // Save callback function pointer
     //
-    ppath->verb_func = verb_func;
-    ppath->method = method;
+    ptr_path->verb_func = verb_func;
+    ptr_path->method = method;
 
     return true;
 }

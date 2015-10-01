@@ -112,7 +112,7 @@ void dino_sm_delete(str_map_t *map);
  * is 1 if an associated value was found and completely copied into the output buffer,
  * 0 otherwise.
  */
-size_t  __unused dino_sm_get(const str_map_t *map, const char *key, char *out_buf, unsigned int n_out_buf);
+size_t dino_sm_get(const str_map_t *map, const char *key, char *out_buf, unsigned int n_out_buf);
 
 const char *dino_sm_get_value(const str_map_t *map, const char *key);
 

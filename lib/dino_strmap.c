@@ -1,4 +1,4 @@
-#include <sys/cdefs.h>/*
+/*
  *    strmap version 2.0.1
  *
  *    ANSI C hash table for strings.
@@ -118,7 +118,7 @@ const char *dino_sm_get_value(const str_map_t *map, const char *key) {
     return pair->value;
 }
 
-size_t  __unused dino_sm_get(const str_map_t *map, const char *key, char *out_buf, unsigned int n_out_buf) {
+size_t dino_sm_get(const str_map_t *map, const char *key, char *out_buf, unsigned int n_out_buf) {
     if (NULL == map || NULL == key) {
         return 0;
     }
