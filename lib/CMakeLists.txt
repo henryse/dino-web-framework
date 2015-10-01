@@ -29,7 +29,11 @@ project(DinoLibrary)
 
 set(DINO_LIB_VERSION "1.0.0")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c99")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_C_FLAGS "-std=gnu99")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_C_FLAGS "-std=gnu99 -pthread -luuid")
+endif()
 
 set(SOURCE_FILES
     dino.c

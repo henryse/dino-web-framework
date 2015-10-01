@@ -23,6 +23,7 @@
 //    OTHER DEALINGS IN THE SOFTWARE.
 //
 **********************************************************************/
+#define _GNU_SOURCE
 
 #include <stdio.h>
 #include <netinet/in.h>
