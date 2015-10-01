@@ -23,6 +23,9 @@
 //    OTHER DEALINGS IN THE SOFTWARE.
 //
 **********************************************************************/
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedMacroInspection"
 #define _GNU_SOURCE
 
 #include <signal.h>
@@ -396,3 +399,4 @@ void DINO_EXPORT params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
 }
 
 
+#pragma clang diagnostic pop
