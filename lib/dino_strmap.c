@@ -59,7 +59,7 @@ static pair_t *get_pair(bucket_t *bucket, const char *key);
 
 static unsigned long hash(const char *str);
 
-str_map_t *dino_sm_new(unsigned int capacity) {
+str_map_t *dino_strmap_new(unsigned int capacity) {
     str_map_t *map = memory_alloc(sizeof(str_map_t));
 
     if (NULL == map) {
@@ -78,7 +78,7 @@ str_map_t *dino_sm_new(unsigned int capacity) {
     return map;
 }
 
-void dino_sm_delete(str_map_t *map) {
+void dino_strmap_delete(str_map_t *map) {
     if (NULL == map) {
         return;
     }
@@ -103,7 +103,7 @@ void dino_sm_delete(str_map_t *map) {
     memory_free(map);
 }
 
-const char *dino_sm_get_value(const str_map_t *map, const char *key) {
+const char *dino_strmap_get_value(const str_map_t *map, const char *key) {
     if (NULL == map || NULL == key) {
         return "";
     }
@@ -118,7 +118,7 @@ const char *dino_sm_get_value(const str_map_t *map, const char *key) {
     return pair->value;
 }
 
-size_t  __unused dino_sm_get(const str_map_t *map, const char *key, char *out_buf, unsigned int n_out_buf) {
+size_t  __unused dino_strmap_get(const str_map_t *map, const char *key, char *out_buf, unsigned int n_out_buf) {
     if (NULL == map || NULL == key) {
         return 0;
     }
@@ -143,7 +143,7 @@ size_t  __unused dino_sm_get(const str_map_t *map, const char *key, char *out_bu
     return 1;
 }
 
-bool dino_sm_exists(const str_map_t *map, const char *key) {
+bool dino_strmap_exists(const str_map_t *map, const char *key) {
     if (NULL == map || NULL == key) {
         return false;
     }
@@ -159,7 +159,7 @@ bool dino_sm_exists(const str_map_t *map, const char *key) {
     return true;
 }
 
-bool dino_sm_add(str_map_t *map, const char *key, const char *value) {
+bool dino_strmap_add(str_map_t *map, const char *key, const char *value) {
     if (NULL == map || NULL == key || NULL == value) {
         return false;
     }
@@ -189,26 +189,26 @@ bool dino_sm_add(str_map_t *map, const char *key, const char *value) {
 
     // Check to see if it exists.
     //
-    if (dino_sm_exists(map, key)) {
+    if (dino_strmap_exists(map, key)) {
         // Get the current value
         //
         char *new_value = NULL;
 
-        asprintf(&new_value, "%s, %s", dino_sm_get_value(map, key), local_value);
+        asprintf(&new_value, "%s, %s", dino_strmap_get_value(map, key), local_value);
 
         bool result = false;
         if (new_value) {
-            result = dino_sm_put(map, key, new_value);
+            result = dino_strmap_put(map, key, new_value);
             free(new_value);
         }
 
         return result;
     }
 
-    return dino_sm_put(map, key, value);
+    return dino_strmap_put(map, key, value);
 }
 
-bool dino_sm_put(str_map_t *map, const char *key, const char *value) {
+bool dino_strmap_put(str_map_t *map, const char *key, const char *value) {
     if (NULL == map || NULL == key || NULL == value) {
         return false;
     }
@@ -296,7 +296,7 @@ bool dino_sm_put(str_map_t *map, const char *key, const char *value) {
     return true;
 }
 
-int dino_sm_get_count(const str_map_t *map) {
+int dino_strmap_get_count(const str_map_t *map) {
     if (NULL == map) {
         return 0;
     }
@@ -321,7 +321,7 @@ int dino_sm_get_count(const str_map_t *map) {
     return count;
 }
 
-bool dino_sm_enum(const str_map_t *map, dino_sm_enum_func enum_func, const void *obj) {
+bool dino_strmap_enum(const str_map_t *map, dino_strmap_enum_func enum_func, const void *obj) {
     if (NULL == map) {
         return false;
     }

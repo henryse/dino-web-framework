@@ -41,9 +41,9 @@
 // DHANDLE Casting helpers functions.
 //
 
-dino_site_t *cast_dhandle_site(DHANDLE dhandle) {
+dino_http_site_t *cast_dhandle_site(DHANDLE dhandle) {
     if (NULL != dhandle) {
-        dino_site_t *ptr = (dino_site_t *) dhandle;
+        dino_http_site_t *ptr = (dino_http_site_t *) dhandle;
 
         if (dino_handle_site == ptr->handle_type) {
             return ptr;
@@ -52,9 +52,9 @@ dino_site_t *cast_dhandle_site(DHANDLE dhandle) {
     return NULL;
 }
 
-http_request_t *cast_dhandle_request(DHANDLE dhandle) {
+dino_http_request_t *cast_dhandle_request(DHANDLE dhandle) {
     if (NULL != dhandle) {
-        http_data_t *ptr = (http_data_t *) dhandle;
+        dino_http_data_t *ptr = (dino_http_data_t *) dhandle;
 
         if (dino_handle_http == ptr->handle_type) {
             return &ptr->request;
@@ -63,9 +63,9 @@ http_request_t *cast_dhandle_request(DHANDLE dhandle) {
     return NULL;
 }
 
-http_response_t *cast_dhandle_response(DHANDLE dhandle) {
+dino_http_response_t *cast_dhandle_response(DHANDLE dhandle) {
     if (NULL != dhandle) {
-        http_data_t *ptr = (http_data_t *) dhandle;
+        dino_http_data_t *ptr = (dino_http_data_t *) dhandle;
 
         if (dino_handle_http == ptr->handle_type) {
             return &ptr->response;
@@ -77,7 +77,7 @@ http_response_t *cast_dhandle_response(DHANDLE dhandle) {
 // HTTP Verbs to function prefix strings...
 //
 
-const char *http_method_prefix_string(http_method method) {
+const char *http_method_prefix_string(dino_http_method method) {
     switch (method) {
         case http_get:
             return "get_";
@@ -134,13 +134,13 @@ dino_route_t *list_find(dino_route_t *list, const char *name) {
     return list;
 }
 
-bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb_func, const char *name,
+bool add_method_to_site(dino_http_method method, DHANDLE dhandle, http_verb_func verb_func, const char *name,
                         const char *path) {
     if (NULL == dhandle) {
         return false;
     }
 
-    dino_site_t *psite = cast_dhandle_site(dhandle);
+    dino_http_site_t *psite = cast_dhandle_site(dhandle);
 
     if (NULL != list_find(psite->list, name)) {
         return false;
@@ -174,7 +174,7 @@ bool add_method_to_site(http_method method, DHANDLE dhandle, http_verb_func verb
 }
 
 DHANDLE DINO_EXPORT dino_config_start(unsigned short port, char *host) {
-    dino_site_t *psite = (dino_site_t *) memory_alloc(sizeof(dino_site_t));
+    dino_http_site_t *psite = (dino_http_site_t *) memory_alloc(sizeof(dino_http_site_t));
     if (NULL != psite) {
         psite->host = memory_alloc(strlen(host) + 1);
         strncpy(psite->host, host, strlen(host));
@@ -266,7 +266,7 @@ bool g_dino_keep_running = true;
 void dino_signal_shutdown(int value) {
     fprintf(stderr, "[WARNING] Shutting down the service, signal: %d\n\r", value);
     g_dino_keep_running = false;
-    dino_stop_http();
+    dino_http_stop();
     exit(value);
 }
 
@@ -288,16 +288,16 @@ bool DINO_EXPORT dino_start(DHANDLE dhandle, const char *function, int line) {
     signal(SIGTERM, dino_signal_shutdown);
     signal(SIGPIPE, dino_signal_SIGPIPE);
 
-    dino_start_http(cast_dhandle_site(dhandle));
+    dino_http_start(cast_dhandle_site(dhandle));
 
     return true;
 }
 
 void DINO_EXPORT response_send(DHANDLE dhandle, const char *data, size_t size) {
-    http_response_t *response = cast_dhandle_response(dhandle);
+    dino_http_response_t *response = cast_dhandle_response(dhandle);
 
     if (NULL != response) {
-        response->buffer_handle = buffer_append_data(response->buffer_handle, data, size);
+        response->buffer_handle = dino_buffer_append_data(response->buffer_handle, data, size);
     }
     else {
         fprintf(stderr, "[ERROR] resposne_handle is NULL... \n\r");
@@ -335,11 +335,11 @@ int DINO_EXPORT response_printf(DHANDLE dhandle, const char *fmt, ...) {
 }
 
 void DINO_EXPORT response_header_set(DHANDLE dhandle, const char *key, const char *value) {
-    http_response_t *response = cast_dhandle_response(dhandle);
+    dino_http_response_t *response = cast_dhandle_response(dhandle);
 
     if (NULL != response) {
         if (key && *key) {
-            dino_sm_add(response->params_map, key, value);
+            dino_strmap_add(response->params_map, key, value);
         }
         else {
             fprintf(stderr, "[ERROR] Invlaid key, must have at least one character...\n\r");
@@ -351,19 +351,19 @@ void DINO_EXPORT response_header_set(DHANDLE dhandle, const char *key, const cha
 }
 
 const char *DINO_EXPORT params_get(DHANDLE dhandle, const char *key) {
-    http_request_t *request = cast_dhandle_request(dhandle);
+    dino_http_request_t *request = cast_dhandle_request(dhandle);
 
     if (NULL != request) {
-        return dino_sm_get_value(request->params_map, key);
+        return dino_strmap_get_value(request->params_map, key);
     }
 
     return "";
 }
 
 size_t DINO_EXPORT params_count(DHANDLE dhandle) {
-    http_request_t *request = cast_dhandle_request(dhandle);
+    dino_http_request_t *request = cast_dhandle_request(dhandle);
     if (NULL != request) {
-        return (size_t) dino_sm_get_count(request->params_map);
+        return (size_t) dino_strmap_get_count(request->params_map);
     }
 
     return 0;
@@ -384,7 +384,7 @@ bool param_enum(const char *key, const char *value, const void *obj) {
 }
 
 void DINO_EXPORT params_enumerate(DHANDLE dhandle, dino_enum_func callback, const void *obj) {
-    http_request_t *request = cast_dhandle_request(dhandle);
+    dino_http_request_t *request = cast_dhandle_request(dhandle);
 
     if (NULL != request) {
         dino_callback_param_t callback_data;
@@ -393,7 +393,7 @@ void DINO_EXPORT params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
         callback_data.dhandle = dhandle;
         callback_data.obj = obj;
 
-        dino_sm_enum(request->params_map, param_enum, &callback_data);
+        dino_strmap_enum(request->params_map, param_enum, &callback_data);
 
     }
 }

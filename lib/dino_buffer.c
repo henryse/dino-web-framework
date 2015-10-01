@@ -99,7 +99,7 @@ BUFFER buffer_realloc(BUFFER buffer_handle, size_t size) {
     return buffer;
 }
 
-void buffer_free(BUFFER buffer_handle) {
+void dino_buffer_free(BUFFER buffer_handle) {
     if (NULL != buffer_handle) {
         http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
         if (NULL != buffer->data) {
@@ -112,7 +112,7 @@ void buffer_free(BUFFER buffer_handle) {
     }
 }
 
-BUFFER buffer_append_data(BUFFER buffer_handle, const char *data, size_t size) {
+BUFFER dino_buffer_append_data(BUFFER buffer_handle, const char *data, size_t size) {
     http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
 
     char *ptr = NULL;
@@ -134,11 +134,11 @@ BUFFER buffer_append_data(BUFFER buffer_handle, const char *data, size_t size) {
     return buffer;
 }
 
-BUFFER buffer_append_char(BUFFER buffer_handle, const char c) {
-    return buffer_append_data(buffer_handle, &c, 1);
+BUFFER dino_buffer_append_char(BUFFER buffer_handle, const char c) {
+    return dino_buffer_append_data(buffer_handle, &c, 1);
 }
 
-char *buffer_data_ptr(BUFFER buffer_handle) {
+char *dino_buffer_data_ptr(BUFFER buffer_handle) {
     if (buffer_handle != NULL) {
         http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
 
@@ -148,7 +148,7 @@ char *buffer_data_ptr(BUFFER buffer_handle) {
     return NULL;
 }
 
-size_t buffer_data_size(BUFFER buffer_handle) {
+size_t dino_buffer_data_size(BUFFER buffer_handle) {
     if (buffer_handle != NULL) {
         http_buffer_t *buffer = (http_buffer_t *) buffer_handle;
 

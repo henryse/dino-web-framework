@@ -23,6 +23,9 @@
 //    OTHER DEALINGS IN THE SOFTWARE.
 //
 **********************************************************************/
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedMacroInspection"
+
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -40,7 +43,7 @@
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #define DINO_VERSION "Server: dinohttp/0.1\r\n"
 
-dino_route_t *list_method_find(dino_route_t *list, http_method method, stack_char_ptr_t *url_stack) {
+dino_route_t *list_method_find(dino_route_t *list, dino_http_method method, stack_char_ptr_t *url_stack) {
     bool match = false;
 
     while (NULL != list) {
@@ -209,7 +212,7 @@ void log_error(const char *sc, const char *function, int line) {
 // Start up connection
 //
 
-int startup_connection(dino_site_t *psite) {
+int startup_connection(dino_http_site_t *psite) {
     int sockfd = 0;
     struct sockaddr_in name;
 
@@ -266,7 +269,7 @@ size_t read_line(int socket, BUFFER *buffer) {
     // Free the buffer because the expectation is that we are reading in a
     // whole new line.
     //
-    buffer_free(*buffer);
+    dino_buffer_free(*buffer);
     *buffer = NULL;
 
     // Now we read in the data:
@@ -287,19 +290,19 @@ size_t read_line(int socket, BUFFER *buffer) {
                     c = '\n';
                 }
             }
-            *buffer = buffer_append_char(*buffer, c);
+            *buffer = dino_buffer_append_char(*buffer, c);
         }
         else {
             c = '\n';
         }
     }
 
-    if (buffer_data_size(*buffer)) {
+    if (dino_buffer_data_size(*buffer)) {
         c = '\0';
-        *buffer = buffer_append_char(*buffer, '\0');
+        *buffer = dino_buffer_append_char(*buffer, '\0');
     }
 
-    return buffer_data_size(*buffer);
+    return dino_buffer_data_size(*buffer);
 }
 
 size_t read_data(int socket, char *data, size_t size) {
@@ -324,8 +327,8 @@ size_t read_data(int socket, char *data, size_t size) {
 // Parsers
 //
 
-http_method map_string_to_http_method(const char *method) {
-    http_method result = http_invalid;
+dino_http_method map_string_to_http_method(const char *method) {
+    dino_http_method result = http_invalid;
 
     if (0 == strcasecmp(method, "GET")) {
         result = http_get;
@@ -356,7 +359,7 @@ http_method map_string_to_http_method(const char *method) {
 }
 
 
-http_method parse_method_url(http_data_t *http) {
+dino_http_method parse_method_url(dino_http_data_t *http) {
     // Should not happen:
     //
     if (NULL == http) {
@@ -368,7 +371,7 @@ http_method parse_method_url(http_data_t *http) {
     BUFFER buffer = NULL;
 
     if (0 == read_line(http->socket, &buffer)) {
-        buffer_free(buffer);
+        dino_buffer_free(buffer);
         return http_invalid;
     }
 
@@ -378,7 +381,7 @@ http_method parse_method_url(http_data_t *http) {
     memory_clear(method, sizeof(method));
     int offset = 0;
 
-    const char *line = buffer_data_ptr(buffer);
+    const char *line = dino_buffer_data_ptr(buffer);
 
     for (int i = 0; !isspace(line[i]) && (i < sizeof(method)); i++) {
         method[i] = line[i];
@@ -388,7 +391,7 @@ http_method parse_method_url(http_data_t *http) {
     http->request.method = map_string_to_http_method(method);
 
     if (http_invalid == http->request.method) {
-        buffer_free(buffer);
+        dino_buffer_free(buffer);
         return http_invalid;
     }
 
@@ -404,18 +407,18 @@ http_method parse_method_url(http_data_t *http) {
     }
 
     while (*query != '\0' && *query != '?' && *query != ' ' && *query != '\t') {
-        buffer_url = buffer_append_char(buffer_url, *query);
+        buffer_url = dino_buffer_append_char(buffer_url, *query);
         query++;
     }
 
     // Allocate and copy url to buffer
     //
-    http->request.url = memory_alloc(buffer_data_size(buffer_url) + 1);
-    strncpy(http->request.url, buffer_data_ptr(buffer_url), buffer_data_size(buffer_url));
+    http->request.url = memory_alloc(dino_buffer_data_size(buffer_url) + 1);
+    strncpy(http->request.url, dino_buffer_data_ptr(buffer_url), dino_buffer_data_size(buffer_url));
 
     // Free the URL Buffer
     //
-    buffer_free(buffer_url);
+    dino_buffer_free(buffer_url);
 
     if (*query == '?') {
         // Move off of '?'
@@ -427,30 +430,30 @@ http_method parse_method_url(http_data_t *http) {
         BUFFER buffer_params = NULL;
 
         while (!isspace(*query) && *query != 0) {
-            buffer_params = buffer_append_char(buffer_params, *query);
+            buffer_params = dino_buffer_append_char(buffer_params, *query);
             offset++;
             query++;
         }
 
-        buffer_params = buffer_append_char(buffer_params, '\0');
+        buffer_params = dino_buffer_append_char(buffer_params, '\0');
 
         // Parse the URL parameters
         //
         char *brkt = NULL;
 
-        for (char *param = strtok_r(buffer_data_ptr(buffer_params), "&", &brkt);
+        for (char *param = strtok_r(dino_buffer_data_ptr(buffer_params), "&", &brkt);
              param;
              param = strtok_r(NULL, "&", &brkt)) {
             char *brkt2 = NULL;
             char *key = strtok_r(param, "=", &brkt2);
             char *value = strtok_r(NULL, "=", &brkt2);
 
-            dino_sm_add(http->request.params_map, key, value);
+            dino_strmap_add(http->request.params_map, key, value);
         }
 
-        buffer_free(buffer_params);
+        dino_buffer_free(buffer_params);
     }
-    buffer_free(buffer);
+    dino_buffer_free(buffer);
     return http->request.method;
 }
 
@@ -467,7 +470,7 @@ char *clean_string(char *value) {
     return value;
 }
 
-size_t parse_headers(http_data_t *http) {
+size_t parse_headers(dino_http_data_t *http) {
     size_t content_size = 0;
 
     // Read the headers...
@@ -477,8 +480,8 @@ size_t parse_headers(http_data_t *http) {
     while (read_line(http->socket, &buffer)) {
         // Find the key and the value
         //
-        char *key = buffer_data_ptr(buffer);
-        char *value = buffer_data_ptr(buffer);
+        char *key = dino_buffer_data_ptr(buffer);
+        char *value = dino_buffer_data_ptr(buffer);
 
         // Look for the ':'
         //
@@ -494,7 +497,7 @@ size_t parse_headers(http_data_t *http) {
         key = clean_string(key);
         value = clean_string(value);
 
-        if (!dino_sm_add(http->request.params_map, key, value)) {
+        if (!dino_strmap_add(http->request.params_map, key, value)) {
             fprintf(stderr, "[WARNING] Unable to add to params list...\n\r");
         }
 
@@ -513,7 +516,7 @@ size_t parse_headers(http_data_t *http) {
         }
     }
 
-    buffer_free(buffer);
+    dino_buffer_free(buffer);
     return content_size;
 }
 
@@ -521,7 +524,7 @@ size_t parse_headers(http_data_t *http) {
 // Read in the request
 //
 
-bool read_request(http_data_t *http) {
+bool read_request(dino_http_data_t *http) {
     // Validate the Method:
     //
     if (http_invalid == parse_method_url(http)) {
@@ -544,7 +547,7 @@ bool read_request(http_data_t *http) {
     return true;
 }
 
-bool bind_url_params(http_request_t *request, dino_route_t *route, stack_char_ptr_t *url_stack) {
+bool bind_url_params(dino_http_request_t *request, dino_route_t *route, stack_char_ptr_t *url_stack) {
     // Now comapre the elements.
     //
     for (int index = 0; index < route->stack->count && index < url_stack->count; index++) {
@@ -557,7 +560,7 @@ bool bind_url_params(http_request_t *request, dino_route_t *route, stack_char_pt
         // Do we have a :param element?
         //
         if (route->stack->pointers[index][0] == ':') {
-            dino_sm_add(request->params_map, route->stack->pointers[index], url_stack->pointers[index]);
+            dino_strmap_add(request->params_map, route->stack->pointers[index], url_stack->pointers[index]);
             continue;
         }
     }
@@ -566,7 +569,7 @@ bool bind_url_params(http_request_t *request, dino_route_t *route, stack_char_pt
 }
 
 bool param_output(const char *key, const char *value, const void *obj) {
-    http_data_t *http = (http_data_t *) obj;
+    dino_http_data_t *http = (dino_http_data_t *) obj;
 
     char *buffer = NULL;
 
@@ -577,7 +580,7 @@ bool param_output(const char *key, const char *value, const void *obj) {
     return true;
 }
 
-void invoke_method(dino_route_t *route, http_data_t *http, stack_char_ptr_t *url_stack) {
+void invoke_method(dino_route_t *route, dino_http_data_t *http, stack_char_ptr_t *url_stack) {
     if (NULL == http || NULL == route || NULL == url_stack) {
         log_error("invoke_method: Invlaid inputs... NULL", __FUNCTION__, __LINE__);
         return;
@@ -598,14 +601,15 @@ void invoke_method(dino_route_t *route, http_data_t *http, stack_char_ptr_t *url
     int bytes = asprintf(&buffer, "HTTP/1.0 %d\r\n", http_error_code);
     send_free(http->socket, &buffer, bytes);
 
-    dino_sm_enum(http->response.params_map, param_output, http);
+    dino_strmap_enum(http->response.params_map, param_output, http);
 
     bytes = asprintf(&buffer, "\r\n");
     send_free(http->socket, &buffer, bytes);
 
     // Output the data payload
     //
-    send(http->socket, buffer_data_ptr(http->response.buffer_handle), buffer_data_size(http->response.buffer_handle),
+    send(http->socket, dino_buffer_data_ptr(http->response.buffer_handle),
+         dino_buffer_data_size(http->response.buffer_handle),
          0);
 }
 
@@ -613,8 +617,8 @@ void init_request(dino_handle_t *dhandle) {
     memory_clear(dhandle, sizeof(dino_handle_t));
     dhandle->http.handle_type = dino_handle_http;
 
-    dhandle->http.request.params_map = dino_sm_new(32);
-    dhandle->http.response.params_map = dino_sm_new(32);
+    dhandle->http.request.params_map = dino_strmap_new(32);
+    dhandle->http.response.params_map = dino_strmap_new(32);
 }
 
 void free_request(dino_handle_t *dhandle) {
@@ -624,18 +628,18 @@ void free_request(dino_handle_t *dhandle) {
             dhandle->http.request.url = NULL;
         }
 
-        buffer_free(dhandle->http.response.buffer_handle);
+        dino_buffer_free(dhandle->http.response.buffer_handle);
         dhandle->http.response.buffer_handle = NULL;
 
-        dino_sm_delete(dhandle->http.request.params_map);
+        dino_strmap_delete(dhandle->http.request.params_map);
         dhandle->http.request.params_map = NULL;
 
-        dino_sm_delete(dhandle->http.response.params_map);
+        dino_strmap_delete(dhandle->http.response.params_map);
         dhandle->http.response.params_map = NULL;
     }
 }
 
-void accept_request(dino_site_t *psite, dino_handle_t *dhandle) {
+void accept_request(dino_http_site_t *psite, dino_handle_t *dhandle) {
     // Setup DHANDLE:
     //
     if (!read_request(&dhandle->http)) {
@@ -665,7 +669,7 @@ void accept_request(dino_site_t *psite, dino_handle_t *dhandle) {
 
 int g_server_socket = 0;
 
-void dino_process_request(dino_site_t *psite, int socket) {
+void dino_process_request(dino_http_site_t *psite, int socket) {
     dino_handle_t dhandle;
     init_request(&dhandle);
 
@@ -692,7 +696,7 @@ void dino_process_request(dino_site_t *psite, int socket) {
     close(socket);
 }
 
-void dino_start_http(dino_site_t *psite) {
+void dino_http_start(dino_http_site_t *psite) {
     if (NULL == psite) {
         fprintf(stderr, "[ERROR] The site is not defined..\n\r");
         return;
@@ -721,7 +725,7 @@ void dino_start_http(dino_site_t *psite) {
     memory_cache_free();
 }
 
-void dino_stop_http() {
+void dino_http_stop() {
     int socket = g_server_socket;
     g_server_socket = -1;
 
@@ -730,4 +734,5 @@ void dino_stop_http() {
     sleep(2);
 }
 
+#pragma clang diagnostic pop
 #pragma clang diagnostic pop

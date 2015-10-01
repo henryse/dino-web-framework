@@ -29,14 +29,14 @@
 
 typedef void *BUFFER;
 
-BUFFER buffer_append_data(BUFFER buffer_handle, const char *data, size_t size);
+BUFFER dino_buffer_append_data(BUFFER buffer_handle, const char *data, size_t size);
 
-BUFFER buffer_append_char(BUFFER buffer_handle, const char c);
+BUFFER dino_buffer_append_char(BUFFER buffer_handle, const char c);
 
-void buffer_free(BUFFER buffer_handle);
+void dino_buffer_free(BUFFER buffer_handle);
 
-char *buffer_data_ptr(BUFFER buffer_handle);
+char *dino_buffer_data_ptr(BUFFER buffer_handle);
 
-size_t buffer_data_size(BUFFER buffer_handle);
+size_t dino_buffer_data_size(BUFFER buffer_handle);
 
 #endif
