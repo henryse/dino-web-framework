@@ -25,6 +25,7 @@
 **********************************************************************/
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMacroInspection"
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
 #define _GNU_SOURCE
 
@@ -38,8 +39,6 @@
 #include "dino.h"
 #include "dino_http.h"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #define DINO_VERSION "Server: dinohttp/0.1\r\n"
 
 dino_route_t *list_method_find(dino_route_t *list, dino_http_method method, stack_char_ptr_t *url_stack) {
@@ -728,5 +727,4 @@ void dino_http_stop() {
     sleep(2);
 }
 
-#pragma clang diagnostic pop
 #pragma clang diagnostic pop
