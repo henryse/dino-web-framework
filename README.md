@@ -25,7 +25,8 @@ int main(int argc, const char * argv[])
     int port = 3030;
     char *host = "localhost";
     
-    DINO_CONFIG_START(port, host);
+    DINO_CONFIG_START(host);
+        HTTP_PORT(port)
         ROUTE_GET(amor, "/amor")
         ROUTE_GET(base, "/")
     DINO_CONFIG_END;
@@ -88,9 +89,10 @@ int main(int argc, const char * argv[])
     int port = 3030;
     char *host = "localhost";
     
-    DINO_CONFIG_START(port, host);
-    ROUTE_GET(amor, "/amor")
-    ROUTE_GET(base, "/")
+    DINO_CONFIG_START(host);
+        HTTP_PORT(port)
+        ROUTE_GET(amor, "/amor")
+        ROUTE_GET(base, "/")
     DINO_CONFIG_END;
     
     DINO_START;
@@ -134,7 +136,8 @@ int main(int argc, const char * argv[])
     int port = 3031;
     char *host = "localhost";
     
-    DINO_CONFIG_START(port, host);
+    DINO_CONFIG_START(host);
+        HTTP_PORT(port)
         ROUTE_GET(amor, "/")
         ROUTE_GET(sway, "/:wine/:bottle")
         ROUTE_POST(main, "/")
@@ -155,10 +158,18 @@ int main(int argc, const char * argv[])
 The config block starts off with the port and the host that the server will listen on:
 
 ~~~C
-DINO_CONFIG_START(port, host);
+DINO_CONFIG_START(host);
 ~~~
 
 Then each route is bound to a name, for example amor is bound to "http://host:port/" and sway is bound to "http://host:port/sway"
+
+
+~~~C
+HTTP_PORT(port);
+~~~
+
+Port to use for HTTP requests, for example: "http://host:port/".  The default is 80
+
 
 ~~~C
 	ROUTE_GET(amor, "/")
@@ -197,13 +208,14 @@ API
 Configuration
 ----
 
-DINO_CONFIG_START(port, host)
-This line is required to declare the begining of the route configuration.  
-port - TCP Port to listen on
+DINO_CONFIG_START(host)
+This line is required to declare the beginning of the route configuration.  
 host - host or ip address t listen on
 
-ROUTE_GET(route_name, path)
+HTTP_PORT(port)
+port - TCP Port to listen on
 
+ROUTE_GET(route_name, path)
 
 ROUTE_POST(route_name, path)
 
