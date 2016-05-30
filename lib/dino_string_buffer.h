@@ -57,11 +57,11 @@ string_buffer_t *string_buffer_new_with_size(size_t size);
 
 // Resets the string_buffer_t to empty
 //
-void string_buffer_reset(string_buffer_t *sb);
+void string_buffer_reset(string_buffer_t *string_buffer);
 
 // Appends the given character to the string builder
 //
-void string_buffer_append_char(string_buffer_t *sb, const char ch);
+void string_buffer_append_char(string_buffer_t *string_buffer, const char ch);
 
 // Appends at most length of the given src string to the string buffer
 //
@@ -69,23 +69,23 @@ void string_buffer_append_str_length(string_buffer_t *string_buffer, const char 
 
 // Appends the given src string to the string builder
 //
-void string_buffer_append_str(string_buffer_t *sb, const char *src);
+void string_buffer_append_str(string_buffer_t *string_buffer, const char *src);
 
 // Appends the formatted string to the given string builder
 //
-void string_buffer_sprintf(string_buffer_t *sb, const char *fmt, ...);
+void string_buffer_sprintf(string_buffer_t *string_buffer, const char *fmt, ...);
 
 // compare two string buffers
 //
-int string_buffer_strcmp(string_buffer_t *sb1, string_buffer_t *sb2);
+int string_buffer_strcmp(string_buffer_t *string_buffer_1, string_buffer_t *string_buffer_2);
 
 // Returns the string_buffer_t as a regular C String
 //
-#define string_buffer_c_string(sb) ((sb)->c_string)
+#define string_buffer_c_string(string_buffer) ((string_buffer)->c_string)
 
 // Returns the size of the string
 //
-#define string_buffer_c_string_length(sb) ((sb)->pos)
+#define string_buffer_c_string_length(string_buffer) ((string_buffer)->pos)
 
 #endif //dino_string_buffer_h
 #pragma clang diagnostic pop

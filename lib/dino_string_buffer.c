@@ -149,26 +149,26 @@ void string_buffer_sprintf(string_buffer_t *string_buffer, const char *template,
     free(str);
 }
 
-int string_buffer_strcmp(string_buffer_t *sb1, string_buffer_t *sb2) {
+int string_buffer_strcmp(string_buffer_t *string_buffer_1, string_buffer_t *string_buffer_2) {
     // If they are both NULL then I guess they are "equal"
     //
-    if (sb1 == NULL && sb2 == NULL) {
+    if (string_buffer_1 == NULL && string_buffer_2 == NULL) {
         return 0;
     }
 
     // If they are one is NULL then I guess they are "not equal"
     //
-    if (sb1 == NULL) {
+    if (string_buffer_1 == NULL) {
         return -1;
     }
 
-    if (sb2 == NULL) {
+    if (string_buffer_2 == NULL) {
         return 1;
     }
 
-    return strncmp(string_buffer_c_string(sb1),
-                   string_buffer_c_string(sb2),
-                   max(string_buffer_c_string_length(sb1),
-                       string_buffer_c_string_length(sb2)));
+    return strncmp(string_buffer_c_string(string_buffer_1),
+                   string_buffer_c_string(string_buffer_2),
+                   max(string_buffer_c_string_length(string_buffer_1),
+                       string_buffer_c_string_length(string_buffer_2)));
 }
 #pragma clang diagnostic pop
