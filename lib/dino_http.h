@@ -29,7 +29,7 @@
 
 #include "dino_utils.h"
 #include "dino_strmap.h"
-#include "string_buffer.h"
+#include "dino_string_buffer.h"
 
 // List of methods
 //

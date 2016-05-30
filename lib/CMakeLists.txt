@@ -47,8 +47,8 @@ set(SOURCE_FILES
         dino_utils.h
         dino_utils.c
         dino_http_error.h
-        string_buffer.c
-        string_buffer.h)
+        dino_string_buffer.c
+        dino_string_buffer.h)
 
 add_library(DinoLibrary STATIC ${SOURCE_FILES})
 

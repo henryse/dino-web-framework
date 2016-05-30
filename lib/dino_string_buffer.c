@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include "string_buffer.h"
+#include "dino_string_buffer.h"
 #include "dino_utils.h"
 
 string_buffer_t *string_buffer_new() {
