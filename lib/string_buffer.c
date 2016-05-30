@@ -51,12 +51,12 @@ string_buffer_t *string_buffer_new_with_str(const char *new_string) {
 }
 
 string_buffer_t *string_buffer_new_with_size(size_t size) {
-    string_buffer_t *string_buffer = (string_buffer_t *) malloc(sizeof(string_buffer_t));
+    string_buffer_t *string_buffer = (string_buffer_t *) memory_alloc(sizeof(string_buffer_t));
     if (string_buffer) {
         memory_clear(string_buffer, sizeof(string_buffer_t));
 
         string_buffer->size = size;
-        string_buffer->c_string = (char *) malloc(size);
+        string_buffer->c_string = (char *) memory_alloc(size);
         memory_clear(string_buffer->c_string, size);
 
         string_buffer->pos = 0;
@@ -75,11 +75,11 @@ void string_buffer_delete(string_buffer_t *string_buffer, bool free_string) {
 
     if (free_string) {
         memory_clear(string_buffer->c_string, string_buffer->size);
-        free(string_buffer->c_string);
+        memory_free(string_buffer->c_string);
     }
 
     memory_clear(string_buffer, sizeof(string_buffer_t));
-    free(string_buffer);
+    memory_free(string_buffer);
 }
 
 bool string_buffer_resize(string_buffer_t *string_buffer, const size_t new_size) {
