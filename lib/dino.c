@@ -33,8 +33,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-
-#include "dino_buffer.h"
 #include "dino.h"
 #include "dino_http.h"
 
@@ -310,10 +308,14 @@ void DINO_EXPORT response_send(DHANDLE dhandle, const char *data, size_t size) {
     dino_http_response_t *response = cast_dhandle_response(dhandle);
 
     if (NULL != response) {
-        response->buffer_handle = dino_buffer_append_data(response->buffer_handle, data, size);
+        if (NULL == response->buffer_handle){
+            response->buffer_handle = string_buffer_new_with_size(size);
+        }
+
+        string_buffer_append_str_length(response->buffer_handle, data, size);
     }
     else {
-        fprintf(stderr, "[ERROR] resposne_handle is NULL... \n\r");
+        fprintf(stderr, "[ERROR] buffer_handle is NULL... \n\r");
     }
 }
 
@@ -326,8 +328,6 @@ int DINO_EXPORT response_printf(DHANDLE dhandle, const char *fmt, ...) {
     //
     va_start(ap, fmt);
 
-    // vasprintf with variable params
-    //
     char *result = NULL;
     if (vasprintf(&result, fmt, ap) > 0) {
         if (NULL != result) {
@@ -355,11 +355,11 @@ void DINO_EXPORT response_header_set(DHANDLE dhandle, const char *key, const cha
             dino_strmap_add(response->params_map, key, value);
         }
         else {
-            fprintf(stderr, "[ERROR] Invlaid key, must have at least one character...\n\r");
+            fprintf(stderr, "[ERROR] Invalid key, must have at least one character...\n\r");
         }
     }
     else {
-        fprintf(stderr, "[ERROR] resposne_handle is NULL... \n\r");
+        fprintf(stderr, "[ERROR] response is NULL... \n\r");
     }
 }
 

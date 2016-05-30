@@ -37,6 +37,9 @@
  *    along with strmap.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedMacroInspection"
+
 #define _GNU_SOURCE
 
 #include <sys/cdefs.h>
@@ -185,7 +188,7 @@ bool dino_strmap_add(str_map_t *map, const char *key, const char *value) {
     //
     local_value = trim_whitespace(local_value);
 
-    // Is there anyting left?
+    // Is there anything left?
     //
     if (0 == strlen(local_value)) {
         return true;
@@ -558,3 +561,4 @@ static unsigned long hash(const char *str) {
  Library.
  
  */
+#pragma clang diagnostic pop

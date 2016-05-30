@@ -82,7 +82,7 @@ typedef struct dino_http_request_struct {
     char *data;
 
     dino_http_method method;
-    char *url;
+    STRING_BUFFER_PTR url;
 
     str_map_t *params_map;
 } dino_http_request_t;
@@ -90,7 +90,7 @@ typedef struct dino_http_request_struct {
 // Response structure
 //
 typedef struct dino_http_response_struct {
-    BUFFER buffer_handle;
+    STRING_BUFFER_PTR buffer_handle;
 
     str_map_t *params_map;
 } dino_http_response_t;

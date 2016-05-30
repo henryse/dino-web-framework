@@ -38,8 +38,6 @@ endif()
 set(SOURCE_FILES
         dino.c
         dino.h
-        dino_buffer.c
-        dino_buffer.h
         dino_http.c
         dino_http.h
         dino_strmap.c

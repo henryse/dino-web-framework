@@ -30,7 +30,6 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include "dino_string_buffer.h"
@@ -59,7 +58,7 @@ string_buffer_t *string_buffer_new_with_size(size_t size) {
         string_buffer->c_string = (char *) memory_alloc(size);
         memory_clear(string_buffer->c_string, size);
 
-        string_buffer->pos = 0;
+        string_buffer->position = 0;
         string_buffer->realloc_count = 0;
     }
 
@@ -67,7 +66,7 @@ string_buffer_t *string_buffer_new_with_size(size_t size) {
 }
 
 void string_buffer_reset(string_buffer_t *string_buffer) {
-    string_buffer->pos = 0;
+    string_buffer->position = 0;
     memory_clear(string_buffer->c_string, string_buffer->size);
 }
 
@@ -85,12 +84,12 @@ void string_buffer_delete(string_buffer_t *string_buffer, bool free_string) {
 bool string_buffer_resize(string_buffer_t *string_buffer, const size_t new_size) {
     char *old_c_string = string_buffer->c_string;
 
-    string_buffer->c_string = (char *) realloc(string_buffer->c_string, new_size);
+    string_buffer->c_string = (char *) memory_realloc(string_buffer->c_string, new_size);
     if (string_buffer->c_string == NULL) {
         string_buffer->c_string = old_c_string;
         return false;
     }
-    memory_clear(string_buffer->c_string + string_buffer->pos, new_size - string_buffer->pos);
+    memory_clear(string_buffer->c_string + string_buffer->position, new_size - string_buffer->position);
 
     string_buffer->size = new_size;
     string_buffer->realloc_count++;
@@ -102,11 +101,11 @@ int string_buffer_double_size(string_buffer_t *string_buffer) {
 }
 
 void string_buffer_append_char(string_buffer_t *string_buffer, const char ch) {
-    if (string_buffer->pos == string_buffer->size) {
+    if (string_buffer->position == string_buffer->size) {
         string_buffer_double_size(string_buffer);
     }
 
-    string_buffer->c_string[string_buffer->pos++] = ch;
+    string_buffer->c_string[string_buffer->position++] = ch;
 }
 
 void string_buffer_append_str_length(string_buffer_t *string_buffer, const char *src, size_t length) {
@@ -115,7 +114,7 @@ void string_buffer_append_str_length(string_buffer_t *string_buffer, const char 
     size_t new_size;
 
     // <buffer size> - <zero based index of next char to write> - <space for null terminator>
-    chars_remaining = string_buffer->size - string_buffer->pos - 1;
+    chars_remaining = string_buffer->size - string_buffer->position - 1;
     if (chars_remaining < length) {
         chars_required = length - chars_remaining;
         new_size = string_buffer->size;
@@ -125,8 +124,8 @@ void string_buffer_append_str_length(string_buffer_t *string_buffer, const char 
         string_buffer_resize(string_buffer, new_size);
     }
 
-    memcpy(string_buffer->c_string + string_buffer->pos, src, length);
-    string_buffer->pos += length;
+    memcpy(string_buffer->c_string + string_buffer->position, src, length);
+    string_buffer->position += length;
 }
 
 void string_buffer_append_str(string_buffer_t *string_buffer, const char *src) {
@@ -146,7 +145,7 @@ void string_buffer_sprintf(string_buffer_t *string_buffer, const char *template,
     }
 
     string_buffer_append_str(string_buffer, str);
-    free(str);
+    memory_free(str);
 }
 
 int string_buffer_strcmp(string_buffer_t *string_buffer_1, string_buffer_t *string_buffer_2) {

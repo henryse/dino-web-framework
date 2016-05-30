@@ -34,10 +34,12 @@
 
 typedef struct string_buffer_struct {
     char *c_string;
-    size_t pos;
+    size_t position;
     size_t size;
     int realloc_count;         // Performance metric to record the number of string re-allocations
 } string_buffer_t;
+
+typedef string_buffer_t *STRING_BUFFER_PTR;
 
 // Creates a new string_buffer_t with the default chunk size
 //
@@ -85,7 +87,7 @@ int string_buffer_strcmp(string_buffer_t *string_buffer_1, string_buffer_t *stri
 
 // Returns the size of the string
 //
-#define string_buffer_c_string_length(string_buffer) ((string_buffer)->pos)
+#define string_buffer_c_string_length(string_buffer) ((string_buffer)->position)
 
 #endif //dino_string_buffer_h
 #pragma clang diagnostic pop
