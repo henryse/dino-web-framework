@@ -127,7 +127,9 @@ dino_route_t *list_add_new_item(dino_route_t **head) {
 }
 
 dino_route_t *list_find(dino_route_t *list, const char *name) {
-    while (NULL != list && strncmp(name, list->name, strlen(list->name))) {
+    while (NULL != list && strncmp(name,
+                                   string_buffer_c_string(list->name),
+                                   string_buffer_c_string_length(list->name))) {
         list = list->next;
     }
 
@@ -140,52 +142,63 @@ bool add_method_to_site(dino_http_method method, DHANDLE dhandle, http_verb_func
         return false;
     }
 
-    dino_http_site_t *psite = cast_dhandle_site(dhandle);
+    dino_http_site_t *dino_site = cast_dhandle_site(dhandle);
 
-    if (NULL != list_find(psite->list, name)) {
+    if (NULL != list_find(dino_site->list, name)) {
         return false;
     }
 
-    dino_route_t *ppath = list_add_new_item(&psite->list);
+    dino_route_t *dino_route = list_add_new_item(&dino_site->list);
 
     // Build name for method
     //
     const char *method_name = http_method_prefix_string(method);
 
-    ppath->name = memory_alloc(strlen(method_name) + strlen(name) + 1);
-    strncpy(ppath->name, method_name, strlen(method_name));
-    strncat(ppath->name, name, strlen(name));
+    dino_route->name = string_buffer_new_with_size(strlen(method_name) + strlen(name));
+
+    string_buffer_append_str(dino_route->name, method_name);
+    string_buffer_append_str(dino_route->name, name);
 
     // Store the path
     //
-    ppath->path = memory_alloc(strlen(path) + 1);
-    strncpy(ppath->path, path, strlen(path));
+    dino_route->path = string_buffer_new_with_str(path);
 
     // Parse the path, we need to see if there are any :[name] directives
     //
-    ppath->stack = stack_ptr_parse(ppath->stack, ppath->path, "/");
+    dino_route->stack = stack_ptr_parse(dino_route->stack, string_buffer_c_string(dino_route->path), "/");
 
     // Save callback function pointer
     //
-    ppath->verb_func = verb_func;
-    ppath->method = method;
+    dino_route->verb_func = verb_func;
+    dino_route->method = method;
 
     return true;
 }
 
-DHANDLE DINO_EXPORT dino_config_start(unsigned short port, char *host) {
-    dino_http_site_t *psite = (dino_http_site_t *) memory_alloc(sizeof(dino_http_site_t));
-    if (NULL != psite) {
-        psite->host = memory_alloc(strlen(host) + 1);
-        strncpy(psite->host, host, strlen(host));
+DHANDLE DINO_EXPORT dino_config_start(char *host) {
+    dino_http_site_t *dino_site = (dino_http_site_t *) memory_alloc(sizeof(dino_http_site_t));
+    if (NULL != dino_site) {
 
-        psite->port = port;
-        psite->list = NULL;
-        psite->handle_type = dino_handle_site;
+        dino_site->host = string_buffer_new_with_str(host);
+        dino_site->port = 80;
+        dino_site->list = NULL;
+        dino_site->handle_type = dino_handle_site;
     }
 
-    return psite;
+    return dino_site;
 }
+
+bool DINO_EXTERN dino_http_port(DHANDLE dhandle, unsigned short port, const char *function, int line){
+
+    fprintf(stdout, "[INFO][%s:%d] Setting HTTP port to %hu \n\r", function, line, port);
+
+    dino_http_site_t *dino_site = cast_dhandle_site(dhandle);
+
+    dino_site->port = port;
+
+    return true;
+}
+
 
 bool DINO_EXPORT dino_route_get(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
                                 const char *function, int line) {

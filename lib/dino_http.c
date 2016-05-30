@@ -212,7 +212,7 @@ void log_error(const char *sc, const char *function, int line) {
 // Start up connection
 //
 
-int startup_connection(dino_http_site_t *psite) {
+int startup_connection(dino_http_site_t *dino_site) {
     int sockfd = 0;
     struct sockaddr_in name;
 
@@ -223,7 +223,7 @@ int startup_connection(dino_http_site_t *psite) {
     else {
         memset(&name, 0, sizeof(name));
         name.sin_family = AF_INET;
-        name.sin_port = htons(psite->port);
+        name.sin_port = htons(dino_site->port);
         name.sin_addr.s_addr = htonl(INADDR_ANY);
 
         if (bind(sockfd, (struct sockaddr *) &name, sizeof(name)) < 0) {
@@ -232,7 +232,7 @@ int startup_connection(dino_http_site_t *psite) {
             sockfd = -1;
         }
         else {
-            if (0 == psite->port) {
+            if (0 == dino_site->port) {
                 socklen_t namelen = sizeof(name);
                 if (getsockname(sockfd, (struct sockaddr *) &name, &namelen) == -1) {
                     log_error("getsockname", __FUNCTION__, __LINE__);
@@ -240,7 +240,7 @@ int startup_connection(dino_http_site_t *psite) {
                     sockfd = -1;
                 }
                 else {
-                    psite->port = ntohs(name.sin_port);
+                    dino_site->port = ntohs(name.sin_port);
                 }
             }
 
@@ -639,7 +639,7 @@ void free_request(dino_handle_t *dhandle) {
     }
 }
 
-void accept_request(dino_http_site_t *psite, dino_handle_t *dhandle) {
+void accept_request(dino_http_site_t *dino_site, dino_handle_t *dhandle) {
     // Setup DHANDLE:
     //
     if (!read_request(&dhandle->http)) {
@@ -652,7 +652,7 @@ void accept_request(dino_http_site_t *psite, dino_handle_t *dhandle) {
 
         // Search for a match...
         //
-        dino_route_t *route = list_method_find(psite->list, dhandle->http.request.method, url_stack);
+        dino_route_t *route = list_method_find(dino_site->list, dhandle->http.request.method, url_stack);
 
         // Do we have a route?
         //
@@ -669,7 +669,7 @@ void accept_request(dino_http_site_t *psite, dino_handle_t *dhandle) {
 
 int g_server_socket = 0;
 
-void dino_process_request(dino_http_site_t *psite, int socket) {
+void dino_process_request(dino_http_site_t *dino_site, int socket) {
     dino_handle_t dhandle;
     init_request(&dhandle);
 
@@ -678,7 +678,7 @@ void dino_process_request(dino_http_site_t *psite, int socket) {
     }
     else {
         dhandle.http.socket = socket;
-        accept_request(psite, &dhandle);
+        accept_request(dino_site, &dhandle);
     }
 
     // Clear the cache memory...
@@ -696,8 +696,8 @@ void dino_process_request(dino_http_site_t *psite, int socket) {
     close(socket);
 }
 
-void dino_http_start(dino_http_site_t *psite) {
-    if (NULL == psite) {
+void dino_http_start(dino_http_site_t *dino_site) {
+    if (NULL == dino_site) {
         fprintf(stderr, "[ERROR] The site is not defined..\n\r");
         return;
     }
@@ -708,15 +708,15 @@ void dino_http_start(dino_http_site_t *psite) {
 
     memory_cache_alloc(1024 * 16);
 
-    g_server_socket = startup_connection(psite);
+    g_server_socket = startup_connection(dino_site);
 
     if (-1 != g_server_socket) {
-        fprintf(stdout, "[INFO] Dino has taking the stage on port %d\n\r", psite->port);
+        fprintf(stdout, "[INFO] Dino has taking the stage on port %d\n\r", dino_site->port);
 
         while (g_dino_keep_running) {
             int client_socket = accept(g_server_socket, (struct sockaddr *) &sockaddr_client, &sockaddr_client_length);
 
-            dino_process_request(psite, client_socket);
+            dino_process_request(dino_site, client_socket);
         }
 
         close(g_server_socket);

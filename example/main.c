@@ -210,7 +210,10 @@ int main(int argc, const char *argv[]) {
     unsigned short port = 3030;
     char *host = "localhost";
 
-    DINO_CONFIG_START(port, host);
+    DINO_CONFIG_START(host);
+
+        HTTP_PORT(port);
+
         ROUTE_GET(amor, "/")
         ROUTE_GET(sway, "/:wine/:bottle")
         ROUTE_POST(main, "/")

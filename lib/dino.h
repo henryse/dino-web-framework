@@ -51,7 +51,9 @@ typedef int (*http_verb_func)(DHANDLE);
 
 // Low Level Bindings for Routes API  (WARNING: for Binding and Routes please use the MACROS below)
 //
-DHANDLE dino_config_start(unsigned short port, char *host);
+DHANDLE DINO_EXTERN dino_config_start(char *host);
+
+bool DINO_EXTERN dino_http_port(DHANDLE dhandle, unsigned short port, const char *function, int line);
 
 bool DINO_EXTERN dino_route_get(DHANDLE dhandle, http_verb_func verb_func, const char *route_name, const char *path,
                                 const char *function, int line);
@@ -97,15 +99,17 @@ typedef bool(*dino_enum_func)(DHANDLE dhandle, const char *key, const char *valu
 
 void DINO_EXTERN params_enumerate(DHANDLE dhandle, dino_enum_func callback, const void *obj);
 
-// MACRO API, this API is intended to not change.  Thus it is safer to use the MACROS when writting your applications then
+// MACRO API, this API is intended to not change.  Thus it is safer to use the MACROS when writing your applications then
 // to use the raw functions described above.
 //
 
 // MACRO API for Bindings for Routes
 //
-#define DINO_CONFIG_START(port, host) DHANDLE dhandle = NULL; \
+#define DINO_CONFIG_START(host) DHANDLE dhandle = NULL; \
             do {  \
-                dhandle = dino_config_start(port, host);
+                dhandle = dino_config_start(host);
+
+#define HTTP_PORT(port)                  if (!dino_http_port(dhandle, port, __FUNCTION__, __LINE__)) break;
 #define ROUTE_GET(route_name, path)      if (!dino_route_get(dhandle, get_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
 #define ROUTE_POST(route_name, path)     if (!dino_route_post(dhandle, post_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
 #define ROUTE_DELETE(route_name, path)   if (!dino_route_delete(dhandle, delete_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
@@ -114,6 +118,7 @@ void DINO_EXTERN params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
 #define ROUTE_HEAD(route_name, path)     if (!dino_route_head(dhandle, head_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
 #define ROUTE_TRACE(route_name, path)    if (!dino_route_trace(dhandle, trace_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
 #define ROUTE_CONNECT(route_name, path)  if (!dino_route_connect(dhandle, connect_##route_name, #route_name, path, __FUNCTION__, __LINE__)) break;
+
 #define DINO_CONFIG_END } while(0)
 
 #define DINO_START  dino_start(dhandle, __FUNCTION__, __LINE__);

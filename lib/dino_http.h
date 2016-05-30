@@ -29,6 +29,7 @@
 
 #include "dino_utils.h"
 #include "dino_strmap.h"
+#include "string_buffer.h"
 
 // List of methods
 //
@@ -50,8 +51,8 @@ typedef struct dino_route_struct {
     struct dino_route_struct *next;
     dino_http_method method;
     http_verb_func verb_func;
-    char *name;
-    char *path;
+    string_buffer_t *name;
+    string_buffer_t *path;
     stack_char_ptr_t *stack;
 } dino_route_t;
 
@@ -71,7 +72,7 @@ typedef struct dino_http_site_struct {
 
     unsigned short port;
     dino_route_t *list;
-    char *host;
+    string_buffer_t  __unused *host;
 } dino_http_site_t;
 
 // Request structure
@@ -109,7 +110,7 @@ typedef union {
 
 // Start server
 //
-void dino_http_start(dino_http_site_t *psite);
+void dino_http_start(dino_http_site_t *dino_site);
 
 // Stop Server
 void dino_http_stop();
