@@ -1,4 +1,4 @@
-#include <sys/cdefs.h>/*
+/*
  *    strmap version 2.0.1
  *
  *    ANSI C hash table for strings.
@@ -36,6 +36,10 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with strmap.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#define _GNU_SOURCE
+
+#include <sys/cdefs.h>
 #include <stdio.h>
 #include "dino_strmap.h"
 #include "dino_utils.h"
