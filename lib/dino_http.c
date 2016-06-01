@@ -267,7 +267,7 @@ size_t read_line(int socket, STRING_BUFFER_PTR *string_buffer_ptr) {
         return 0;
     }
 
-    // We are gettign a new "line" so wack the old one if it exists.
+    // We are getting a new "line" so wack the old one if it exists.
     //
     if (*string_buffer_ptr){
         string_buffer_reset(*string_buffer_ptr);
