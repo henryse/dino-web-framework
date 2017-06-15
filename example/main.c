@@ -207,7 +207,7 @@ CONNECT(volare) {
 }
 
 int main(int argc, const char *argv[]) {
-    unsigned short port = 3030;
+    unsigned short port = 9080;
     char *host = "localhost";
 
     DINO_CONFIG_START(host);

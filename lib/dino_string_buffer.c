@@ -71,14 +71,15 @@ void string_buffer_reset(string_buffer_t *string_buffer) {
 }
 
 void string_buffer_delete(string_buffer_t *string_buffer, bool free_string) {
+    if (string_buffer){
+        if (free_string) {
+            memory_clear(string_buffer->c_string, string_buffer->size);
+            memory_free(string_buffer->c_string);
+        }
 
-    if (free_string) {
-        memory_clear(string_buffer->c_string, string_buffer->size);
-        memory_free(string_buffer->c_string);
+        memory_clear(string_buffer, sizeof(string_buffer_t));
+        memory_free(string_buffer);
     }
-
-    memory_clear(string_buffer, sizeof(string_buffer_t));
-    memory_free(string_buffer);
 }
 
 bool string_buffer_resize(string_buffer_t *string_buffer, const size_t new_size) {
