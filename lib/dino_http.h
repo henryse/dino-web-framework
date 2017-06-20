@@ -1,5 +1,5 @@
 /**********************************************************************
-//    Copyright (c) 2015 Henry Seurer
+//    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining a copy of this software and associated documentation
@@ -29,7 +29,7 @@
 
 #include "dino_utils.h"
 #include "dino_strmap.h"
-#include "dino_string_buffer.h"
+#include "dino_string.h"
 
 // List of methods
 //
@@ -51,8 +51,8 @@ typedef struct dino_route_struct {
     struct dino_route_struct *next;
     dino_http_method method;
     http_verb_func verb_func;
-    string_buffer_t *name;
-    string_buffer_t *path;
+    dino_string_ptr name;
+    dino_string_ptr path;
     stack_char_ptr_t *stack;
 } dino_route_t;
 
@@ -72,7 +72,7 @@ typedef struct dino_http_site_struct {
 
     unsigned short port;
     dino_route_t *list;
-    string_buffer_t  __unused *host;
+    dino_string_t  __unused *host;
 } dino_http_site_t;
 
 // Request structure
@@ -82,7 +82,7 @@ typedef struct dino_http_request_struct {
     char *data;
 
     dino_http_method method;
-    STRING_BUFFER_PTR url;
+    dino_string_ptr url;
 
     str_map_t *params_map;
 } dino_http_request_t;
@@ -90,7 +90,7 @@ typedef struct dino_http_request_struct {
 // Response structure
 //
 typedef struct dino_http_response_struct {
-    STRING_BUFFER_PTR buffer_handle;
+    dino_string_ptr buffer_handle;
 
     str_map_t *params_map;
 } dino_http_response_t;

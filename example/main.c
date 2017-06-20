@@ -1,5 +1,5 @@
 /**********************************************************************
-//    Copyright (c) 2015 Henry Seurer
+//    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining a copy of this software and associated documentation
@@ -209,8 +209,9 @@ CONNECT(volare) {
 int main(int argc, const char *argv[]) {
     unsigned short port = 9080;
     char *host = "localhost";
+    const char *application_name="dino_example";
 
-    DINO_CONFIG_START(host);
+    DINO_CONFIG_START(application_name, host, true);
 
         HTTP_PORT(port);
 

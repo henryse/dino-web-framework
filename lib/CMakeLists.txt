@@ -27,13 +27,33 @@
 cmake_minimum_required(VERSION 3.2)
 project(DinoLibrary)
 
-set(DINO_LIB_VERSION "1.0.0")
+set(DINO_LIB_VERSION "dino-server-1.1.0")
 
+# Check to see if we are running on a Raspberry PI
+#
+if(EXISTS "/opt/vc/include/bcm_host.h")
+    MESSAGE("-- bcm_host.h found, we must be on a Raspberry PI")
+    set(BCMHOST found)
+else()
+    MESSAGE("-- bcm_host.h not found we must NOT on in a Raspberry PI")
+endif()
+
+# Set The correct compiler
+#
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_C_FLAGS "-std=gnu99")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_C_FLAGS "-std=gnu99 -pthread -luuid")
-endif()
+    if(DEFINED BCMHOST)
+        set(CMAKE_C_FLAGS "-std=gnu99 -lwiringPi -pthread -lrt")
+    else()
+        set(CMAKE_C_FLAGS "-std=gnu99 -pthread -lrt")
+    endif()
+endif ()
+
+# Versioning
+#
+configure_file(version_config.h.in ${CMAKE_BINARY_DIR}/generated/version_config.h)
+include_directories(${CMAKE_BINARY_DIR}/generated/)
 
 set(SOURCE_FILES
         dino.c
@@ -45,12 +65,18 @@ set(SOURCE_FILES
         dino_utils.h
         dino_utils.c
         dino_http_error.h
-        dino_string_buffer.c
-        dino_string_buffer.h)
+        dino_string.c
+        dino_string.h
+        dino_intmap.c
+        dino_intmap.h
+        dino_template_generator.c
+        dino_template_generator.h
+        dino_debug.c
+        dino_debug.h)
 
 add_library(DinoLibrary STATIC ${SOURCE_FILES})
 
 install(TARGETS DinoLibrary DESTINATION lib)
 install(FILES dino.h dino_http_error.h DESTINATION include)
 
-target_include_directories (DinoLibrary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(DinoLibrary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

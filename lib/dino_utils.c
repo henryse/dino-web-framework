@@ -1,5 +1,5 @@
 /**********************************************************************
-//    Copyright (c) 2015 Henry Seurer
+//    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining a copy of this software and associated documentation
@@ -112,8 +112,7 @@ void *memory_alloc(size_t n) {
     if (NULL != g_mem_cache && n < g_mem_cache->freed) {
         p = g_mem_cache->buffer + (g_mem_cache->size - g_mem_cache->freed);
         g_mem_cache->freed -= n;
-    }
-    else {
+    } else {
         // If not allocate from memory.
         //
         p = malloc(n);

@@ -24,40 +24,43 @@
 //
 **********************************************************************/
 
-#ifndef dino_dino_utils_h
-#define dino_dino_utils_h
+#ifndef DINO_DEBUG_H
+#define DINO_DEBUG_H
 
-typedef struct stack_char_ptr_struct {
-    char *data;
-    size_t count;
-    char **pointers;
-} stack_char_ptr_t;
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <sys/syslog.h>
 
-void *memory_clear(void *p, size_t n);
+struct timespec timer_start();
 
-void *memory_alloc(size_t n);
+long long timer_diff_minutes(struct timespec start_time);
 
-void *memory_realloc(void *p, size_t n);
+bool get_log_mode();
 
-void memory_free(void *p);
+void set_log_mode(bool log_messages);
 
-void memory_cache_alloc(size_t n);
+const char *application_name();
 
-void memory_cache_clear();
+void set_application_name(const char *name);
 
-void memory_cache_free();
-
-void stack_ptr_free(stack_char_ptr_t *stack);
-
-stack_char_ptr_t *stack_ptr_parse(stack_char_ptr_t *stack, const char *data, const char *delim);
-
-char *trim_whitespace(char *str);
-
-#define max(a, b) \
-       ({ \
-            __typeof__ (a) _a = (a); \
-            __typeof__ (b) _b = (b); \
-            _a > _b ? _a : _b; \
-        })
-
+#if !defined(NDEBUG)
+#define ASSERT(x)  {if (!(x)){log_message(LOG_ALERT, __FUNCTION__, __FILE__, __LINE__, "Assert Fired" );}}
+#else
+#define ASSERT(x) ((void)0)
 #endif
+
+#define ERROR_LOG(...) log_message(LOG_CRIT, __FUNCTION__, __FILE__, __LINE__, __VA_ARGS__ )
+#define DEBUG_LOG(...) log_message(LOG_DEBUG, __FUNCTION__, __FILE__, __LINE__, __VA_ARGS__ )
+#define INFO_LOG(...) log_message(LOG_INFO, __FUNCTION__, __FILE__, __LINE__, __VA_ARGS__ )
+
+void log_message(int log_level, const char *function, const char *file, int line,
+                 const char *template, ...);
+
+void create_logs();
+
+void close_logs();
+
+const char *get_dino_version();
+
+#endif //DINO_DEBUG_H

@@ -1,5 +1,5 @@
 /**********************************************************************
-//    Copyright (c) 2015 Henry Seurer
+//    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining a copy of this software and associated documentation
@@ -27,8 +27,8 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
-#ifndef dino_string_buffer_h
-#define dino_string_buffer_h
+#ifndef dino_string_h
+#define dino_string_h
 
 #include <stdbool.h>
 
@@ -36,58 +36,57 @@ typedef struct string_buffer_struct {
     char *c_string;
     size_t position;
     size_t size;
-    int realloc_count;         // Performance metric to record the number of string re-allocations
-} string_buffer_t;
+} dino_string_t;
 
-typedef string_buffer_t *STRING_BUFFER_PTR;
+typedef dino_string_t *dino_string_ptr;
 
-// Creates a new string_buffer_t with the default chunk size
+// Creates a new dino_string_t with the default chunk size
 //
-string_buffer_t *string_buffer_new();
+dino_string_ptr dino_string_new();
 
-// Creates a new string_buffer_t with the default string
+// Creates a new dino_string_t with the default string
 //
-string_buffer_t *string_buffer_new_with_str(const char *new_string);
+dino_string_ptr dino_string_new_with_str(const char *new_string);
 
-// Destroys the given string_buffer_t.  Pass 1 to free_string if the underlying c string should also be freed
+// Destroys the given dino_string_t.  Pass 1 to free_string if the underlying c string should also be freed
 //
-void string_buffer_delete(string_buffer_t *sb, bool free_string);
+void dino_string_delete(dino_string_ptr sb, bool free_string);
 
-// Creates a new string_buffer_t with initial size at least the given size
+// Creates a new dino_string_t with initial size at least the given size
 //
-string_buffer_t *string_buffer_new_with_size(size_t size);
+dino_string_ptr dino_string_new_with_size(size_t size);
 
-// Resets the string_buffer_t to empty
+// Resets the dino_string_t to empty
 //
-void string_buffer_reset(string_buffer_t *string_buffer);
+void dino_string_reset(dino_string_ptr dino_string);
 
 // Appends the given character to the string builder
 //
-void string_buffer_append_char(string_buffer_t *string_buffer, const char ch);
+void dino_string_append_char(dino_string_ptr dino_string, const char ch);
 
 // Appends at most length of the given src string to the string buffer
 //
-void string_buffer_append_str_length(string_buffer_t *string_buffer, const char *src, size_t length);
+void dino_string_append_str_length(dino_string_ptr dino_string, const char *src, size_t length);
 
 // Appends the given src string to the string builder
 //
-void string_buffer_append_str(string_buffer_t *string_buffer, const char *src);
+void dino_string_append_str(dino_string_ptr dino_string, const char *src);
 
 // Appends the formatted string to the given string builder
 //
-void string_buffer_sprintf(string_buffer_t *string_buffer, const char *fmt, ...);
+void dino_string_sprintf(dino_string_ptr dino_string, const char *fmt, ...);
 
 // compare two string buffers
 //
-int string_buffer_strcmp(string_buffer_t *string_buffer_1, string_buffer_t *string_buffer_2);
+int dino_string_strcmp(dino_string_ptr dino_string_1, dino_string_ptr dino_string_2);
 
-// Returns the string_buffer_t as a regular C String
+// Returns the dino_string_t as a regular C String
 //
-#define string_buffer_c_string(string_buffer) ((string_buffer)->c_string)
+char *dino_string_c_ptr(dino_string_ptr string_ptr);
 
 // Returns the size of the string
 //
-#define string_buffer_c_string_length(string_buffer) ((string_buffer)->position)
+size_t dino_string_c_strlen(dino_string_ptr string_ptr);
 
-#endif //dino_string_buffer_h
+#endif //dino_string_h
 #pragma clang diagnostic pop

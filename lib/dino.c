@@ -1,5 +1,5 @@
 /**********************************************************************
-//    Copyright (c) 2015 Henry Seurer
+//    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining a copy of this software and associated documentation
@@ -35,6 +35,7 @@
 #include <stdarg.h>
 #include "dino.h"
 #include "dino_http.h"
+#include "dino_debug.h"
 
 // DHANDLE Casting helpers functions.
 //
@@ -126,8 +127,8 @@ dino_route_t *list_add_new_item(dino_route_t **head) {
 
 dino_route_t *list_find(dino_route_t *list, const char *name) {
     while (NULL != list && strncmp(name,
-                                   string_buffer_c_string(list->name),
-                                   string_buffer_c_string_length(list->name))) {
+                                   dino_string_c_ptr(list->name),
+                                   dino_string_c_strlen(list->name))) {
         list = list->next;
     }
 
@@ -152,18 +153,18 @@ bool add_method_to_site(dino_http_method method, DHANDLE dhandle, http_verb_func
     //
     const char *method_name = http_method_prefix_string(method);
 
-    dino_route->name = string_buffer_new_with_size(strlen(method_name) + strlen(name));
+    dino_route->name = dino_string_new_with_size(strlen(method_name) + strlen(name));
 
-    string_buffer_append_str(dino_route->name, method_name);
-    string_buffer_append_str(dino_route->name, name);
+    dino_string_append_str(dino_route->name, method_name);
+    dino_string_append_str(dino_route->name, name);
 
     // Store the path
     //
-    dino_route->path = string_buffer_new_with_str(path);
+    dino_route->path = dino_string_new_with_str(path);
 
     // Parse the path, we need to see if there are any :[name] directives
     //
-    dino_route->stack = stack_ptr_parse(dino_route->stack, string_buffer_c_string(dino_route->path), "/");
+    dino_route->stack = stack_ptr_parse(dino_route->stack, dino_string_c_ptr(dino_route->path), "/");
 
     // Save callback function pointer
     //
@@ -173,11 +174,17 @@ bool add_method_to_site(dino_http_method method, DHANDLE dhandle, http_verb_func
     return true;
 }
 
-DHANDLE DINO_EXPORT dino_config_start(char *host) {
+DHANDLE DINO_EXPORT dino_config_start(const char *application_name, const char *host, bool enable_logging,
+                                      const char *function, const char *file, int line) {
+    set_application_name(application_name);
+    set_log_mode(enable_logging);
+
+    log_message(LOG_INFO, function, file, line, "Config Start with host %s.", host);
+
     dino_http_site_t *dino_site = (dino_http_site_t *) memory_alloc(sizeof(dino_http_site_t));
     if (NULL != dino_site) {
 
-        dino_site->host = string_buffer_new_with_str(host);
+        dino_site->host = dino_string_new_with_str(host);
         dino_site->port = 80;
         dino_site->list = NULL;
         dino_site->handle_type = dino_handle_site;
@@ -186,9 +193,9 @@ DHANDLE DINO_EXPORT dino_config_start(char *host) {
     return dino_site;
 }
 
-bool DINO_EXTERN dino_http_port(DHANDLE dhandle, unsigned short port, const char *function, int line){
-
-    fprintf(stdout, "[INFO][%s:%d] Setting HTTP port to %hu \n\r", function, line, port);
+bool DINO_EXTERN dino_http_port(DHANDLE dhandle, unsigned short port,
+                                const char *function, const char *file, int line) {
+    log_message(LOG_INFO, function, file, line, "Setting HTTP port to %hu", port);
 
     dino_http_site_t *dino_site = cast_dhandle_site(dhandle);
 
@@ -199,9 +206,9 @@ bool DINO_EXTERN dino_http_port(DHANDLE dhandle, unsigned short port, const char
 
 
 bool DINO_EXPORT dino_route_get(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
-                                const char *function, int line) {
+                                const char *function, const char *file, int line) {
     if (!add_method_to_site(http_get, dhandle, verb_func, name, path)) {
-        fprintf(stderr, "[ERROR][%s:%d] GET unable to bind %s to path %s\n\r", function, line, name, path);
+        log_message(LOG_ERR, function, file, line, "GET unable to bind %s to path %s", name, path);
         return false;
     }
 
@@ -209,9 +216,9 @@ bool DINO_EXPORT dino_route_get(DHANDLE dhandle, http_verb_func verb_func, const
 }
 
 bool DINO_EXPORT dino_route_post(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
-                                 const char *function, int line) {
+                                 const char *function, const char *file, int line) {
     if (!add_method_to_site(http_post, dhandle, verb_func, name, path)) {
-        fprintf(stderr, "[ERROR][%s:%d] POST unable to bind %s to path %s\n\r", function, line, name, path);
+        log_message(LOG_ERR, function, file, line, "POST unable to bind %s to path %s", name, path);
         return false;
     }
 
@@ -219,54 +226,54 @@ bool DINO_EXPORT dino_route_post(DHANDLE dhandle, http_verb_func verb_func, cons
 }
 
 bool DINO_EXPORT dino_route_delete(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
-                                   const char *function, int line) {
+                                   const char *function, const char *file, int line) {
     if (!add_method_to_site(http_delete, dhandle, verb_func, name, path)) {
-        fprintf(stderr, "[ERROR][%s:%d] DELETE unable to bind %s to path %s\n\r", function, line, name, path);
+        log_message(LOG_ERR, function, file, line, "DELETE unable to bind %s to path %s", name, path);
         return false;
     }
     return true;
 }
 
 bool DINO_EXPORT dino_route_put(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
-                                const char *function, int line) {
+                                const char *function, const char *file, int line) {
     if (!add_method_to_site(http_put, dhandle, verb_func, name, path)) {
-        fprintf(stderr, "[ERROR][%s:%d] PUT unable to bind %s to path %s\n\r", function, line, name, path);
+        log_message(LOG_ERR, function, file, line, "PUT unable to bind %s to path %s", name, path);
         return false;
     }
     return true;
 }
 
 bool DINO_EXPORT dino_route_options(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
-                                    const char *function, int line) {
+                                    const char *function, const char *file, int line) {
     if (!add_method_to_site(http_options, dhandle, verb_func, name, path)) {
-        fprintf(stderr, "[ERROR][%s:%d] OPTIONS unable to bind %s to path %s\n\r", function, line, name, path);
+        log_message(LOG_ERR, function, file, line, "OPTIONS unable to bind %s to path %s", name, path);
         return false;
     }
     return true;
 }
 
 bool DINO_EXPORT dino_route_head(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
-                                 const char *function, int line) {
+                                 const char *function, const char *file, int line) {
     if (!add_method_to_site(http_head, dhandle, verb_func, name, path)) {
-        fprintf(stderr, "[ERROR][%s:%d] HEAD unable to bind %s to path %s\n\r", function, line, name, path);
+        log_message(LOG_ERR, function, file, line, "HEAD unable to bind %s to path %s", name, path);
         return false;
     }
     return true;
 }
 
 bool DINO_EXPORT dino_route_trace(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
-                                  const char *function, int line) {
+                                  const char *function, const char *file, int line) {
     if (!add_method_to_site(http_trace, dhandle, verb_func, name, path)) {
-        fprintf(stderr, "[ERROR][%s:%d] TRACE unable to bind %s to path %s\n\r", function, line, name, path);
+        log_message(LOG_ERR, function, file, line, "TRACE unable to bind %s to path %s", name, path);
         return false;
     }
     return true;
 }
 
 bool DINO_EXPORT dino_route_connect(DHANDLE dhandle, http_verb_func verb_func, const char *name, const char *path,
-                                    const char *function, int line) {
+                                    const char *function, const char *file, int line) {
     if (!add_method_to_site(http_connect, dhandle, verb_func, name, path)) {
-        fprintf(stderr, "[ERROR][%s:%d] CONNECT unable to bind %s to path %s\n\r", function, line, name, path);
+        log_message(LOG_ERR, function, file, line, "CONNECT unable to bind %s to path %s", name, path);
         return false;
     }
     return true;
@@ -275,19 +282,19 @@ bool DINO_EXPORT dino_route_connect(DHANDLE dhandle, http_verb_func verb_func, c
 bool g_dino_keep_running = true;
 
 void dino_signal_shutdown(int value) {
-    fprintf(stderr, "[WARNING] Shutting down the service, signal: %d\n\r", value);
+    log_message(LOG_WARNING, __FUNCTION__, __FILE__, __LINE__, "Shutting down the service, signal: %d\n\r", value);
     g_dino_keep_running = false;
     dino_http_stop();
     exit(value);
 }
 
 void dino_signal_SIGPIPE(int value) {
-    fprintf(stderr, "[WARNING] SIGPIPE failure: %d\n\r", value);
+    log_message(LOG_WARNING, __FUNCTION__, __FILE__, __LINE__, "SIGPIPE failure: %d\n\r", value);
 }
 
-bool DINO_EXPORT dino_start(DHANDLE dhandle, const char *function, int line) {
+bool DINO_EXPORT dino_start(DHANDLE dhandle, const char *function, const char *file, int line) {
     if (NULL == dhandle) {
-        fprintf(stderr, "[ERROR][%s:%d] Unable to start Dino, the dhandle is invlaid.\n\r", function, line);
+        log_message(LOG_ERR, function, file, line, "Unable to start Dino, the dhandle is invalid");
         return false;
     }
 
@@ -308,14 +315,13 @@ void DINO_EXPORT response_send(DHANDLE dhandle, const char *data, size_t size) {
     dino_http_response_t *response = cast_dhandle_response(dhandle);
 
     if (NULL != response) {
-        if (NULL == response->buffer_handle){
-            response->buffer_handle = string_buffer_new_with_size(size);
+        if (NULL == response->buffer_handle) {
+            response->buffer_handle = dino_string_new_with_size(size);
         }
 
-        string_buffer_append_str_length(response->buffer_handle, data, size);
-    }
-    else {
-        fprintf(stderr, "[ERROR] buffer_handle is NULL... \n\r");
+        dino_string_append_str_length(response->buffer_handle, data, size);
+    } else {
+        log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "buffer_handle is NULL");
     }
 }
 
@@ -353,13 +359,11 @@ void DINO_EXPORT response_header_set(DHANDLE dhandle, const char *key, const cha
     if (NULL != response) {
         if (key && *key) {
             dino_strmap_add(response->params_map, key, value);
+        } else {
+            log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "Invalid key, must have at least one character...");
         }
-        else {
-            fprintf(stderr, "[ERROR] Invalid key, must have at least one character...\n\r");
-        }
-    }
-    else {
-        fprintf(stderr, "[ERROR] response is NULL... \n\r");
+    } else {
+        log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "Response is NULL...");
     }
 }
 

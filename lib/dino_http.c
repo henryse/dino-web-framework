@@ -1,5 +1,5 @@
 /**********************************************************************
-//    Copyright (c) 2015 Henry Seurer
+//    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining a copy of this software and associated documentation
@@ -23,6 +23,7 @@
 //    OTHER DEALINGS IN THE SOFTWARE.
 //
 **********************************************************************/
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMacroInspection"
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
@@ -35,9 +36,9 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "dino.h"
 #include "dino_http.h"
+#include "dino_debug.h"
 
 #define DINO_VERSION "Server: dinohttp/0.1\r\n"
 
@@ -201,11 +202,6 @@ void unimplemented(int client) {
     send_free(client, &buffer, bytes);;
 }
 
-void log_error(const char *sc, const char *function, int line) {
-    perror(sc);
-    fprintf(stderr, "[SYSTEM ERROR][%s:%d]\n\r", function, line);
-}
-
 //
 // Start up connection
 //
@@ -216,35 +212,33 @@ int startup_connection(dino_http_site_t *dino_site) {
 
     sockfd = socket(PF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
-        log_error("socket", __FUNCTION__, __LINE__);
-    }
-    else {
+        log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "socket allocation failed");
+
+    } else {
         memset(&name, 0, sizeof(name));
         name.sin_family = AF_INET;
         name.sin_port = htons(dino_site->port);
         name.sin_addr.s_addr = htonl(INADDR_ANY);
 
         if (bind(sockfd, (struct sockaddr *) &name, sizeof(name)) < 0) {
-            log_error("bind", __FUNCTION__, __LINE__);
+            log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "socket bind failed");
             close(sockfd);
             sockfd = -1;
-        }
-        else {
+        } else {
             if (0 == dino_site->port) {
                 socklen_t namelen = sizeof(name);
                 if (getsockname(sockfd, (struct sockaddr *) &name, &namelen) == -1) {
-                    log_error("getsockname", __FUNCTION__, __LINE__);
+                    log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "socket getsockname failed");
                     close(sockfd);
                     sockfd = -1;
-                }
-                else {
+                } else {
                     dino_site->port = ntohs(name.sin_port);
                 }
             }
 
             if (sockfd != -1) {
                 if (listen(sockfd, 5) < 0) {
-                    log_error("listen", __FUNCTION__, __LINE__);
+                    log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "socket listen failed");
                     close(sockfd);
                     sockfd = -1;
                 }
@@ -259,21 +253,20 @@ int startup_connection(dino_http_site_t *dino_site) {
 // Read data from socket
 //
 
-size_t read_line(int socket, STRING_BUFFER_PTR *string_buffer_ptr) {
+size_t read_line(int socket, dino_string_ptr *string_buffer_ptr) {
 
     // If input is invalid then just error out.
     //
-    if (NULL == string_buffer_ptr){
+    if (NULL == string_buffer_ptr) {
         return 0;
     }
 
     // We are getting a new "line" so wack the old one if it exists.
     //
-    if (*string_buffer_ptr){
-        string_buffer_reset(*string_buffer_ptr);
-    }
-    else{
-        *string_buffer_ptr = string_buffer_new();
+    if (*string_buffer_ptr) {
+        dino_string_reset(*string_buffer_ptr);
+    } else {
+        *string_buffer_ptr = dino_string_new();
     }
 
     // Now we read in the data:
@@ -289,20 +282,18 @@ size_t read_line(int socket, STRING_BUFFER_PTR *string_buffer_ptr) {
 
                 if ((n > 0) && (c == '\n')) {
                     recv(socket, &c, 1, 0);
-                }
-                else {
+                } else {
                     c = '\n';
                 }
             }
 
-            string_buffer_append_char(*string_buffer_ptr, c);
-        }
-        else {
+            dino_string_append_char(*string_buffer_ptr, c);
+        } else {
             c = '\n';
         }
     }
 
-    return string_buffer_c_string_length(*string_buffer_ptr);
+    return dino_string_c_strlen(*string_buffer_ptr);
 }
 
 size_t read_data(int socket, char *data, size_t size) {
@@ -332,26 +323,19 @@ dino_http_method map_string_to_http_method(const char *method) {
 
     if (0 == strcasecmp(method, "GET")) {
         result = http_get;
-    }
-    else if (0 == strcasecmp(method, "POST")) {
+    } else if (0 == strcasecmp(method, "POST")) {
         result = http_post;
-    }
-    else if (0 == strcasecmp(method, "PUT")) {
+    } else if (0 == strcasecmp(method, "PUT")) {
         result = http_put;
-    }
-    else if (0 == strcasecmp(method, "DELETE")) {
+    } else if (0 == strcasecmp(method, "DELETE")) {
         result = http_delete;
-    }
-    else if (0 == strcasecmp(method, "OPTIONS")) {
+    } else if (0 == strcasecmp(method, "OPTIONS")) {
         result = http_options;
-    }
-    else if (0 == strcasecmp(method, "HEAD")) {
+    } else if (0 == strcasecmp(method, "HEAD")) {
         result = http_head;
-    }
-    else if (0 == strcasecmp(method, "TRACE")) {
+    } else if (0 == strcasecmp(method, "TRACE")) {
         result = http_trace;
-    }
-    else if (0 == strcasecmp(method, "CONNECT")) {
+    } else if (0 == strcasecmp(method, "CONNECT")) {
         result = http_connect;
     }
 
@@ -368,10 +352,10 @@ dino_http_method parse_method_url(dino_http_data_t *http) {
 
     // Read in the data:
     //
-    STRING_BUFFER_PTR string_buffer_ptr = NULL;
+    dino_string_ptr string_buffer_ptr = NULL;
 
     if (0 == read_line(http->socket, &string_buffer_ptr)) {
-        string_buffer_delete(string_buffer_ptr, true);
+        dino_string_delete(string_buffer_ptr, true);
         return http_invalid;
     }
 
@@ -381,7 +365,7 @@ dino_http_method parse_method_url(dino_http_data_t *http) {
     memory_clear(method, sizeof(method));
     int offset = 0;
 
-    const char *line = string_buffer_c_string(string_buffer_ptr);
+    const char *line = dino_string_c_ptr(string_buffer_ptr);
 
     for (int i = 0; !isspace(line[i]) && (i < sizeof(method)); i++) {
         method[i] = line[i];
@@ -391,14 +375,14 @@ dino_http_method parse_method_url(dino_http_data_t *http) {
     http->request.method = map_string_to_http_method(method);
 
     if (http_invalid == http->request.method) {
-        string_buffer_delete(string_buffer_ptr, true);
+        dino_string_delete(string_buffer_ptr, true);
         return http_invalid;
     }
 
     // Fetch the URL
     //
     const char *query = line + offset;
-    STRING_BUFFER_PTR buffer_url = string_buffer_new();
+    dino_string_ptr buffer_url = dino_string_new();
 
     // Skip over the ' 's and the tabs
     //
@@ -407,7 +391,7 @@ dino_http_method parse_method_url(dino_http_data_t *http) {
     }
 
     while (*query != '\0' && *query != '?' && *query != ' ' && *query != '\t') {
-        string_buffer_append_char(buffer_url, *query);
+        dino_string_append_char(buffer_url, *query);
         query++;
     }
 
@@ -420,10 +404,10 @@ dino_http_method parse_method_url(dino_http_data_t *http) {
 
         offset = 0;
 
-        STRING_BUFFER_PTR buffer_params = string_buffer_new();
+        dino_string_ptr buffer_params = dino_string_new();
 
         while (!isspace(*query) && *query != 0) {
-            string_buffer_append_char(buffer_params, *query);
+            dino_string_append_char(buffer_params, *query);
             offset++;
             query++;
         }
@@ -432,10 +416,9 @@ dino_http_method parse_method_url(dino_http_data_t *http) {
         //
         char *break_token = NULL;
 
-        for (char *param = strtok_r(string_buffer_c_string(buffer_params), "&", &break_token);
+        for (char *param = strtok_r(dino_string_c_ptr(buffer_params), "&", &break_token);
              param;
-             param = strtok_r(NULL, "&", &break_token))
-        {
+             param = strtok_r(NULL, "&", &break_token)) {
             char *break_token_2 = NULL;
             char *key = strtok_r(param, "=", &break_token_2);
             char *value = strtok_r(NULL, "=", &break_token_2);
@@ -443,10 +426,10 @@ dino_http_method parse_method_url(dino_http_data_t *http) {
             dino_strmap_add(http->request.params_map, key, value);
         }
 
-        string_buffer_delete(buffer_params, true);
+        dino_string_delete(buffer_params, true);
     }
 
-    string_buffer_delete(string_buffer_ptr, true);
+    dino_string_delete(string_buffer_ptr, true);
     return http->request.method;
 }
 
@@ -468,17 +451,17 @@ size_t parse_headers(dino_http_data_t *http) {
 
     // Read the headers...
     //
-    STRING_BUFFER_PTR string_buffer_ptr = NULL;
+    dino_string_ptr string_buffer_ptr = NULL;
 
     while (read_line(http->socket, &string_buffer_ptr)) {
         // Find the key and the value
         //
-        char *key = string_buffer_c_string(string_buffer_ptr);
-        char *value = string_buffer_c_string(string_buffer_ptr);
+        char *key = dino_string_c_ptr(string_buffer_ptr);
+        char *value = dino_string_c_ptr(string_buffer_ptr);
 
         // Look for the ':'
         //
-        for (; *value && *value != ':'; value++) { };
+        for (; *value && *value != ':'; value++) {};
 
         // Get the "Value
         //
@@ -491,7 +474,7 @@ size_t parse_headers(dino_http_data_t *http) {
         value = clean_string(value);
 
         if (!dino_strmap_add(http->request.params_map, key, value)) {
-            fprintf(stderr, "[WARNING] Unable to add to params list...\n\r");
+            log_message(LOG_WARNING, __FUNCTION__, __FILE__, __LINE__, " Unable to add to params list...");
         }
 
         // Check to see if we have hit the end...
@@ -509,7 +492,7 @@ size_t parse_headers(dino_http_data_t *http) {
         }
     }
 
-    string_buffer_delete(string_buffer_ptr, true);
+    dino_string_delete(string_buffer_ptr, true);
     return content_size;
 }
 
@@ -533,7 +516,7 @@ bool read_request(dino_http_data_t *http) {
     if (http->request.content_size) {
         http->request.data = memory_alloc(http->request.content_size);
         size_t total = read_data(http->socket, http->request.data, http->request.content_size);
-        assert(total == http->request.content_size);
+        ASSERT(total == http->request.content_size);
         http->request.content_size = total;
     }
 
@@ -575,7 +558,7 @@ bool param_output(const char *key, const char *value, const void *obj) {
 
 void invoke_method(dino_route_t *route, dino_http_data_t *http, stack_char_ptr_t *url_stack) {
     if (NULL == http || NULL == route || NULL == url_stack) {
-        log_error("invoke_method: Invlaid inputs... NULL", __FUNCTION__, __LINE__);
+        log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "invoke_method: Invlaid inputs... NULL");
         return;
     }
 
@@ -601,8 +584,8 @@ void invoke_method(dino_route_t *route, dino_http_data_t *http, stack_char_ptr_t
 
     // Output the data payload
     //
-    send(http->socket, string_buffer_c_string(http->response.buffer_handle),
-         string_buffer_c_string_length(http->response.buffer_handle),
+    send(http->socket, dino_string_c_ptr(http->response.buffer_handle),
+         dino_string_c_strlen(http->response.buffer_handle),
          0);
 }
 
@@ -621,7 +604,7 @@ void free_request(dino_handle_t *dhandle) {
             dhandle->http.request.url = NULL;
         }
 
-        string_buffer_delete(dhandle->http.response.buffer_handle, true);
+        dino_string_delete(dhandle->http.response.buffer_handle, true);
         dhandle->http.response.buffer_handle = NULL;
 
         dino_strmap_delete(dhandle->http.request.params_map);
@@ -637,11 +620,10 @@ void accept_request(dino_http_site_t *dino_site, dino_handle_t *dhandle) {
     //
     if (!read_request(&dhandle->http)) {
         bad_request(dhandle->http.socket);
-    }
-    else {
+    } else {
         // Parse the URL Parameters.
         //
-        stack_char_ptr_t *url_stack = stack_ptr_parse(NULL, string_buffer_c_string(dhandle->http.request.url), "/");
+        stack_char_ptr_t *url_stack = stack_ptr_parse(NULL, dino_string_c_ptr(dhandle->http.request.url), "/");
 
         // Search for a match...
         //
@@ -651,9 +633,9 @@ void accept_request(dino_http_site_t *dino_site, dino_handle_t *dhandle) {
         //
         if (NULL != route) {
             invoke_method(route, &dhandle->http, url_stack);
-        }
-        else {
-            fprintf(stderr, "[ERROR] Path %s not found; \n\r", string_buffer_c_string(dhandle->http.request.url));
+        } else {
+            log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "Path %s not found",
+                        dino_string_c_ptr(dhandle->http.request.url));
         }
 
         stack_ptr_free(url_stack);
@@ -667,9 +649,8 @@ void dino_process_request(dino_http_site_t *dino_site, int socket) {
     init_request(&dhandle);
 
     if (-1 == socket) {
-        log_error("accept", __FUNCTION__, __LINE__);
-    }
-    else {
+        log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "accept failed");
+    } else {
         dhandle.http.socket = socket;
         accept_request(dino_site, &dhandle);
     }
@@ -691,7 +672,7 @@ void dino_process_request(dino_http_site_t *dino_site, int socket) {
 
 void dino_http_start(dino_http_site_t *dino_site) {
     if (NULL == dino_site) {
-        fprintf(stderr, "[ERROR] The site is not defined..\n\r");
+        log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "The site is not defined");
         return;
     }
 
@@ -704,7 +685,8 @@ void dino_http_start(dino_http_site_t *dino_site) {
     g_server_socket = startup_connection(dino_site);
 
     if (-1 != g_server_socket) {
-        fprintf(stdout, "[INFO] Dino has taking the stage on port %d\n\r", dino_site->port);
+        log_message(LOG_INFO, __FUNCTION__, __FILE__, __LINE__, "Dino has taking the stage on port %d",
+                    dino_site->port);
 
         while (g_dino_keep_running) {
             int client_socket = accept(g_server_socket, (struct sockaddr *) &sockaddr_client, &sockaddr_client_length);

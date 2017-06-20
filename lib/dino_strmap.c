@@ -276,8 +276,7 @@ bool dino_strmap_put(str_map_t *map, const char *key, const char *value) {
             return false;
         }
         bucket->count = 1;
-    }
-    else {
+    } else {
         // The bucket wasn't empty but no pair existed that matches the provided
         // key, so create a new key-value pair.
         //

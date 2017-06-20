@@ -24,40 +24,10 @@
 //
 **********************************************************************/
 
-#ifndef dino_dino_utils_h
-#define dino_dino_utils_h
+#ifndef VERSION_CONFIG_H
+#define VERSION_CONFIG_H
 
-typedef struct stack_char_ptr_struct {
-    char *data;
-    size_t count;
-    char **pointers;
-} stack_char_ptr_t;
+#define DINO_LIB_VERSION "@DINO_LIB_VERSION@"
+#cmakedefine BCMHOST 1
 
-void *memory_clear(void *p, size_t n);
-
-void *memory_alloc(size_t n);
-
-void *memory_realloc(void *p, size_t n);
-
-void memory_free(void *p);
-
-void memory_cache_alloc(size_t n);
-
-void memory_cache_clear();
-
-void memory_cache_free();
-
-void stack_ptr_free(stack_char_ptr_t *stack);
-
-stack_char_ptr_t *stack_ptr_parse(stack_char_ptr_t *stack, const char *data, const char *delim);
-
-char *trim_whitespace(char *str);
-
-#define max(a, b) \
-       ({ \
-            __typeof__ (a) _a = (a); \
-            __typeof__ (b) _b = (b); \
-            _a > _b ? _a : _b; \
-        })
-
-#endif
+#endif // VERSION_CONFIG_H

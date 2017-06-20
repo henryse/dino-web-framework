@@ -1,5 +1,5 @@
 /**********************************************************************
-//    Copyright (c) 2015 Henry Seurer
+//    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining a copy of this software and associated documentation
@@ -26,6 +26,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <dino_string.h>
+#include <dino_template_generator.h>
 #include "dino.h"
 
 bool enum_params(DINO_DECLARE_VARS, const char *key, const char *value, const void *obj) {
@@ -49,12 +51,70 @@ GET(amor) {
     char *magicIngredient = "anchovies";
     RESPONSE_PRINTF(lyrics, ingredientOne, magicIngredient);
 
-
     RSP_HEADER_SET("Content-Type", "music");
 
     RSP_HEADER_SET("Content-Type", "text/html");
 
     RSP_HEADER_SET("Dino-Type", "Wine");
+
+    return HTTP_ERROR_CODE_OK;
+}
+
+bool template_compare_tag(const char *symbol, const char *tag){
+    return strncmp(symbol, tag, strlen(tag)) == 0;
+}
+
+
+const char *test_first_tag = "test.first";
+const char *test_second_tag = "test.second";
+
+bool function_string(void __unused *context_ptr,
+                     const char *symbol,
+                     dino_string_ptr output_string) {
+
+    if (template_compare_tag(symbol, test_first_tag)) {
+        dino_string_append_str(output_string, "666");
+        return true;
+    }
+
+    if (template_compare_tag(symbol, test_second_tag)) {
+        dino_string_append_str(output_string, "Testing 1,2,3");
+        return true;
+    }
+
+    return false;
+}
+
+bool function_boolean(void __unused *context_ptr,
+                      const char *symbol,
+                      bool *value) {
+
+    if (template_compare_tag(symbol, "test.boolean.false")) {
+        if (value) {
+            *value = false;
+        }
+        return true;
+    }
+
+    if (template_compare_tag(symbol, "test.boolean.true")) {
+        if (value) {
+            *value = true;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+GET(template_test) {
+
+    RSP_HEADER_SET("Content-Type", "text/html");
+
+    dino_string_ptr input_buffer;
+    dino_string_ptr output_buffer;
+
+    dino_template_error_t error = dino_template_generate_buffer(input_buffer, output_buffer,
+                                                        NULL, function_string, function_boolean);
 
     return HTTP_ERROR_CODE_OK;
 }
@@ -206,13 +266,16 @@ CONNECT(volare) {
     return HTTP_ERROR_CODE_OK;
 }
 
+
 int main(int argc, const char *argv[]) {
     unsigned short port = 9080;
     char *host = "localhost";
+    const char *application_name = "test_framework";
 
-    DINO_CONFIG_START(host);
+    DINO_CONFIG_START(application_name, host, true);
         HTTP_PORT(port);
         ROUTE_GET(amor, "/")
+        ROUTE_GET(template_test, "/template");
         ROUTE_GET(sway, "/:wine/:bottle")
         ROUTE_POST(main, "/")
         ROUTE_DELETE(main, "/")
