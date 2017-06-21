@@ -42,15 +42,7 @@ endif()
 
 # Set The correct compiler
 #
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_C_FLAGS "-std=gnu99")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    if(DEFINED BCMHOST)
-        set(CMAKE_C_FLAGS "-std=gnu99 -lwiringPi")
-    else()
-        set(CMAKE_C_FLAGS "-std=gnu99")
-    endif()
-endif ()
+set(CMAKE_C_FLAGS "-std=gnu99")
 
 # Versioning
 #

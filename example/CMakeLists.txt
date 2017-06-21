@@ -41,11 +41,7 @@ endif()
 
 # Set The correct compiler
 #
-if(DEFINED BCMHOST)
-    set(CMAKE_C_FLAGS "-std=gnu99 -lwiringPi")
-else()
-    set(CMAKE_C_FLAGS "-std=gnu99")
-endif()
+set(CMAKE_C_FLAGS "-std=gnu99")
 
 set(SOURCE_FILES
     main.c)
@@ -55,5 +51,9 @@ add_executable(dino-example ${SOURCE_FILES})
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries (dino-example LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT})
 else()
-    target_link_libraries (dino-example LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT} rt)
+    if(DEFINED BCMHOST)
+        target_link_libraries (dino-example LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT} rt wiringPi)
+    else()
+        target_link_libraries (dino-example LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT} rt)
+    endif()
 endif()
