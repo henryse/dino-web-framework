@@ -27,7 +27,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(DinoTest)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c99 -lrt")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu99 -pthread -lrt")
 
 set(SOURCE_FILES
     main.c)
