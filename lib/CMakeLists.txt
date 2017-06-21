@@ -27,7 +27,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(DinoLibrary)
 
-find_package(openssl REQUIRED)
+# find_package(openssl REQUIRED)
 
 set(DINO_LIB_VERSION "dino-server-1.1.0")
 
