@@ -28,6 +28,9 @@
 #define DINO_TEMPLATE_GENERATOR_H
 
 #include "dino_string.h"
+#ifndef __unused
+#define __unused
+#endif
 
 typedef enum {
     dino_template_no_error = 0,
