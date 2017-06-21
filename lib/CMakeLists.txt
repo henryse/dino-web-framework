@@ -37,7 +37,7 @@ if(EXISTS "/opt/vc/include/bcm_host.h")
     MESSAGE("-- bcm_host.h found, we must be on a Raspberry PI")
     set(BCMHOST found)
 else()
-    MESSAGE("-- bcm_host.h not found we must NOT on in a Raspberry PI")
+    MESSAGE("-- bcm_host.h not found we must NOT be on a Raspberry PI")
 endif()
 
 # Set The correct compiler

@@ -35,7 +35,7 @@ if(EXISTS "/opt/vc/include/bcm_host.h")
     MESSAGE("-- bcm_host.h found, we must be on a Raspberry PI")
     set(BCMHOST found)
 else()
-    MESSAGE("-- bcm_host.h not found we must NOT on in a Raspberry PI")
+    MESSAGE("-- bcm_host.h not found we must NOT be on a Raspberry PI")
 endif()
 
 
@@ -51,4 +51,9 @@ set(SOURCE_FILES
     main.c)
 
 add_executable(dino-example ${SOURCE_FILES})
-target_link_libraries (dino-example LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT})
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries (dino-example LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT})
+else()
+    target_link_libraries (dino-example LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT} rt)
+endif()
