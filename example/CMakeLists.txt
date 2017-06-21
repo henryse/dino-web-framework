@@ -35,5 +35,4 @@ set(SOURCE_FILES
     main.c)
 
 add_executable(dino-example ${SOURCE_FILES})
-target_link_libraries (dino-example LINK_PUBLIC dino-library)
-target_link_libraries (dino-example ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (dino-example LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT})
