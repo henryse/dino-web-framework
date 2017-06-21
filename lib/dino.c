@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <openssl/ssl.h>
+// #include <openssl/ssl.h>
 // #include <openssl/err.h>
 #include "dino.h"
 #include "dino_http.h"
@@ -208,11 +208,11 @@ DHANDLE DINO_EXPORT dino_config_start_https(const char *application_name, const 
         dino_site->host = dino_string_new_with_str(host);
         dino_site->port = 443;
         dino_site->list = NULL;
-        SSL_CTX *ctx = SSL_CTX_new (SSLv23_server_method ());
-        SSL_CTX_set_options (ctx,
-                             SSL_OP_SINGLE_DH_USE |
-                             SSL_OP_SINGLE_ECDH_USE |
-                             SSL_OP_NO_SSLv2);
+//        SSL_CTX *ctx = SSL_CTX_new (SSLv23_server_method ());
+//        SSL_CTX_set_options (ctx,
+//                             SSL_OP_SINGLE_DH_USE |
+//                             SSL_OP_SINGLE_ECDH_USE |
+//                             SSL_OP_NO_SSLv2);
         dino_site->handle_type = dino_handle_site;
     }
 

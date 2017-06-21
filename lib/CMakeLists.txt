@@ -56,7 +56,8 @@ endif ()
 # Versioning
 #
 configure_file(version_config.h.in ${CMAKE_BINARY_DIR}/generated/version_config.h)
-include_directories(${CMAKE_BINARY_DIR}/generated/ /usr/local/opt/openssl/include/)
+#include_directories(${CMAKE_BINARY_DIR}/generated/ /usr/local/opt/openssl/include/)
+include_directories(${CMAKE_BINARY_DIR}/generated/)
 
 set(SOURCE_FILES
         dino.c
