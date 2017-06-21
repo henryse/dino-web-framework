@@ -23,6 +23,7 @@
 //    OTHER DEALINGS IN THE SOFTWARE.
 //
 **********************************************************************/
+#define _GNU_SOURCE
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -222,3 +223,5 @@ long long timer_diff_minutes(struct timespec start_time) {
 const char *get_dino_version() {
     return DINO_LIB_VERSION;
 }
+
+#pragma clang diagnostic pop
