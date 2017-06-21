@@ -25,7 +25,7 @@
 #**********************************************************************
 
 cmake_minimum_required(VERSION 3.2)
-project(DinoLibrary)
+project(dino-library)
 
 # find_package(openssl REQUIRED)
 
@@ -78,9 +78,9 @@ set(SOURCE_FILES
         dino_debug.c
         dino_debug.h)
 
-add_library(DinoLibrary STATIC ${SOURCE_FILES})
+add_library(dino-library STATIC ${SOURCE_FILES})
 
-install(TARGETS DinoLibrary DESTINATION lib)
+install(TARGETS dino-library DESTINATION lib)
 install(FILES dino.h dino_http_error.h DESTINATION include)
 
-target_include_directories(DinoLibrary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(dino-library PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

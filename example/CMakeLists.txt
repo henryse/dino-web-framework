@@ -25,12 +25,12 @@
 #**********************************************************************
 
 cmake_minimum_required(VERSION 3.2)
-project(DinoExample)
+project(dino-example)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu99 -pthread -lrt")
 
 set(SOURCE_FILES
     main.c)
 
-add_executable(DinoExample ${SOURCE_FILES})
-target_link_libraries (DinoExample LINK_PUBLIC DinoLibrary)
+add_executable(dino-example ${SOURCE_FILES})
+target_link_libraries (dino-example LINK_PUBLIC dino-library)
