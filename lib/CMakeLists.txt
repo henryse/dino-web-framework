@@ -27,7 +27,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(dino-library)
 
-# find_package(openssl REQUIRED)
+find_package (Threads)
 
 set(DINO_LIB_VERSION "dino-server-1.1.0")
 
@@ -42,21 +42,19 @@ endif()
 
 # Set The correct compiler
 #
-MESSAGE("-- Using compiler ${CMAKE_CXX_COMPILER_ID}")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_C_FLAGS "-std=gnu99 -lrt")
+    set(CMAKE_C_FLAGS "-std=gnu99")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if(DEFINED BCMHOST)
-        set(CMAKE_C_FLAGS "-std=gnu99 -pthread -lwiringPi -lrt")
+        set(CMAKE_C_FLAGS "-std=gnu99 -lwiringPi")
     else()
-        set(CMAKE_C_FLAGS "-std=gnu99 -pthread -lrt")
+        set(CMAKE_C_FLAGS "-std=gnu99")
     endif()
 endif ()
 
 # Versioning
 #
 configure_file(version_config.h.in ${CMAKE_BINARY_DIR}/generated/version_config.h)
-#include_directories(${CMAKE_BINARY_DIR}/generated/ /usr/local/opt/openssl/include/)
 include_directories(${CMAKE_BINARY_DIR}/generated/)
 
 set(SOURCE_FILES

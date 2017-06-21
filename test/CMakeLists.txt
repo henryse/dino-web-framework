@@ -27,11 +27,30 @@
 cmake_minimum_required(VERSION 3.2)
 project(dino-test)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu99 -pthread -lrt")
+find_package (Threads)
+
+
+# Check to see if we are running on a Raspberry PI
+#
+if(EXISTS "/opt/vc/include/bcm_host.h")
+    MESSAGE("-- bcm_host.h found, we must be on a Raspberry PI")
+    set(BCMHOST found)
+else()
+    MESSAGE("-- bcm_host.h not found we must NOT on in a Raspberry PI")
+endif()
+
+
+# Set The correct compiler
+#
+if(DEFINED BCMHOST)
+    set(CMAKE_C_FLAGS "-std=gnu99 -lwiringPi")
+else()
+    set(CMAKE_C_FLAGS "-std=gnu99")
+endif()
 
 set(SOURCE_FILES
     main.c)
 
 add_executable(dino-test ${SOURCE_FILES})
 
-target_link_libraries (dino-test LINK_PUBLIC dino-library)
+target_link_libraries (dino-test LINK_PUBLIC dino-library ${CMAKE_THREAD_LIBS_INIT})
