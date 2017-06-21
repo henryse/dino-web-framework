@@ -171,18 +171,18 @@ int dino_string_strcmp(dino_string_ptr dino_string_1, dino_string_ptr dino_strin
                        dino_string_c_strlen(dino_string_2)));
 }
 
-char *dino_string_c_ptr(dino_string_ptr string_ptr){
-    char *empty_string="";
+char *dino_string_c_ptr(dino_string_ptr string_ptr) {
+    char *empty_string = "";
 
-    if (string_ptr == NULL || string_ptr->c_string == NULL){
+    if (string_ptr == NULL || string_ptr->c_string == NULL) {
         return empty_string;
     }
 
     return (string_ptr)->c_string;
 }
 
-size_t dino_string_c_strlen(dino_string_ptr string_ptr){
-    if (string_ptr == NULL || string_ptr->c_string == NULL){
+size_t dino_string_c_strlen(dino_string_ptr string_ptr) {
+    if (string_ptr == NULL || string_ptr->c_string == NULL) {
         return 0;
     }
 

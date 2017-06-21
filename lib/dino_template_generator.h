@@ -50,10 +50,10 @@ dino_template_error_t dino_template_generate_buffer(dino_string_ptr input_buffer
                                                     function_string_ptr_t function_string_ptr,
                                                     function_boolean_ptr_t function_boolean_ptr);
 
-dino_template_error_t dino_template_process_file(dino_string_ptr source_file,
-                                                    dino_string_ptr response,
-                                                    void *context_ptr,
-                                                    function_string_ptr_t function_string_ptr,
-                                                    function_boolean_ptr_t function_boolean_ptr);
+dino_template_error_t  __unused dino_template_process_file(dino_string_ptr source_file,
+                                                 dino_string_ptr response,
+                                                 void *context_ptr,
+                                                 function_string_ptr_t function_string_ptr,
+                                                 function_boolean_ptr_t function_boolean_ptr);
 
 #endif //DINO_TEMPLATE_GENERATOR_H

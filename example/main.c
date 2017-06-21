@@ -211,10 +211,7 @@ int main(int argc, const char *argv[]) {
     char *host = "localhost";
     const char *application_name="dino_example";
 
-    DINO_CONFIG_START(application_name, host, true);
-
-        HTTP_PORT(port);
-
+    DINO_CONFIG_START_HTTP(application_name, host, port, true);
         ROUTE_GET(amor, "/")
         ROUTE_GET(sway, "/:wine/:bottle")
         ROUTE_POST(main, "/")

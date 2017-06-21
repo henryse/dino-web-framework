@@ -33,6 +33,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <openssl/ssl.h>
+// #include <openssl/err.h>
 #include "dino.h"
 #include "dino_http.h"
 #include "dino_debug.h"
@@ -174,7 +176,7 @@ bool add_method_to_site(dino_http_method method, DHANDLE dhandle, http_verb_func
     return true;
 }
 
-DHANDLE DINO_EXPORT dino_config_start(const char *application_name, const char *host, bool enable_logging,
+DHANDLE DINO_EXPORT dino_config_start_http(const char *application_name, const char *host, bool enable_logging,
                                       const char *function, const char *file, int line) {
     set_application_name(application_name);
     set_log_mode(enable_logging);
@@ -187,6 +189,30 @@ DHANDLE DINO_EXPORT dino_config_start(const char *application_name, const char *
         dino_site->host = dino_string_new_with_str(host);
         dino_site->port = 80;
         dino_site->list = NULL;
+        dino_site->handle_type = dino_handle_site;
+    }
+
+    return dino_site;
+}
+
+DHANDLE DINO_EXPORT dino_config_start_https(const char *application_name, const char *host, bool enable_logging,
+                                           const char *function, const char *file, int line) {
+    set_application_name(application_name);
+    set_log_mode(enable_logging);
+
+    log_message(LOG_INFO, function, file, line, "Config Start with host %s.", host);
+
+    dino_http_site_t *dino_site = (dino_http_site_t *) memory_alloc(sizeof(dino_http_site_t));
+    if (NULL != dino_site) {
+
+        dino_site->host = dino_string_new_with_str(host);
+        dino_site->port = 443;
+        dino_site->list = NULL;
+        SSL_CTX *ctx = SSL_CTX_new (SSLv23_server_method ());
+        SSL_CTX_set_options (ctx,
+                             SSL_OP_SINGLE_DH_USE |
+                             SSL_OP_SINGLE_ECDH_USE |
+                             SSL_OP_NO_SSLv2);
         dino_site->handle_type = dino_handle_site;
     }
 

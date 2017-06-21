@@ -51,7 +51,7 @@ typedef int (*http_verb_func)(DHANDLE);
 
 // Low Level Bindings for Routes API  (WARNING: for Binding and Routes please use the MACROS below)
 //
-DHANDLE DINO_EXTERN dino_config_start(const char *application_name, const char *host, bool enable_logging,
+DHANDLE DINO_EXTERN dino_config_start_http(const char *application_name, const char *host, bool enable_logging,
                                       const char *function, const char *file, int line);
 
 bool DINO_EXTERN dino_http_port(DHANDLE dhandle, unsigned short port, const char *function, const char *file, int line);
@@ -106,11 +106,17 @@ void DINO_EXTERN params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
 
 // MACRO API for Bindings for Routes
 //
-#define DINO_CONFIG_START(application_name, host, enable_logging) DHANDLE dhandle = NULL; \
+#define DINO_CONFIG_START_HTTP(application_name, host, port, enable_logging) DHANDLE dhandle = NULL; \
             do {  \
-                dhandle = dino_config_start(application_name, host, enable_logging, __FUNCTION__, __FILE__, __LINE__);
+                dhandle = dino_config_start_http(application_name, host, enable_logging, __FUNCTION__, __FILE__, __LINE__); \
+                if (!dino_http_port(dhandle, port, __FUNCTION__, __FILE__, __LINE__)) break;
 
-#define HTTP_PORT(port)                  if (!dino_http_port(dhandle, port, __FUNCTION__, __FILE__, __LINE__)) break;
+
+#define DINO_CONFIG_START_HTTPS(application_name, host, port, enable_logging) DHANDLE dhandle = NULL; \
+            do {  \
+                dhandle = dino_config_start_https(application_name, host, enable_logging, __FUNCTION__, __FILE__, __LINE__); \
+                if (!dino_http_port(dhandle, port, __FUNCTION__, __FILE__, __LINE__)) break;
+
 #define ROUTE_GET(route_name, path)      if (!dino_route_get(dhandle, get_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
 #define ROUTE_POST(route_name, path)     if (!dino_route_post(dhandle, post_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
 #define ROUTE_DELETE(route_name, path)   if (!dino_route_delete(dhandle, delete_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;

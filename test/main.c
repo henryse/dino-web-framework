@@ -1,4 +1,4 @@
-/**********************************************************************
+#include <ntsid.h>/**********************************************************************
 //    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dino_string.h>
-#include <dino_template_generator.h>
+// #include <dino_template_generator.h>
 #include "dino.h"
 
 bool enum_params(DINO_DECLARE_VARS, const char *key, const char *value, const void *obj) {
@@ -68,7 +68,7 @@ bool template_compare_tag(const char *symbol, const char *tag){
 const char *test_first_tag = "test.first";
 const char *test_second_tag = "test.second";
 
-bool function_string(void __unused *context_ptr,
+bool __unused function_string(void __unused *context_ptr,
                      const char *symbol,
                      dino_string_ptr output_string) {
 
@@ -85,7 +85,7 @@ bool function_string(void __unused *context_ptr,
     return false;
 }
 
-bool function_boolean(void __unused *context_ptr,
+bool __unused function_boolean(void __unused *context_ptr,
                       const char *symbol,
                       bool *value) {
 
@@ -110,13 +110,17 @@ GET(template_test) {
 
     RSP_HEADER_SET("Content-Type", "text/html");
 
-    dino_string_ptr input_buffer;
-    dino_string_ptr output_buffer;
+//    dino_string_ptr input_buffer;
+//    dino_string_ptr output_buffer;
+//
+//    dino_template_error_t error = dino_template_generate_buffer(input_buffer, output_buffer,
+//                                                        NULL, function_string, function_boolean);
+//
+//    if (error == dino_template_no_error){
+//        return HTTP_ERROR_CODE_OK;
+//    }
 
-    dino_template_error_t error = dino_template_generate_buffer(input_buffer, output_buffer,
-                                                        NULL, function_string, function_boolean);
-
-    return HTTP_ERROR_CODE_OK;
+    return HTTP_ERROR_CODE_PROCESSING;
 }
 
 void sway_test(DINO_DECLARE_VARS) {
@@ -272,8 +276,7 @@ int main(int argc, const char *argv[]) {
     char *host = "localhost";
     const char *application_name = "test_framework";
 
-    DINO_CONFIG_START(application_name, host, true);
-        HTTP_PORT(port);
+    DINO_CONFIG_START_HTTP(application_name, host, port, true);
         ROUTE_GET(amor, "/")
         ROUTE_GET(template_test, "/template");
         ROUTE_GET(sway, "/:wine/:bottle")

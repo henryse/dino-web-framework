@@ -120,7 +120,7 @@ dino_string_ptr pi_template_get_symbol(const char *begin_tag, char **end_tag) {
         }
     }
 
-    dino_string_ptr symbol = dino_string_new(*end_tag - begin_tag);
+    dino_string_ptr symbol = dino_string_new_with_size(*end_tag - begin_tag);
     dino_string_append_str_length(symbol, begin_tag, *end_tag - begin_tag);
 
     return symbol;
@@ -320,7 +320,7 @@ dino_template_error_t dino_template_generate_buffer(dino_string_ptr input_buffer
         ptr_in++;
     }
 
-    dino_string_ptr symbol_buffer = dino_string_new(64);
+    dino_string_ptr symbol_buffer = dino_string_new();
 
     while (ptr_in < ptr_EOF) {
         //  Look for '%' and then see if we have a "<%"
@@ -409,7 +409,7 @@ size_t http_html_file_size(FILE *file_p) {
     return (size_t) file_size;
 }
 
-dino_template_error_t dino_template_process_file(dino_string_ptr source_file,
+dino_template_error_t  __unused dino_template_process_file(dino_string_ptr source_file,
                                                  dino_string_ptr response,
                                                  void *context_ptr,
                                                  function_string_ptr_t function_string_ptr,
@@ -418,10 +418,10 @@ dino_template_error_t dino_template_process_file(dino_string_ptr source_file,
 
     dino_template_error_t status = dino_template_invalid_input;
 
-    if (file_p){
+    if (file_p) {
         size_t file_size = http_html_file_size(file_p);
 
-        if (file_size){
+        if (file_size) {
 
             // Read in the file:
             //
@@ -431,12 +431,13 @@ dino_template_error_t dino_template_process_file(dino_string_ptr source_file,
             if (fread(file_contents, file_size, sizeof(char), file_p) != 0) {
                 // Setup buffers.
                 //
-                dino_string_ptr input_buffer = dino_string_new(file_size + 1);
+                dino_string_ptr input_buffer = dino_string_new_with_size(file_size + 1);
                 dino_string_append_str_length(input_buffer, file_contents, file_size);
 
-                dino_string_ptr response_body = dino_string_new(file_size + 1);
+                dino_string_ptr response_body = dino_string_new_with_size(file_size + 1);
 
-                dino_template_generate_buffer(input_buffer, response_body, context_ptr, function_string_ptr, function_boolean_ptr);
+                dino_template_generate_buffer(input_buffer, response_body, context_ptr, function_string_ptr,
+                                              function_boolean_ptr);
 
                 // Output the header
                 //
@@ -450,8 +451,7 @@ dino_template_error_t dino_template_process_file(dino_string_ptr source_file,
                 dino_string_delete(response_body, true);
                 dino_string_delete(input_buffer, true);
                 status = dino_template_no_error;
-            }
-            else {
+            } else {
                 ERROR_LOG("Unable to read file %s", dino_string_c_ptr(source_file));
                 status = dino_template_file_not_found;
             }
