@@ -207,10 +207,10 @@ Configuration
 
 DINO_CONFIG_START_HTTP(application_name, host, port, logging);  
 This line is required to declare the beginning of the route configuration.  
-application_name - application name to be used for logging
-host - host or ip address t listen on
-port - port to listen on
-logging - true/false to enable sys logging.
+* application_name - application name to be used for logging
+* host - host or ip address t listen on
+* port - port to listen on
+* logging - true/false to enable sys logging.
 
 ROUTE_GET(route_name, path)
 
