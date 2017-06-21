@@ -1,4 +1,4 @@
-#include <ntsid.h>/**********************************************************************
+/**********************************************************************
 //    Copyright (c) 2017 Henry Seurer
 //
 //    Permission is hereby granted, free of charge, to any person
