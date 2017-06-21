@@ -30,7 +30,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <sys/syslog.h>
+#include <syslog.h>
 
 struct timespec timer_start();
 

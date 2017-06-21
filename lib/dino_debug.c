@@ -30,6 +30,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <time.h>
+#include <syslog.h>
 #include "version_config.h"
 
 #ifdef __MACH__
@@ -223,5 +224,3 @@ long long timer_diff_minutes(struct timespec start_time) {
 const char *get_dino_version() {
     return DINO_LIB_VERSION;
 }
-
-#pragma clang diagnostic pop
