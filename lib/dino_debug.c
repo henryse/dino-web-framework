@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <syslog.h>
+#include <string.h>
 #include "version_config.h"
 
 #ifdef __MACH__
