@@ -3,6 +3,11 @@
 
 In my professional career I use Java and C++ but my favorite two languages are C and Ruby.   I wanted to create a web server framework for my Raspberry PI that would be simple and memory efficient.  This is not intended as High Performance Framework like NGINX or a Reactor Pattern like JavaRX.  It is simply an easy to use framework to create simple web services for small systems in C.
 
+This framework's targeted platforms are:
+* Debian Raspberry PI
+* Debian Intel
+* Mac OS X
+
 The inspiration for this framework came from folks at [Sinatra](http://www.sinatrarb.com), hence it is named of after that other famous member of the rat pack: Dino or Dean Martin. 
 
 Dino is a simple web framework for quickly creating web applications in C with minimal effort.  
@@ -22,11 +27,11 @@ Define a route by binding it to a path:
 ~~~C
 int main(int argc, const char * argv[])
 {
-    int port = 3030;
+    unsigned short port = 9080;
     char *host = "localhost";
+    const char *application_name="dino_example";
     
-    DINO_CONFIG_START_HTTP(host);
-        HTTP_PORT(port)
+    DINO_CONFIG_START_HTTP(application_name, host, port, true);  
         ROUTE_GET(amor, "/amor")
         ROUTE_GET(base, "/")
     DINO_CONFIG_END;
@@ -88,9 +93,9 @@ int main(int argc, const char * argv[])
 {
     int port = 3030;
     char *host = "localhost";
+    const char *application_name="dino_example";
     
-    DINO_CONFIG_START_HTTP(host);
-        HTTP_PORT(port)
+    DINO_CONFIG_START_HTTP(application_name, host, port, true);  
         ROUTE_GET(amor, "/amor")
         ROUTE_GET(base, "/")
     DINO_CONFIG_END;
@@ -135,9 +140,9 @@ int main(int argc, const char * argv[])
 {
     int port = 3031;
     char *host = "localhost";
+    const char *application_name="dino_example";
     
-    DINO_CONFIG_START_HTTP(host);
-        HTTP_PORT(port)
+    DINO_CONFIG_START_HTTP(application_name, host, port, true);  
         ROUTE_GET(amor, "/")
         ROUTE_GET(sway, "/:wine/:bottle")
         ROUTE_POST(main, "/")
@@ -158,18 +163,10 @@ int main(int argc, const char * argv[])
 The config block starts off with the port and the host that the server will listen on:
 
 ~~~C
-DINO_CONFIG_START_HTTP(host);
+DINO_CONFIG_START_HTTP(application_name, host, port, true);  
 ~~~
 
 Then each route is bound to a name, for example amor is bound to "http://host:port/" and sway is bound to "http://host:port/sway"
-
-
-~~~C
-HTTP_PORT(port);
-~~~
-
-Port to use for HTTP requests, for example: "http://host:port/".  The default is 80
-
 
 ~~~C
 	ROUTE_GET(amor, "/")
@@ -208,12 +205,12 @@ API
 Configuration
 ----
 
-DINO_CONFIG_START_HTTP(host)
+DINO_CONFIG_START_HTTP(application_name, host, port, logging);  
 This line is required to declare the beginning of the route configuration.  
+application_name - application name to be used for logging
 host - host or ip address t listen on
-
-HTTP_PORT(port)
-port - TCP Port to listen on
+port - port to listen on
+logging - true/false to enable sys logging.
 
 ROUTE_GET(route_name, path)
 
