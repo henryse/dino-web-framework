@@ -28,6 +28,9 @@
 #pragma ide diagnostic ignored "OCUnusedMacroInspection"
 #ifndef dino_dino_h
 #define dino_dino_h
+#ifndef __unused
+#define __unused
+#endif
 
 #include <stdbool.h>
 #include "dino_http_error.h"
