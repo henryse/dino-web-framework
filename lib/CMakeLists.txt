@@ -44,7 +44,7 @@ endif()
 #
 MESSAGE("-- Using compiler ${CMAKE_CXX_COMPILER_ID}")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_C_FLAGS "-std=gnu99")
+    set(CMAKE_C_FLAGS "-std=gnu99 -lrt")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if(DEFINED BCMHOST)
         set(CMAKE_C_FLAGS "-std=gnu99 -pthread -lwiringPi -lrt")
