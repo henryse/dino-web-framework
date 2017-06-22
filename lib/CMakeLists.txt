@@ -65,12 +65,13 @@ set(SOURCE_FILES
         dino_intmap.h
         dino_template_generator.c
         dino_template_generator.h
+        dino_template_types.h
         dino_debug.c
         dino_debug.h)
 
 add_library(dino-library STATIC ${SOURCE_FILES})
 
 install(TARGETS dino-library DESTINATION lib)
-install(FILES dino.h dino_http_error.h DESTINATION include)
+install(FILES dino.h dino_http_error.h dino_template_types.h DESTINATION include)
 
 target_include_directories(dino-library PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

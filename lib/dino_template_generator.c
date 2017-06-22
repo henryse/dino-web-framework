@@ -141,9 +141,15 @@ bool pi_template_resolve_symbol(pi_template_generator_t *ptg_context,
             dino_string_reset(result_buffer);
         }
 
+        char *result_ptr = NULL;
         valid = (*ptg_context->function_string_ptr)(ptg_context->context_ptr,
                                                     dino_string_c_ptr(symbol_buffer),
-                                                    result_buffer);
+                                                    &result_ptr);
+
+        if (result_ptr != NULL) {
+            dino_string_append_str(result_buffer, result_ptr);
+            free(result_ptr);
+        }
 
         if (valid && operator_type == operator_type_invalid) {
             intmap_put(ptg_context->symbol_map, dino_string_c_ptr(symbol_buffer), operator_type_variable);
@@ -410,10 +416,10 @@ size_t http_html_file_size(FILE *file_p) {
 }
 
 dino_template_error_t  __unused dino_template_process_file(dino_string_ptr source_file,
-                                                 dino_string_ptr response,
-                                                 void *context_ptr,
-                                                 function_string_ptr_t function_string_ptr,
-                                                 function_boolean_ptr_t function_boolean_ptr) {
+                                                           dino_string_ptr response,
+                                                           void *context_ptr,
+                                                           function_string_ptr_t function_string_ptr,
+                                                           function_boolean_ptr_t function_boolean_ptr) {
     FILE *file_p = fopen(dino_string_c_ptr(source_file), "r");
 
     dino_template_error_t status = dino_template_invalid_input;

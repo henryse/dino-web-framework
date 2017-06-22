@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dino_string.h>
-// #include <dino_template_generator.h>
+#include <stdlib.h>
 #include "dino.h"
 
 bool enum_params(DINO_DECLARE_VARS, const char *key, const char *value, const void *obj) {
@@ -67,40 +67,44 @@ bool template_compare_tag(const char *symbol, const char *tag){
 
 const char *test_first_tag = "test.first";
 const char *test_second_tag = "test.second";
+const char *test_first_output = "test first output";
+const char *test_second_output = "test second output";
 
-bool __unused function_string(void __unused *context_ptr,
+bool __unused test_function_string(void __unused *context_ptr,
                      const char *symbol,
-                     dino_string_ptr output_string) {
+                     char **output_string) {
 
-    if (template_compare_tag(symbol, test_first_tag)) {
-        dino_string_append_str(output_string, "666");
-        return true;
-    }
+    if (output_string) {
+        if (template_compare_tag(symbol, test_first_tag)) {
+            *output_string = malloc(strlen(test_first_output) + 1);
+            strcpy(*output_string, test_first_output);
+            return true;
+        }
 
-    if (template_compare_tag(symbol, test_second_tag)) {
-        dino_string_append_str(output_string, "Testing 1,2,3");
-        return true;
+        if (template_compare_tag(symbol, test_second_tag)) {
+            *output_string = malloc(strlen(test_second_output) + 1);
+            strcpy(*output_string, test_second_output);
+            return true;
+        }
     }
 
     return false;
 }
 
-bool __unused function_boolean(void __unused *context_ptr,
+bool __unused test_function_boolean(void __unused *context_ptr,
                       const char *symbol,
                       bool *value) {
 
-    if (template_compare_tag(symbol, "test.boolean.false")) {
-        if (value) {
+    if (value) {
+        if (template_compare_tag(symbol, "test.boolean.false")) {
             *value = false;
+            return true;
         }
-        return true;
-    }
 
-    if (template_compare_tag(symbol, "test.boolean.true")) {
-        if (value) {
+        if (template_compare_tag(symbol, "test.boolean.true")) {
             *value = true;
+            return true;
         }
-        return true;
     }
 
     return false;
@@ -110,15 +114,22 @@ GET(template_test) {
 
     RSP_HEADER_SET("Content-Type", "text/html");
 
-//    dino_string_ptr input_buffer;
-//    dino_string_ptr output_buffer;
-//
-//    dino_template_error_t error = dino_template_generate_buffer(input_buffer, output_buffer,
-//                                                        NULL, function_string, function_boolean);
-//
-//    if (error == dino_template_no_error){
-//        return HTTP_ERROR_CODE_OK;
-//    }
+    char *output_buffer = NULL;
+
+    dino_template_error_t error = TEMPLATE_GENERATE_BUFFER("<%=test_string%>",
+                                                           &output_buffer,
+                                                           NULL,
+                                                           test_function_string,
+                                                           test_function_boolean);
+
+    if (output_buffer){
+        RESPONSE_SEND(output_buffer, strlen(output_buffer));
+        free(output_buffer);
+    }
+
+    if (error == dino_template_no_error){
+        return HTTP_ERROR_CODE_OK;
+    }
 
     return HTTP_ERROR_CODE_PROCESSING;
 }

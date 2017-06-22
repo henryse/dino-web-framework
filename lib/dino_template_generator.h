@@ -28,24 +28,11 @@
 #define DINO_TEMPLATE_GENERATOR_H
 
 #include "dino_string.h"
+#include "dino_template_types.h"
+
 #ifndef __unused
 #define __unused
 #endif
-
-typedef enum {
-    dino_template_no_error = 0,
-    dino_template_invalid_input,
-    dino_template_file_not_found
-} dino_template_error_t;
-
-
-typedef bool ( *function_string_ptr_t )(void *context_ptr,
-                                        const char *symbol,
-                                        dino_string_ptr value);
-
-typedef bool ( *function_boolean_ptr_t )(void *context_ptr,
-                                         const char *symbol,
-                                         bool *value);
 
 dino_template_error_t dino_template_generate_buffer(dino_string_ptr input_buffer,
                                                     dino_string_ptr output_buffer,
@@ -53,7 +40,7 @@ dino_template_error_t dino_template_generate_buffer(dino_string_ptr input_buffer
                                                     function_string_ptr_t function_string_ptr,
                                                     function_boolean_ptr_t function_boolean_ptr);
 
-dino_template_error_t  __unused dino_template_process_file(dino_string_ptr source_file,
+dino_template_error_t dino_template_process_file(dino_string_ptr source_file,
                                                  dino_string_ptr response,
                                                  void *context_ptr,
                                                  function_string_ptr_t function_string_ptr,

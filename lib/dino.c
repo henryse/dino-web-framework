@@ -38,6 +38,7 @@
 #include "dino.h"
 #include "dino_http.h"
 #include "dino_debug.h"
+#include "dino_template_generator.h"
 
 // DHANDLE Casting helpers functions.
 //
@@ -177,7 +178,7 @@ bool add_method_to_site(dino_http_method method, DHANDLE dhandle, http_verb_func
 }
 
 DHANDLE DINO_EXPORT dino_config_start_http(const char *application_name, const char *host, bool enable_logging,
-                                      const char *function, const char *file, int line) {
+                                           const char *function, const char *file, int line) {
     set_application_name(application_name);
     set_log_mode(enable_logging);
 
@@ -196,7 +197,7 @@ DHANDLE DINO_EXPORT dino_config_start_http(const char *application_name, const c
 }
 
 DHANDLE DINO_EXPORT dino_config_start_https(const char *application_name, const char *host, bool enable_logging,
-                                           const char *function, const char *file, int line) {
+                                            const char *function, const char *file, int line) {
     set_application_name(application_name);
     set_log_mode(enable_logging);
 
@@ -441,5 +442,60 @@ void DINO_EXPORT params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
     }
 }
 
+dino_template_error_t DINO_EXTERN template_generate_buffer(const char *input_buffer,
+                                                           char **output_buffer,
+                                                           void *context_ptr,
+                                                           function_string_ptr_t function_string_ptr,
+                                                           function_boolean_ptr_t function_boolean_ptr,
+                                                           const char *function, const char *file, int line) {
+    log_message(LOG_INFO, function, file, line, "dino_template_generate_buffer");
+
+    dino_string_ptr input_buffer_ptr = dino_string_new_with_str(input_buffer);
+    dino_string_ptr output_buffer_ptr = dino_string_new();
+
+    dino_template_error_t error = dino_template_generate_buffer(input_buffer_ptr,
+                                                                output_buffer_ptr,
+                                                                context_ptr,
+                                                                function_string_ptr,
+                                                                function_boolean_ptr);
+
+    if (output_buffer) {
+        *output_buffer = dino_string_c_ptr(output_buffer_ptr);
+        dino_string_delete(output_buffer_ptr, false);
+    } else {
+        dino_string_delete(output_buffer_ptr, true);
+    }
+
+    return error;
+}
+
+dino_template_error_t DINO_EXTERN template_process_file(const char *source_file,
+                                                        char **output_buffer,
+                                                        void *context_ptr,
+                                                        function_string_ptr_t function_string_ptr,
+                                                        function_boolean_ptr_t function_boolean_ptr,
+                                                        const char *function, const char *file, int line) {
+    log_message(LOG_INFO, function, file, line, "dino_template_process_file");
+
+    dino_string_ptr source_file_ptr = dino_string_new_with_str(source_file);
+    dino_string_ptr output_buffer_ptr = dino_string_new();
+
+    dino_template_error_t error = dino_template_process_file(source_file_ptr,
+                                                             output_buffer_ptr,
+                                                             context_ptr,
+                                                             function_string_ptr,
+                                                             function_boolean_ptr);
+
+    dino_string_delete(source_file_ptr, true);
+
+    if (output_buffer) {
+        *output_buffer = dino_string_c_ptr(output_buffer_ptr);
+        dino_string_delete(output_buffer_ptr, false);
+    } else {
+        dino_string_delete(output_buffer_ptr, true);
+    }
+
+    return error;
+}
 
 #pragma clang diagnostic pop

@@ -34,6 +34,7 @@
 
 #include <stdbool.h>
 #include "dino_http_error.h"
+#include "dino_template_types.h"
 
 #ifndef DINO_EXTERN
 #define DINO_EXTERN extern
@@ -55,7 +56,7 @@ typedef int (*http_verb_func)(DHANDLE);
 // Low Level Bindings for Routes API  (WARNING: for Binding and Routes please use the MACROS below)
 //
 DHANDLE DINO_EXTERN dino_config_start_http(const char *application_name, const char *host, bool enable_logging,
-                                      const char *function, const char *file, int line);
+                                           const char *function, const char *file, int line);
 
 bool DINO_EXTERN dino_http_port(DHANDLE dhandle, unsigned short port, const char *function, const char *file, int line);
 
@@ -120,14 +121,22 @@ void DINO_EXTERN params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
                 dhandle = dino_config_start_https(application_name, host, enable_logging, __FUNCTION__, __FILE__, __LINE__); \
                 if (!dino_http_port(dhandle, port, __FUNCTION__, __FILE__, __LINE__)) break;
 
-#define ROUTE_GET(route_name, path)      if (!dino_route_get(dhandle, get_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
-#define ROUTE_POST(route_name, path)     if (!dino_route_post(dhandle, post_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
-#define ROUTE_DELETE(route_name, path)   if (!dino_route_delete(dhandle, delete_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
-#define ROUTE_PUT(route_name, path)      if (!dino_route_put(dhandle, put_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
-#define ROUTE_OPTIONS(route_name, path)  if (!dino_route_options(dhandle, options_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
-#define ROUTE_HEAD(route_name, path)     if (!dino_route_head(dhandle, head_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
-#define ROUTE_TRACE(route_name, path)    if (!dino_route_trace(dhandle, trace_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
-#define ROUTE_CONNECT(route_name, path)  if (!dino_route_connect(dhandle, connect_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
+#define ROUTE_GET(route_name, path) \
+    if (!dino_route_get(dhandle, get_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
+#define ROUTE_POST(route_name, path) \
+    if (!dino_route_post(dhandle, post_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
+#define ROUTE_DELETE(route_name, path) \
+    if (!dino_route_delete(dhandle, delete_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
+#define ROUTE_PUT(route_name, path) \
+    if (!dino_route_put(dhandle, put_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
+#define ROUTE_OPTIONS(route_name, path) \
+    if (!dino_route_options(dhandle, options_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
+#define ROUTE_HEAD(route_name, path) \
+    if (!dino_route_head(dhandle, head_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
+#define ROUTE_TRACE(route_name, path) \
+    if (!dino_route_trace(dhandle, trace_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
+#define ROUTE_CONNECT(route_name, path) \
+    if (!dino_route_connect(dhandle, connect_##route_name, #route_name, path, __FUNCTION__, __FILE__, __LINE__)) break;
 
 #define DINO_CONFIG_END } while(0)
 
@@ -160,5 +169,31 @@ void DINO_EXTERN params_enumerate(DHANDLE dhandle, dino_enum_func callback, cons
 #define DINO_VARS           dhandle
 #define DINO_DECLARE_VARS   DHANDLE dhandle
 #endif
+
+// Template Generator Low level APIs to the template generator, (WARNING: for Please use the MACROS below)
+//
+
+dino_template_error_t DINO_EXTERN template_generate_buffer(const char *input_buffer,
+                                                           char **output_buffer,
+                                                           void *context_ptr,
+                                                           function_string_ptr_t function_string_ptr,
+                                                           function_boolean_ptr_t function_boolean_ptr,
+                                                           const char *function, const char *file, int line);
+
+dino_template_error_t DINO_EXTERN template_process_file(const char *source_file,
+                                                        char **output_buffer,
+                                                        void *context_ptr,
+                                                        function_string_ptr_t function_string_ptr,
+                                                        function_boolean_ptr_t function_boolean_ptr,
+                                                        const char *function, const char *file, int line);
+
+
+#define TEMPLATE_GENERATE_BUFFER(input_buffer, output_buffer, context_ptr, function_string_ptr, function_boolean_ptr) \
+    template_generate_buffer(input_buffer, output_buffer, context_ptr, function_string_ptr, function_boolean_ptr \
+        , __FUNCTION__, __FILE__, __LINE__)
+
+#define TEMPLATE_GENERATE_FILE(source_file, output_buffer, context_ptr, function_string_ptr, function_boolean_ptr) \
+    template_process_file(source_file, output_buffer, context_ptr, function_string_ptr, function_boolean_ptr \
+        , __FUNCTION__, __FILE__, __LINE__)
 
 #pragma clang diagnostic pop

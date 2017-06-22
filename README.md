@@ -94,8 +94,9 @@ int main(int argc, const char * argv[])
     int port = 3030;
     char *host = "localhost";
     const char *application_name="dino_example";
+    bool logging = true;
     
-    DINO_CONFIG_START_HTTP(application_name, host, port, true);  
+    DINO_CONFIG_START_HTTP(application_name, host, port, logging);  
         ROUTE_GET(amor, "/amor")
         ROUTE_GET(base, "/")
     DINO_CONFIG_END;
