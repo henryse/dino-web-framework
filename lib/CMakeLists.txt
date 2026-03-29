@@ -24,12 +24,12 @@
 #
 #**********************************************************************
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 4.2)
 project(dino-library)
 
 find_package (Threads)
 
-set(DINO_LIB_VERSION "dino-server-1.1.0")
+set(DINO_LIB_VERSION "dino-server-1.2.0")
 
 # Check to see if we are running on a Raspberry PI
 #

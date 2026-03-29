@@ -24,7 +24,7 @@
 #
 #**********************************************************************
 
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 4.2)
 project(dino-test)
 
 find_package (Threads)
