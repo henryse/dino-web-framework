@@ -27,6 +27,7 @@
 #ifndef dino_dino_http_h
 #define dino_dino_http_h
 
+#include "dino.h"
 #include "dino_utils.h"
 #include "dino_strmap.h"
 #include "dino_string.h"

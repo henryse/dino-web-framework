@@ -35,8 +35,6 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <string.h>
-#include <stdlib.h>
-#include "dino.h"
 #include "dino_http.h"
 #include "dino_debug.h"
 
@@ -215,6 +213,13 @@ int startup_connection(dino_http_site_t *dino_site) {
         log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "socket allocation failed");
 
     } else {
+        int opt = 1;
+        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+            log_message(LOG_ERR, __FUNCTION__, __FILE__, __LINE__, "setsockopt SO_REUSEADDR failed");
+            close(sockfd);
+            return -1;
+        }
+
         memset(&name, 0, sizeof(name));
         name.sin_family = AF_INET;
         name.sin_port = htons(dino_site->port);

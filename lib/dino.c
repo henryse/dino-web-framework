@@ -30,8 +30,6 @@
 
 #include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>
 // #include <openssl/ssl.h>
 // #include <openssl/err.h>

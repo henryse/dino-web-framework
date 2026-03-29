@@ -33,7 +33,6 @@
 #endif
 
 #include <stdbool.h>
-#include "dino_http_error.h"
 #include "dino_template_types.h"
 
 #ifndef DINO_EXTERN

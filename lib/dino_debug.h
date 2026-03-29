@@ -27,9 +27,7 @@
 #ifndef DINO_DEBUG_H
 #define DINO_DEBUG_H
 
-#include <stddef.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <syslog.h>
 
 struct timespec timer_start();

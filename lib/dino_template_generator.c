@@ -27,6 +27,9 @@
 #include <memory.h>
 #include <ctype.h>
 #include "dino_template_generator.h"
+
+#include <stdio.h>
+
 #include "dino_utils.h"
 #include "dino_intmap.h"
 #include "dino_debug.h"
