@@ -90,7 +90,7 @@ stack_char_ptr_t *stack_ptr_parse(stack_char_ptr_t *stack, const char *data, con
 
 void *memory_clear(void *p, size_t n) {
     if (NULL != p) {
-        bzero(p, n);
+        memset(p, 0, n);
     }
 
     return p;

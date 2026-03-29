@@ -30,13 +30,15 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <stdarg.h>
+#include <syslog.h>
 #include "version_config.h"
+#include "dino_debug.h"
 
 #ifdef __MACH__
 
 #include <mach/clock.h>
 #include <mach/mach.h>
-#include "dino_debug.h"
 
 #endif
 
