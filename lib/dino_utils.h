@@ -53,11 +53,6 @@ stack_char_ptr_t *stack_ptr_parse(stack_char_ptr_t *stack, const char *data, con
 
 char *trim_whitespace(char *str);
 
-#define max(a, b) \
-       ({ \
-            __typeof__ (a) _a = (a); \
-            __typeof__ (b) _b = (b); \
-            _a > _b ? _a : _b; \
-        })
+#define max(a, b) (((a) > (b)) ? (a) : (b))
 
 #endif

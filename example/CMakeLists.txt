@@ -39,10 +39,6 @@ else()
 endif()
 
 
-# Set The correct compiler
-#
-set(CMAKE_C_FLAGS "-std=gnu99")
-
 set(SOURCE_FILES
     main.c)
 

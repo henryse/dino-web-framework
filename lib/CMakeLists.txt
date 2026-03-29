@@ -40,10 +40,6 @@ else()
     MESSAGE("-- bcm_host.h not found we must NOT be on a Raspberry PI")
 endif()
 
-# Set The correct compiler
-#
-set(CMAKE_C_FLAGS "-std=gnu99")
-
 # Versioning
 #
 configure_file(version_config.h.in ${CMAKE_BINARY_DIR}/generated/version_config.h)
